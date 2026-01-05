@@ -1,0 +1,95 @@
+name: Repo Websites Initializer
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Processar todos do registry ou somente um"
+        required: true
+        default: "all"
+        type: choice
+        options: ["all", "one"]
+      org:
+        description: "Org (usado quando mode=one)"
+        required: false
+        default: "high-energy-physics-research"
+      repo:
+        description: "Repo (usado quando mode=one)"
+        required: false
+        default: ""
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout central repo
+        uses: actions/checkout@v4
+        with:
+          path: central
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # ------------------------------------------------------------
+      # Guardrails 
+      # ------------------------------------------------------------
+      - name: Guardrails 
+        working-directory: central
+        env:
+          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }} 
+          MODE: ${{ inputs.mode }}
+          ONE_ORG: ${{ inputs.org }}
+          ONE_REPO: ${{ inputs.repo }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "[guard] MODE=${MODE}"
+          echo "[guard] ONE_ORG=${ONE_ORG}"
+          echo "[guard] ONE_REPO=${ONE_REPO:-<empty>}"
+          echo "[guard] pwd=$(pwd)"
+          echo "[guard] registry exists? $(test -f .github/registry/repos.yml && echo yes || echo no)"
+          echo "[guard] script exists? $(test -f .github/scripts/repo_initializer.py && echo yes || echo no)"
+
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::error::GH_TOKEN is empty. Check secrets.GH_WORKFLOWS visibility."
+            exit 2
+          fi
+
+          # imprime o tamanho
+          echo "[guard] GH_TOKEN length: ${#GH_TOKEN}"
+
+          # sanity check API identity + org visibility
+          echo "[guard] sanity: /user"
+          curl -sS -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+            https://api.github.com/user | python -c "import sys,json; print('[guard] login:', json.load(sys.stdin).get('login'))"
+
+          echo "[guard] sanity: /orgs/${ONE_ORG}"
+          curl -sS -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/orgs/${ONE_ORG}" | python -c "import sys,json; print('[guard] org:', json.load(sys.stdin).get('login'))"
+
+      # ------------------------------------------------------------
+      # Inicializador
+      # ------------------------------------------------------------
+      - name: Run initializer
+        working-directory: central
+        env:
+          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}  
+          USE_TOKEN_IN_URL: "true"
+          MODE: ${{ inputs.mode }}
+          ONE_ORG: ${{ inputs.org }}
+          ONE_REPO: ${{ inputs.repo }}
+        run: |
+          python .github/scripts/repo_initializer.py

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>{{TITLE}}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./css/paleta_cores.css" />
+  <link rel="stylesheet" href="./css/software.css" />
+  <link rel="stylesheet" href="./css/nav_bar.css" />
+  <link rel="stylesheet" href="./css/pages.css" />
+  <link rel="stylesheet" href="./css/home.css" />
+  <script src="./js/app.js" defer></script>
+</head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EM7FEY66C3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-EM7FEY66C3');
+</script>
+<body>
+  <header class="navbar">
+    <div class="wrap">
+      <!-- Link extra à esquerda -->
+      <a class="repo-link" href="https://high-energy-physics-research.github.io/" title="Repositório Central">⚛</a>
+      
+      <div class="brand"><a href="./index.html">Homepage</a></div>
+      <nav class="nav">
+        <a href="./research.html">Referências</a>
+        <a href="./software.html">Estudos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- HERO -->
+    <section class="hero" role="img" aria-label="Imagem temática do repositório">
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <h1 class="hero__title"> {{ TITLE_1 }} • {{ TITLE_2}} </h1>
+        <p class="hero__subtitle">
+         {{ SUBTITLE_1 }} . {{ SUBTITLE_2 }}
+        </p>
+        <a class="btn btn--light" href="./software.html">Estudos</a>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <h2>Sobre</h2>
+      <div class="card grid">
+        <div>
+          {{ ABOUT }}
+
+          <p class="muted">Last Updated at {{TIMESTAMP}} • Total de notebooks: <span id="nbcount">{{NBCOUNT}}</span></p>
+          <p>
+            <strong>Contact:</strong><br>
+            nara.moraes@usp.br ·
+            <a href="{{ GITHUB_LINK }}#readme" >GitHub</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BIO -->
+    <section class="section">
+      <h3>Autora</h3>
+      <div class="card author">
+        <img id="avatar" class="avatar" alt="Foto da autora" />
+        <div>
+        Pesquisadora no IFUSP. Interesses: computação quântica, ML, métodos numéricos.
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>
