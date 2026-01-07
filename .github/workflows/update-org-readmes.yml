@@ -93,7 +93,7 @@ jobs:
 
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJson(env.MAX_PARALLEL) }}
+      max-parallel: 10
       matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
     steps:
