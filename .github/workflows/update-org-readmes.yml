@@ -235,6 +235,24 @@ jobs:
           if [[ -f README.md ]]; then echo "yes"; else echo "no"; fi
           echo ""
 
+      - name: Write cfg/placeholders inside target (from matrix)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p target/.github/scripts/cfg/placeholders
+
+          python - <<'PY'
+          import os, base64, json, yaml
+          cfg_b64 = os.environ["CFG_B64"]
+          data = base64.b64decode(cfg_b64).decode("utf-8")
+          cfg = json.loads(data)
+          with open("target/.github/scripts/cfg/placeholders/readme.yml", "w", encoding="utf-8") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+          print("[ok] wrote target/.github/scripts/cfg/placeholders/readme.yml")
+          PY
+        env:
+          CFG_B64: ${{ matrix.cfg_b64 }}
+
       - name: Build README (with verbose wrapper) (safe)
         shell: bash
         run: |
@@ -272,7 +290,7 @@ jobs:
           ls -la .github/readme || true
           echo ""
 
-          
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -318,7 +336,8 @@ jobs:
           git config user.name "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
 
-          if git diff --quiet; then
+          # no lugar de: if git diff --quiet; then ...
+          if [[ -z "$(git status --porcelain)" ]]; then
             echo "No changes."
             exit 0
           fi
