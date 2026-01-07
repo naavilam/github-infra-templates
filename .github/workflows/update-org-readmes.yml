@@ -327,18 +327,18 @@ jobs:
           
           cd target
 
+          # identidade do bot (org do manager atual)
           ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
           BOT="${ORG_LC}-provisioner-app[bot]"
-
           git config user.name "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
 
-          # no lugar de: if git diff --quiet; then ...
-          if [[ -z "$(git status --porcelain)" ]]; then
+          git add README.md .github/readme || true
+
+          if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
 
-          git add README.md .github/readme || true
           git commit -m "chore: update README"
           git push
