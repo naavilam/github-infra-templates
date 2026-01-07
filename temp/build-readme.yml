@@ -133,5 +133,5 @@ jobs:
           git add README.md || true
           git add .github/readme || true
 
-          git commit -m "chore: update README assets"
+          git commit -m "Update files"
           git push
