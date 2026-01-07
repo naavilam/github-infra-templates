@@ -14,14 +14,6 @@ on:
       PROVISIONER_PRIVATE_KEY_PEM:
         required: true
 
-  workflow_dispatch:
-    inputs:
-      repo:
-        description: "Target repository or else all."
-        required: false
-        type: string
-        default: ""
-
 permissions:
   contents: write
 
@@ -176,8 +168,8 @@ jobs:
           ref: ${{ env.TEMPLATE_REF }}
           path: central
           sparse-checkout: |
-            .github/templates/readme
-            .github/scripts/build_readme.py
+            bootstrap/repo_readme
+            bootstrap/repo_scripts/build_readme.py
           sparse-checkout-cone-mode: false
 
       - name: Setup Python
@@ -195,16 +187,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          python central/.github/scripts/build_readme.py \
+          python central/bootstrap/repo_scripts/build_readme.py \
             --repo target \
-            --central central/.github/templates/readme
+            --central central/bootstrap/repo_readme
 
           cd target
 
           ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
           BOT="${ORG_LC}-provisioner-app[bot]"
 
-          git config user.name  "${BOT}"
+          git config user.name "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
 
           if git diff --quiet; then
