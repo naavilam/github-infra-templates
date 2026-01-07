@@ -4,44 +4,32 @@ on:
   workflow_call:
     inputs:
       repo:
-        description: "Repo específico (vazio = todos)"
+        description: "Target repository or else all."
         required: false
         type: string
         default: ""
-      template_ref:
-        description: "Ref do central (templates/scripts)"
-        required: false
-        type: string
-        default: "main"
-      max_parallel:
-        description: "Máximo de jobs em paralelo"
-        required: false
-        type: number
-        default: 10
 
   workflow_dispatch:
     inputs:
       repo:
-        description: "Repo específico (vazio = todos)"
+        description: "Target repository or else all."
         required: false
         default: ""
-      template_ref:
-        description: "Ref do central (templates/scripts)"
-        required: false
-        default: "main"
-      max_parallel:
-        description: "Máximo de jobs em paralelo"
-        required: false
-        default: 10
 
 permissions:
   contents: write
+
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+  MAX_PARALLEL: "10"
 
 jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
+
     steps:
       - name: Checkout manager repo (registry)
         uses: actions/checkout@v4
@@ -61,10 +49,10 @@ jobs:
       - id: set
         name: Build matrix from registry
         shell: bash
+        env:
+          REPO_FILTER: ${{ inputs.repo }}
         run: |
           set -euo pipefail
-
-          REPO_FILTER="${{ inputs.repo || github.event.inputs.repo || '' }}"
 
           MATRIX="$(python - <<'PY'
           import os, sys, json, yaml
@@ -98,18 +86,67 @@ jobs:
           )"
 
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
-        env:
-          REPO_FILTER: ${{ inputs.repo || github.event.inputs.repo || '' }}
 
   apply:
     needs: plan
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
-      max-parallel: ${{ inputs.max_parallel || github.event.inputs.max_parallel || 10 }}
+      max-parallel: ${{ fromJson(env.MAX_PARALLEL) }}
       matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
     steps:
+      - name: Guardrail context (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== context ==="
+          echo "event=${{ github.event_name }}"
+          echo "repo=${{ github.repository }}"
+          echo "owner=${{ github.repository_owner }}"
+          echo "ref=${{ github.ref }}"
+          echo "sha=${{ github.sha }}"
+          echo "actor=${{ github.actor }}"
+          echo "workflow=${{ github.workflow }}"
+          echo "job=${{ github.job }}"
+          echo "run_id=${{ github.run_id }}"
+          echo "run_number=${{ github.run_number }}"
+          echo "runner_name=${{ runner.name }}"
+          echo "runner_os=${{ runner.os }}"
+          echo "runner_arch=${{ runner.arch }}"
+          echo "workspace=${{ github.workspace }}"
+          echo ""
+
+      - name: Guardrail secrets presence (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== secrets presence ==="
+          echo "has PROVISIONER_APP_ID? ${{ secrets.PROVISIONER_APP_ID != '' }}"
+          echo "has PROVISIONER_PRIVATE_KEY_PEM? ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM != '' }}"
+          echo "has DISPATCHER_APP_ID? ${{ secrets.DISPATCHER_APP_ID != '' }}"
+          echo "has DISPATCHER_PRIVATE_KEY_PEM? ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM != '' }}"
+          echo ""
+
+      - name: Guardrail sanity of PROVISIONER_APP_ID (safe)
+        shell: bash
+        env:
+          APP_ID: ${{ secrets.PROVISIONER_APP_ID }}
+        run: |
+          set -euo pipefail
+          echo "=== app-id sanity ==="
+          if [[ -z "${APP_ID:-}" ]]; then
+            echo "::error::PROVISIONER_APP_ID is empty in this job context."
+            exit 2
+          fi
+          # não printa o valor; só valida formato (número)
+          if [[ ! "${APP_ID}" =~ ^[0-9]+$ ]]; then
+            echo "::error::PROVISIONER_APP_ID is present but not purely numeric (check spaces/quotes)."
+            exit 3
+          fi
+          echo "app-id looks numeric: ok"
+          
       - name: Mint Provisioner GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v1
@@ -129,8 +166,8 @@ jobs:
       - name: Checkout central templates + scripts
         uses: actions/checkout@v4
         with:
-          repository: naavilam/github-infra-templates
-          ref: ${{ inputs.template_ref || github.event.inputs.template_ref || 'main' }}
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
           path: central
           sparse-checkout: |
             .github/templates/readme
