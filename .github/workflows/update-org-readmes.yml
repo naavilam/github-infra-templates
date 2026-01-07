@@ -235,34 +235,31 @@ jobs:
           if [[ -f README.md ]]; then echo "yes"; else echo "no"; fi
           echo ""
 
-      - name: Write cfg/placeholders inside target (from matrix)
+      - name: Write cfg file (from matrix, local workspace)
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p target/.github/scripts/cfg/placeholders
-
-          python - <<'PY'
-          import os, base64, json, yaml
-          cfg_b64 = os.environ["CFG_B64"]
-          data = base64.b64decode(cfg_b64).decode("utf-8")
-          cfg = json.loads(data)
-          with open("target/.github/scripts/cfg/placeholders/readme.yml", "w", encoding="utf-8") as f:
-            yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
-          print("[ok] wrote target/.github/scripts/cfg/placeholders/readme.yml")
-          PY
         env:
           CFG_B64: ${{ matrix.cfg_b64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p _cfg
+          python - <<'PY'
+          import os, base64, json, yaml
+          data = base64.b64decode(os.environ["CFG_B64"]).decode("utf-8")
+          cfg = json.loads(data)  # se você guardar JSON no registry
+          with open("_cfg/readme.yml", "w", encoding="utf-8") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+          print("[ok] wrote _cfg/readme.yml")
+          PY
 
-      - name: Build README (with verbose wrapper) (safe)
+      - name: Build README (from central + cfg)
         shell: bash
         run: |
           set -euo pipefail
-          echo "=== running build_readme ==="
+
           python central/bootstrap/repo_scripts/build_readme.py \
             --repo target \
             --central central/bootstrap/repo_readme \
-            --repo-cfg _cfg
-          echo "=== build done ==="
+            --cfg _cfg/readme.yml
 
       - name: Debug after build (what changed?) (safe)
         shell: bash
