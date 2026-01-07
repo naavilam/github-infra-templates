@@ -142,57 +142,7 @@ jobs:
       max-parallel: 10
       matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
-    steps:
-      - name: Guardrail context (safe)
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "=== context ==="
-          echo "event=${{ github.event_name }}"
-          echo "repo=${{ github.repository }}"
-          echo "owner=${{ github.repository_owner }}"
-          echo "ref=${{ github.ref }}"
-          echo "sha=${{ github.sha }}"
-          echo "actor=${{ github.actor }}"
-          echo "workflow=${{ github.workflow }}"
-          echo "job=${{ github.job }}"
-          echo "run_id=${{ github.run_id }}"
-          echo "run_number=${{ github.run_number }}"
-          echo "runner_name=${{ runner.name }}"
-          echo "runner_os=${{ runner.os }}"
-          echo "runner_arch=${{ runner.arch }}"
-          echo "workspace=${{ github.workspace }}"
-          echo ""
-
-      - name: Guardrail secrets presence (safe)
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "=== secrets presence ==="
-          echo "has PROVISIONER_APP_ID? ${{ secrets.PROVISIONER_APP_ID != '' }}"
-          echo "has PROVISIONER_PRIVATE_KEY_PEM? ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM != '' }}"
-          echo "has DISPATCHER_APP_ID? ${{ secrets.DISPATCHER_APP_ID != '' }}"
-          echo "has DISPATCHER_PRIVATE_KEY_PEM? ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM != '' }}"
-          echo ""
-
-      - name: Guardrail sanity of PROVISIONER_APP_ID (safe)
-        shell: bash
-        env:
-          APP_ID: ${{ secrets.PROVISIONER_APP_ID }}
-        run: |
-          set -euo pipefail
-          echo "=== app-id sanity ==="
-          if [[ -z "${APP_ID:-}" ]]; then
-            echo "::error::PROVISIONER_APP_ID is empty in this job context."
-            exit 2
-          fi
-          # não printa o valor; só valida formato (número)
-          if [[ ! "${APP_ID}" =~ ^[0-9]+$ ]]; then
-            echo "::error::PROVISIONER_APP_ID is present but not purely numeric (check spaces/quotes)."
-            exit 3
-          fi
-          echo "app-id looks numeric: ok"
-          
+    steps:          
       - name: Mint Provisioner GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v1
@@ -220,6 +170,109 @@ jobs:
             bootstrap/repo_scripts/build_readme.py
           sparse-checkout-cone-mode: false
 
+
+      - name: Debug matrix item (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== matrix item ==="
+          echo "matrix.repo=${{ matrix.repo }}"
+          echo "workspace=${{ github.workspace }}"
+          echo "pwd=$(pwd)"
+          echo ""
+
+      - name: Debug filesystem (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== tree (top) ==="
+          ls -la
+          echo ""
+          echo "=== tree (target) ==="
+          ls -la target || true
+          echo ""
+          echo "=== tree (target/.github) ==="
+          ls -la target/.github || true
+          echo ""
+          echo "=== tree (target/.github/readme) ==="
+          ls -la target/.github/readme || true
+          echo ""
+
+      # se você está gerando _cfg/readme.yml a partir de base64/JSON/YAML do registry,
+      # garanta que ele existe e MOSTRE o conteúdo (isso é safe).
+      - name: Debug cfg file (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== cfg ==="
+          ls -la _cfg || true
+          if [[ -f "_cfg/readme.yml" ]]; then
+            echo "--- _cfg/readme.yml ---"
+            cat _cfg/readme.yml
+            echo "------------------------"
+          else
+            echo "::warning::_cfg/readme.yml not found"
+          fi
+          echo ""
+
+      - name: Debug before build (git + repo state) (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target
+          echo "=== target git state (before) ==="
+          echo "repo=$(git remote get-url origin || true)"
+          echo "branch=$(git rev-parse --abbrev-ref HEAD || true)"
+          echo "head=$(git rev-parse --short HEAD || true)"
+          echo ""
+          echo "--- status --porcelain ---"
+          git status --porcelain=v1 || true
+          echo ""
+          echo "--- ls ---"
+          ls -la
+          echo ""
+          echo "--- has README.md? ---"
+          if [[ -f README.md ]]; then echo "yes"; else echo "no"; fi
+          echo ""
+
+      - name: Build README (with verbose wrapper) (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== running build_readme ==="
+          python central/bootstrap/repo_scripts/build_readme.py \
+            --repo target \
+            --central central/bootstrap/repo_readme \
+            --repo-cfg _cfg
+          echo "=== build done ==="
+
+      - name: Debug after build (what changed?) (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target
+          echo "=== target git state (after) ==="
+          echo "--- status --porcelain ---"
+          git status --porcelain=v1 || true
+          echo ""
+          echo "--- diff --name-status ---"
+          git diff --name-status || true
+          echo ""
+          echo "--- diffstat ---"
+          git diff --stat || true
+          echo ""
+          echo "--- show README head (if exists) ---"
+          if [[ -f README.md ]]; then
+            head -n 40 README.md
+          else
+            echo "::warning::README.md still not present"
+          fi
+          echo ""
+          echo "--- list .github/readme (if exists) ---"
+          ls -la .github/readme || true
+          echo ""
+
+          
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
