@@ -8,6 +8,10 @@ on:
         required: false
         type: string
         default: ""
+      registry_path:
+        type: string
+        required: false
+        default: ".github/registry/repos.yml"
     secrets:
       PROVISIONER_APP_ID:
         required: true
@@ -45,31 +49,34 @@ jobs:
           pip install pyyaml
 
       - id: set
-        name: Build matrix from registry
+        name: Build matrix from registry (with embedded cfg)
         shell: bash
         env:
           REPO_FILTER: ${{ inputs.repo }}
+          REGISTRY_PATH: ${{ inputs.registry_path }}
         run: |
           set -euo pipefail
 
           MATRIX="$(python - <<'PY'
-          import os, sys, json, yaml
+          import os, sys, json, yaml, base64
           from pathlib import Path
 
           repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
+          reg_path = Path(os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml")
+
           owner = (os.environ.get("GITHUB_REPOSITORY_OWNER") or "").strip()
 
-          reg = Path(".github/registry/repos.yml")
-          if not reg.exists():
+          if not reg_path.exists():
             print(json.dumps({"include": []}))
             sys.exit(0)
 
-          data = yaml.safe_load(reg.read_text(encoding="utf-8")) or {}
+          data = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
           items = data.get("repos", [])
           if not isinstance(items, list):
             items = []
 
-          inc = []
+          include = []
+
           for it in items:
             name = str(it.get("name","")).strip()
             org  = str(it.get("org","")).strip() or owner
@@ -77,9 +84,50 @@ jobs:
               continue
             if repo_filter and name.lower() != repo_filter:
               continue
-            inc.append({"repo": f"{org}/{name}"})
 
-          print(json.dumps({"include": inc}))
+            # --- placeholders mínimos pro README ---
+            course_id = (it.get("id") or "").strip() or (name.split("-",1)[0] if "-" in name else name)
+            title = (it.get("title") or "").strip()
+            if not title:
+              rest = name.split("-", 1)[1] if "-" in name else name
+              title = rest.replace("-", " ").strip()
+
+            site_url = (it.get("site_url") or "").strip()
+            if not site_url:
+              site_url = f"https://{org}.github.io/" if name == f"{org}.github.io" else f"https://{org}.github.io/{name}"
+
+            area  = (it.get("academic_area") or "").strip()
+            level = (it.get("academic_level") or "").strip()
+            if level:
+              lvl = level.lower().strip()
+              if lvl == "undergrad": level = "Undergraduate Course"
+              elif lvl == "grad": level = "Graduate Course"
+              else: level = level[:1].upper() + level[1:]
+
+            tagline = (it.get("readme_tagline") or "").strip()
+            if not tagline:
+              parts = [p for p in [area, level] if p]
+              tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
+
+            cfg = {
+              "TITLE_1": course_id,
+              "TITLE_2": title,
+              "REPO_TAGLINE": tagline,
+              "CTA_TEXT": (it.get("readme_cta_text") or "Access the full course website").strip(),
+              "THEME": (it.get("readme_theme") or "coding").strip(),
+              "SITE_URL": site_url,
+              "ASSETS_DIR": (it.get("readme_assets_dir") or ".github/readme").strip(),
+            }
+
+            payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+            cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
+
+            include.append({
+              "repo": f"{org}/{name}",
+              "cfg_b64": cfg_b64
+            })
+
+          print(json.dumps({"include": include}))
           PY
           )"
 
@@ -182,6 +230,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      - name: Write _cfg/readme.yml from matrix payload
+        shell: bash
+        env:
+          CFG_B64: ${{ matrix.cfg_b64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p _cfg
+          python - <<'PY'
+          import os, json, base64, yaml
+          b64 = os.environ["CFG_B64"]
+          data = base64.urlsafe_b64decode(b64.encode("ascii")).decode("utf-8")
+          cfg = json.loads(data)
+          with open("_cfg/readme.yml", "w", encoding="utf-8") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+          print("[ok] wrote _cfg/readme.yml")
+          PY
+
       - name: Build + commit + push
         shell: bash
         run: |
@@ -189,7 +254,8 @@ jobs:
 
           python central/bootstrap/repo_scripts/build_readme.py \
             --repo target \
-            --central central/bootstrap/repo_readme
+            --central central/bootstrap/repo_readme \
+            --repo-cfg _cfg
 
           cd target
 
