@@ -8,12 +8,18 @@ on:
         required: false
         type: string
         default: ""
+    secrets:
+      PROVISIONER_APP_ID:
+        required: true
+      PROVISIONER_PRIVATE_KEY_PEM:
+        required: true
 
   workflow_dispatch:
     inputs:
       repo:
         description: "Target repository or else all."
         required: false
+        type: string
         default: ""
 
 permissions:
