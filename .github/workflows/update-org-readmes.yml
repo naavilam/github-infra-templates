@@ -326,8 +326,8 @@ jobs:
           python central/bootstrap/repo_scripts/build_readme.py \
             --repo target \
             --central central/bootstrap/repo_readme \
-            --repo-cfg _cfg
-
+            --repo-cfg _cfg/readme.yml
+          
           cd target
 
           ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
