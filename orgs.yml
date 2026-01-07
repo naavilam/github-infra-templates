@@ -1,0 +1,20 @@
+orgs:
+  - org: high-energy-physics-research
+    manager:
+      - high-energy-physics-research.github.io
+    mode: list
+
+  - org: academic-codex
+    manager:
+      - academic-codex.github.io
+    mode: list
+
+  - org: quantum-computing-research
+    manager:
+      - quantum-computing-research.github.io
+    mode: list
+
+  - org: quantum-materials-simulation-research
+    manager:
+      - quantum-materials-simulation-research.github.io
+    mode: list

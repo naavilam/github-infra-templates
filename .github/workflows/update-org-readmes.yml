@@ -1,0 +1,140 @@
+name: Update org READMEs
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "Target repository or else all."
+        required: false
+        type: string
+        default: ""
+
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Target repository or else all."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - name: Checkout manager repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build matrix from registry
+        id: set
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          import os, json, sys, yaml
+          from pathlib import Path
+
+          repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
+
+          reg_path = Path(".github/registry/repos.yml")
+          if not reg_path.exists():
+            print(f"[fatal] registry not found: {reg_path}", file=sys.stderr)
+            sys.exit(2)
+
+          data = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
+          items = data.get("repos", [])
+          if not isinstance(items, list):
+            items = []
+
+          out = []
+          for it in items:
+            name = (it.get("name") or "").strip()
+            org  = (it.get("org")  or "").strip() or os.environ.get("GITHUB_REPOSITORY_OWNER","").strip()
+            if not name or not org:
+              continue
+            if repo_filter and name.lower() != repo_filter.lower():
+              continue
+            out.append({"repo": f"{org}/{name}"})
+
+          print(json.dumps({"include": out}))
+          PY
+        env:
+          REPO_FILTER: ${{ inputs.repo || github.event.inputs.repo || '' }}
+
+      - name: Expose matrix
+        shell: bash
+        run: |
+          echo "matrix=${{ steps.set.outputs.matrix }}" >> "$GITHUB_OUTPUT"
+        # ^ nota: o bash acima não “vê” steps.set.outputs.matrix; por isso fazemos direto abaixo:
+        # (de forma mais simples/segura, substitua este step por:)
+        # echo "matrix=$(python ...)" >> $GITHUB_OUTPUT
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ inputs.max_parallel || github.event.inputs.max_parallel || 10 }}
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+
+    steps:
+      - name: Mint Provisioner GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ steps.app-token.outputs.token }}
+          path: target
+          fetch-depth: 0
+
+      - name: Checkout central templates + scripts
+        uses: actions/checkout@v4
+        with:
+          repository: naavilam/github-infra-templates
+          ref: 'main'
+          path: central
+          sparse-checkout: |
+            .github/templates/readme
+            .github/scripts/build_readme.py
+          sparse-checkout-cone-mode: false
+
+      - name: Build + commit + push
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python central/.github/scripts/build_readme.py \
+            --repo target \
+            --central central/.github/templates/readme
+
+          cd target
+
+          OWNER="${{ matrix.repo }}"
+          OWNER="${OWNER%%/*}"
+          OWNER_LC="$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')"
+          BOT="${OWNER_LC}-provisioner-app[bot]"
+
+          git config user.name  "${BOT}"
+          git config user.email "${BOT}@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+
+          git add README.md .github/readme || true
+          git commit -m "chore: update README"
+          git push

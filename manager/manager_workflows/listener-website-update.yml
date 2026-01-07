@@ -1,0 +1,19 @@
+name: Update website
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target repository or else all"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    uses: naavilam/github-infra-templates/.github/workflows/update-org-websites.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ inputs.target }}
