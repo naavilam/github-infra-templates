@@ -4,17 +4,35 @@ on:
   workflow_call:
     inputs:
       repo:
-        description: "Target repository or else all."
+        description: "Repo específico (vazio = todos)"
         required: false
         type: string
         default: ""
+      template_ref:
+        description: "Ref do central (templates/scripts)"
+        required: false
+        type: string
+        default: "main"
+      max_parallel:
+        description: "Máximo de jobs em paralelo"
+        required: false
+        type: number
+        default: 10
 
   workflow_dispatch:
     inputs:
       repo:
-        description: "Target repository or else all."
+        description: "Repo específico (vazio = todos)"
         required: false
         default: ""
+      template_ref:
+        description: "Ref do central (templates/scripts)"
+        required: false
+        default: "main"
+      max_parallel:
+        description: "Máximo de jobs em paralelo"
+        required: false
+        default: 10
 
 permissions:
   contents: write
@@ -25,55 +43,63 @@ jobs:
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
-      - name: Checkout manager repo
+      - name: Checkout manager repo (registry)
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Build matrix from registry
-        id: set
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - id: set
+        name: Build matrix from registry
         shell: bash
         run: |
           set -euo pipefail
 
-          python - <<'PY'
-          import os, json, sys, yaml
+          REPO_FILTER="${{ inputs.repo || github.event.inputs.repo || '' }}"
+
+          MATRIX="$(python - <<'PY'
+          import os, sys, json, yaml
           from pathlib import Path
 
-          repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
+          repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
+          owner = (os.environ.get("GITHUB_REPOSITORY_OWNER") or "").strip()
 
-          reg_path = Path(".github/registry/repos.yml")
-          if not reg_path.exists():
-            print(f"[fatal] registry not found: {reg_path}", file=sys.stderr)
-            sys.exit(2)
+          reg = Path(".github/registry/repos.yml")
+          if not reg.exists():
+            print(json.dumps({"include": []}))
+            sys.exit(0)
 
-          data = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
+          data = yaml.safe_load(reg.read_text(encoding="utf-8")) or {}
           items = data.get("repos", [])
           if not isinstance(items, list):
             items = []
 
-          out = []
+          inc = []
           for it in items:
-            name = (it.get("name") or "").strip()
-            org  = (it.get("org")  or "").strip() or os.environ.get("GITHUB_REPOSITORY_OWNER","").strip()
+            name = str(it.get("name","")).strip()
+            org  = str(it.get("org","")).strip() or owner
             if not name or not org:
               continue
-            if repo_filter and name.lower() != repo_filter.lower():
+            if repo_filter and name.lower() != repo_filter:
               continue
-            out.append({"repo": f"{org}/{name}"})
+            inc.append({"repo": f"{org}/{name}"})
 
-          print(json.dumps({"include": out}))
+          print(json.dumps({"include": inc}))
           PY
+          )"
+
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
         env:
           REPO_FILTER: ${{ inputs.repo || github.event.inputs.repo || '' }}
-
-      - name: Expose matrix
-        shell: bash
-        run: |
-          echo "matrix=${{ steps.set.outputs.matrix }}" >> "$GITHUB_OUTPUT"
-        # ^ nota: o bash acima não “vê” steps.set.outputs.matrix; por isso fazemos direto abaixo:
-        # (de forma mais simples/segura, substitua este step por:)
-        # echo "matrix=$(python ...)" >> $GITHUB_OUTPUT
 
   apply:
     needs: plan
@@ -104,12 +130,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: naavilam/github-infra-templates
-          ref: 'main'
+          ref: ${{ inputs.template_ref || github.event.inputs.template_ref || 'main' }}
           path: central
           sparse-checkout: |
             .github/templates/readme
             .github/scripts/build_readme.py
           sparse-checkout-cone-mode: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
 
       - name: Build + commit + push
         shell: bash
@@ -122,10 +158,8 @@ jobs:
 
           cd target
 
-          OWNER="${{ matrix.repo }}"
-          OWNER="${OWNER%%/*}"
-          OWNER_LC="$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')"
-          BOT="${OWNER_LC}-provisioner-app[bot]"
+          ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          BOT="${ORG_LC}-provisioner-app[bot]"
 
           git config user.name  "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
