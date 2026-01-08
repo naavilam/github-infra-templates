@@ -1,23 +1,37 @@
 name: Repo Websites Initializer
 
 on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "Target repository or else all."
+        required: false
+        type: string
+        default: ""
+      registry_path:
+        type: string
+        required: false
+        default: ".github/registry/repos.yml"
+    secrets:
+      PROVISIONER_APP_ID:
+        required: true
+      PROVISIONER_PRIVATE_KEY_PEM:
+        required: true
+
+on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: "Processar todos do registry ou somente um"
-        required: true
-        default: "all"
-        type: choice
-        options: ["all", "one"]
-      org:
-        description: "Org (usado quando mode=one)"
-        required: false
-        default: "high-energy-physics-research"
       repo:
-        description: "Repo (usado quando mode=one)"
+        description: "Target repository or else all."
         required: false
+        type: string
         default: ""
 
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+  MAX_PARALLEL: "10"
+  
 jobs:
   init:
     runs-on: ubuntu-latest
