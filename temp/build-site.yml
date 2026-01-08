@@ -124,7 +124,8 @@ jobs:
             "SUBTITLE": hit.get("site_subtitle") or "",
             "DESCRIPTION": hit.get("site_description") or "",
             "SITE_URL": site_url,
-            "GITHUB_URL": hit.get("github_url") or f"https://github.com/{owner}/{repo}",
+            "GITHUB_URL": f"https://github.com/{owner}/{repo}",
+            "GITHUB_LINK": f"https://github.com/{owner}/{repo}"
           }
 
           Path("_cfg").mkdir(exist_ok=True)
