@@ -91,6 +91,21 @@ jobs:
             if not isinstance(cfg, dict):
               cfg = {}
 
+            # DEBUG (safe): inspeciona estrutura do item do registry
+            if len(inc) < 10:
+              keys = sorted(list(it.keys()))
+              print(f"[DBG] item keys for {org}/{name}: {keys}")
+
+              for k in ["website_cfg", "cfg", "placeholders", "site_cfg", "website", "site"]:
+                if k in it:
+                  v = it.get(k)
+                  t = type(v).__name__
+                  # preview curto e seguro
+                  preview = str(v)
+                  if len(preview) > 200:
+                    preview = preview[:200] + "..."
+                  print(f"[DBG]  - {k}: type={t} preview={preview}")
+                  
             inc.append({
               "repo": f"{org}/{name}",
               "cfg": cfg
