@@ -31,7 +31,9 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
+    outputs:
       matrix: ${{ steps.set.outputs.matrix }}
+      count:  ${{ steps.set.outputs.count }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,11 +58,11 @@ jobs:
       - id: set
         name: Build matrix (local registry OR manager registry)
         env:
-        GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        REGISTRY_PATH: ${{ inputs.registry_path }}
-        REPO_FILTER: ${{ inputs.repo }}
-        CALLER_REPO: ${{ github.repository }}
-        OWNER: ${{ github.repository_owner }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REGISTRY_PATH: ${{ inputs.registry_path }}
+          REPO_FILTER: ${{ inputs.repo }}
+          CALLER_REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
         run: |
           python - <<'PY'
           import os, sys, json, base64
