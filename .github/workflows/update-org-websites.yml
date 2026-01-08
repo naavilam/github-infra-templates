@@ -56,13 +56,11 @@ jobs:
 
           MATRIX="$(
           python - <<'PY'
-          import os, json, yaml
+          import os, json, yaml, sys
           from pathlib import Path
 
           def _as_str(v):
-              if v is None:
-                  return ""
-              return str(v).strip()
+              return "" if v is None else str(v).strip()
 
           repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
           reg_path = Path(os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml")
@@ -90,31 +88,42 @@ jobs:
               if repo_filter and name.lower() != repo_filter:
                   continue
 
-              # === cfg CANÔNICO (derivado do registry) ===
               cfg = {
-                  "TITLE_1":   _as_str(it.get("id")),
-                  "TITLE_2":   _as_str(it.get("title")),
-                  "SUBTITLE_1":_as_str(it.get("academic_area")),
-                  "SUBTITLE_2":_as_str(it.get("academic_level")),
-                  "ABOUT":     _as_str(it.get("site_description") or it.get("description")),
-                  "CTA_TEXT":  _as_str(it.get("readme_cta_text")),
-                  "TAGLINE":   _as_str(it.get("readme_tagline")),
-                  "THEME":     _as_str(it.get("readme_theme")),
-                  # se quiser já propagar o hero pro script:
-                  "HERO_FILE": _as_str(it.get("site_hero_image")),
+                  "TITLE_1":    _as_str(it.get("id")),
+                  "TITLE_2":    _as_str(it.get("title")),
+                  "SUBTITLE_1": _as_str(it.get("academic_area")),
+                  "SUBTITLE_2": _as_str(it.get("academic_level")),
+                  "ABOUT":      _as_str(it.get("site_description") or it.get("description")),
+                  "CTA_TEXT":   _as_str(it.get("readme_cta_text")),
+                  "TAGLINE":    _as_str(it.get("readme_tagline")),
+                  "THEME":      _as_str(it.get("readme_theme")),
+                  "HERO_FILE":  _as_str(it.get("site_hero_image")),
               }
-
-              # remove vazios
               cfg = {k: v for k, v in cfg.items() if v}
 
-              inc.append({
-                  "repo": f"{org}/{name}",
-                  "cfg": cfg,
-              })
+              # debug SEM quebrar output: manda pro stderr
+              if len(inc) < 10:
+                  print(f"[DBG] keys for {org}/{name}: {sorted(it.keys())}", file=sys.stderr)
+                  print(f"[DBG] cfg for {org}/{name}: {cfg}", file=sys.stderr)
+
+              inc.append({"repo": f"{org}/{name}", "cfg": cfg})
+
+          # imprimir o JSON no stdout
+          print(json.dumps({"include": inc}, ensure_ascii=False))
           PY
           )"
 
-          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          # fallback: nunca deixa vazio
+          if [[ -z "${MATRIX}" ]]; then
+            MATRIX='{"include":[]}'
+          fi
+
+          # write output do jeito certo (multiline)
+          {
+            echo "matrix<<'EOF'"
+            echo "$MATRIX"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
 
   apply:
