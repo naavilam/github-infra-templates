@@ -101,7 +101,7 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               "https://api.github.com/orgs/$ORG/repos?per_page=10" \
               | jq '.[].name'
-              
+
       - id: set
         name: Build matrix (missing repos or single target)
         env:
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(env.MAX_PARALLEL) }}
+      max-parallel: ${{ env.MAX_PARALLEL }}
       matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
     env:
       ORG: ${{ github.repository_owner }}
