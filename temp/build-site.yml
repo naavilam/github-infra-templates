@@ -122,7 +122,7 @@ jobs:
             "TITLE": hit.get("title") or repo,
             "HERO_FILE": hit.get("site_hero_image") or "",
             "SUBTITLE": hit.get("site_subtitle") or "",
-            "DESCRIPTION": hit.get("site_description") or "",
+            "ABOUT": hit.get("site_description") or "",
             "SITE_URL": site_url,
             "GITHUB_URL": f"https://github.com/{owner}/{repo}",
             "GITHUB_LINK": f"https://github.com/{owner}/{repo}"
