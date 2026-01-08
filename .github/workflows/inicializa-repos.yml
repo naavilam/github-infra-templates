@@ -31,14 +31,138 @@ env:
   CENTRAL_REPO: naavilam/github-infra-templates
   TEMPLATE_REF: main
   MAX_PARALLEL: "10"
-  
+
 jobs:
-  init:
+  detect:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      count: ${{ steps.set.outputs.count }}
     steps:
+      # checkout do repo que chamou (onde está o registry_path)
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+        with:
+          path: caller
+
+      # checkout do repo central (onde está o script)
       - name: Checkout central repo
         uses: actions/checkout@v4
         with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: central
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - id: set
+        name: Build matrix (missing repos or single target)
+        env:
+          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
+          REGISTRY_PATH: ${{ inputs.registry_path }}
+          ONE_REPO: ${{ inputs.repo }}
+        run: |
+          python - <<'PY'
+          import os, json, sys
+          from pathlib import Path
+          import yaml, requests
+
+          token = os.environ["GH_TOKEN"]
+          registry_path = os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml"
+          one_repo = (os.environ.get("ONE_REPO") or "").strip()
+
+          registry_file = Path("caller") / registry_path
+          if not registry_file.exists():
+            print(f"::error::registry not found: {registry_file}", file=sys.stderr)
+            sys.exit(2)
+
+          data = yaml.safe_load(registry_file.read_text(encoding="utf-8")) or {}
+          repos = data.get("repos", [])
+          if not isinstance(repos, list):
+            print("::error::registry.repos must be a list", file=sys.stderr)
+            sys.exit(2)
+
+          s = requests.Session()
+          s.headers.update({
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          })
+
+          def exists(org, name):
+            r = s.get(f"https://api.github.com/repos/{org}/{name}", timeout=30)
+            if r.status_code in (200, 404):
+              return r.status_code == 200
+            raise RuntimeError(f"exists({org}/{name}) unexpected {r.status_code}: {r.text}")
+
+          # filtra alvo único (aceita "repo" OU "org/repo")
+          selected = []
+          if one_repo:
+            matches = []
+            for e in repos:
+              org = (e.get("org") or "").strip()
+              name = (e.get("name") or "").strip()
+              full = f"{org}/{name}"
+              if one_repo == name or one_repo == full:
+                matches.append({"org": org, "repo": name})
+            if not matches:
+              print(f"::error::repo '{one_repo}' not found in registry", file=sys.stderr)
+              sys.exit(2)
+            if len(matches) > 1 and "/" not in one_repo:
+              # se só veio "repo", pode colidir entre orgs
+              print(f"::error::repo '{one_repo}' is ambiguous in registry; use org/repo", file=sys.stderr)
+              sys.exit(2)
+            selected = matches
+
+          else:
+            # lista só os que NÃO existem
+            for e in repos:
+              org = (e.get("org") or "").strip()
+              name = (e.get("name") or "").strip()
+              if not org or not name:
+                continue
+              if not exists(org, name):
+                selected.append({"org": org, "repo": name})
+
+          matrix = {"include": selected}
+          out = json.dumps(matrix)
+          print(f"matrix={out}")
+          print(f"count={len(selected)}")
+
+          # escreve outputs pro GitHub Actions
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+            f.write(f"matrix={out}\n")
+            f.write(f"count={len(selected)}\n")
+          PY
+
+  init:
+    needs: detect
+    if: ${{ needs.detect.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(env.MAX_PARALLEL) }}
+      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
+
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+        with:
+          path: caller
+
+      - name: Checkout central repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
           path: central
 
       - name: Setup Python
@@ -56,54 +180,21 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      # ------------------------------------------------------------
-      # Guardrails 
-      # ------------------------------------------------------------
-      - name: Guardrails 
-        working-directory: central
+      # garante que o script use o registry do caller (porque ele lê .github/registry/repos.yml relativo ao cwd=central)
+      - name: Copy registry into central
         env:
-          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }} 
-          MODE: ${{ inputs.mode }}
-          ONE_ORG: ${{ inputs.org }}
-          ONE_REPO: ${{ inputs.repo }}
-        shell: bash
+          REGISTRY_PATH: ${{ inputs.registry_path }}
         run: |
           set -euo pipefail
+          mkdir -p central/.github/registry
+          cp "caller/${REGISTRY_PATH}" "central/.github/registry/repos.yml"
 
-          echo "[guard] MODE=${MODE}"
-          echo "[guard] ONE_ORG=${ONE_ORG}"
-          echo "[guard] ONE_REPO=${ONE_REPO:-<empty>}"
-          echo "[guard] pwd=$(pwd)"
-          echo "[guard] registry exists? $(test -f .github/registry/repos.yml && echo yes || echo no)"
-          echo "[guard] script exists? $(test -f .github/scripts/repo_initializer.py && echo yes || echo no)"
-
-          if [[ -z "${GH_TOKEN:-}" ]]; then
-            echo "::error::GH_TOKEN is empty. Check secrets.GH_WORKFLOWS visibility."
-            exit 2
-          fi
-
-          # imprime o tamanho
-          echo "[guard] GH_TOKEN length: ${#GH_TOKEN}"
-
-          # sanity check API identity + org visibility
-          echo "[guard] sanity: /user"
-          curl -sS -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
-            https://api.github.com/user | python -c "import sys,json; print('[guard] login:', json.load(sys.stdin).get('login'))"
-
-          echo "[guard] sanity: /orgs/${ONE_ORG}"
-          curl -sS -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/orgs/${ONE_ORG}" | python -c "import sys,json; print('[guard] org:', json.load(sys.stdin).get('login'))"
-
-      # ------------------------------------------------------------
-      # Inicializador
-      # ------------------------------------------------------------
-      - name: Run initializer
+      - name: Run initializer (one repo)
         working-directory: central
         env:
-          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}  
+          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
           USE_TOKEN_IN_URL: "true"
-          MODE: ${{ inputs.mode }}
-          ONE_ORG: ${{ inputs.org }}
-          ONE_REPO: ${{ inputs.repo }}
+          ONE_ORG: ${{ matrix.org }}
+          ONE_REPO: ${{ matrix.repo }}
         run: |
           python .github/scripts/repo_initializer.py
