@@ -94,7 +94,7 @@ jobs:
                   "TITLE_2":    _as_str(it.get("title")),
                   "SUBTITLE_1": _as_str(it.get("academic_area")),
                   "SUBTITLE_2": _as_str(it.get("academic_level")),
-                  "ABOUT":      _as_str(it.get("site_description"),
+                  "ABOUT":      _as_str(it.get("site_description")),
                   "CTA_TEXT":   _as_str(it.get("readme_cta_text")),
                   "TAGLINE":    _as_str(it.get("readme_tagline")),
                   "THEME":      _as_str(it.get("readme_theme")),
