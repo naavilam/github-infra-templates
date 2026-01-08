@@ -236,6 +236,7 @@ jobs:
           sparse-checkout: |
             bootstrap/repo_website
             bootstrap/repo_scripts/build_site.py
+            img/portfolio
           sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
@@ -261,6 +262,64 @@ jobs:
         env:
           CFG_JSON: ${{ toJson(matrix.cfg) }}
 
+      - name: Fetch hero image (from central)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          HERO_FILE="$(python - <<'PY'
+          import yaml
+          from pathlib import Path
+          cfg = yaml.safe_load(Path("_cfg/website.yml").read_text(encoding="utf-8")) or {}
+          print((cfg.get("HERO_FILE") or "").strip())
+          PY
+          )"
+
+          if [[ -z "$HERO_FILE" ]]; then
+            echo "Sem HERO_FILE no cfg -> pulando hero."
+            exit 0
+          fi
+
+          mkdir -p _site/assets/img
+
+          found=""
+          for p in \
+            "central/img/portfolio/${HERO_FILE}" \
+            "central/bootstrap/repo_website/assets/img/${HERO_FILE}" \
+            "central/bootstrap/repo_website/assets/img/portfolio/${HERO_FILE}"
+          do
+            if [[ -f "$p" ]]; then
+              cp "$p" "_site/assets/img/hero.png"
+              echo "Hero encontrado em: $p"
+              found="1"
+              break
+            fi
+          done
+
+          if [[ -z "$found" ]]; then
+            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado no central (paths testados acima)."
+            exit 1
+          fi
+
+      - name: Set HERO_URL in cfg
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+
+          p = Path("_cfg/website.yml")
+          cfg = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+
+          # só seta se existir HERO_FILE (pra não “forçar” hero em repos sem imagem)
+          if (cfg.get("HERO_FILE") or "").strip():
+              cfg["HERO_URL"] = "./assets/img/hero.png"
+
+          p.write_text(yaml.safe_dump(cfg, sort_keys=False, allow_unicode=True), encoding="utf-8")
+          print("[ok] HERO_URL atualizado em _cfg/website.yml")
+          PY
+        
       # agora o src é a MAIN (pasta src), e out é _site
       - name: Build site into _site (from main)
         shell: bash
