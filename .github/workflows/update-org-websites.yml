@@ -88,16 +88,18 @@ jobs:
               if repo_filter and name.lower() != repo_filter:
                   continue
 
+              repo_full = f"{org}/{name}"
               cfg = {
                   "TITLE_1":    _as_str(it.get("id")),
                   "TITLE_2":    _as_str(it.get("title")),
                   "SUBTITLE_1": _as_str(it.get("academic_area")),
                   "SUBTITLE_2": _as_str(it.get("academic_level")),
-                  "ABOUT":      _as_str(it.get("site_description") or it.get("description")),
+                  "ABOUT":      _as_str(it.get("site_description"),
                   "CTA_TEXT":   _as_str(it.get("readme_cta_text")),
                   "TAGLINE":    _as_str(it.get("readme_tagline")),
                   "THEME":      _as_str(it.get("readme_theme")),
                   "HERO_FILE":  _as_str(it.get("site_hero_image")),
+                  "GITHUB_LINK": f"https://github.com/{repo_full}",
               }
               cfg = {k: v for k, v in cfg.items() if v}
 
