@@ -122,25 +122,11 @@ jobs:
                   "repo": f"{org}/{name}",
                   "cfg": cfg,
               })
-
-          print(json.dumps({"include": inc}, ensure_ascii=False))
           PY
           )"
 
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
 
-          echo "=== registry_path ==="
-          echo "${REGISTRY_PATH:-.github/registry/repos.yml}"
-
-          echo "=== matrix (raw json) ==="
-          echo "$MATRIX"
-
-          echo "=== matrix (pretty) ==="
-          MATRIX="$MATRIX" python - <<'PY'
-          import os, json
-          m = os.environ.get("MATRIX","{}")
-          print(json.dumps(json.loads(m), indent=2, ensure_ascii=False))
-          PY
 
   apply:
     needs: plan
