@@ -262,7 +262,19 @@ jobs:
         env:
           CFG_JSON: ${{ toJson(matrix.cfg) }}
 
-      - name: Fetch hero image (from central)
+      - name: Checkout manager assets (hero)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/${{ github.repository_owner }}.github.io
+          token: ${{ steps.app-token.outputs.token }}
+          ref: main
+          path: manager
+          sparse-checkout: |
+            img/portfolio
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
+      - name: Fetch hero image (from manager)
         shell: bash
         run: |
           set -euo pipefail
@@ -275,31 +287,33 @@ jobs:
           PY
           )"
 
-          if [[ -z "$HERO_FILE" ]]; then
+          if [[ -z "${HERO_FILE}" ]]; then
             echo "Sem HERO_FILE no cfg -> pulando hero."
             exit 0
           fi
 
-          mkdir -p _site/assets/img
-
-          found=""
-          for p in \
-            "central/img/portfolio/${HERO_FILE}" \
-            "central/bootstrap/repo_website/assets/img/${HERO_FILE}" \
-            "central/bootstrap/repo_website/assets/img/portfolio/${HERO_FILE}"
-          do
-            if [[ -f "$p" ]]; then
-              cp "$p" "_site/assets/img/hero.png"
-              echo "Hero encontrado em: $p"
-              found="1"
-              break
-            fi
-          done
-
-          if [[ -z "$found" ]]; then
-            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado no central (paths testados acima)."
+          SRC="manager/img/portfolio/${HERO_FILE}"
+          if [[ ! -f "$SRC" ]]; then
+            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado no manager em $SRC"
+            echo "Conteúdo de manager/img/portfolio:"
+            ls -la manager/img/portfolio || true
             exit 1
           fi
+
+          mkdir -p _site/assets/img
+          cp "$SRC" _site/assets/img/hero.png
+          echo "[ok] hero copiado: $SRC -> _site/assets/img/hero.png"
+
+          # garante que o template use a imagem local publicada (robusto)
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          p = Path("_cfg/website.yml")
+          cfg = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+          cfg["HERO_URL"] = "/assets/img/hero.png"
+          p.write_text(yaml.safe_dump(cfg, sort_keys=False, allow_unicode=True), encoding="utf-8")
+          print("[ok] set HERO_URL=/assets/img/hero.png")
+          PY
 
       - name: Set HERO_URL in cfg
         shell: bash
