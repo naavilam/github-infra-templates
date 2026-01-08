@@ -157,9 +157,130 @@ def collect_tree(src: Path, out: Path, execute: bool):
             str(path),
         ]
         
+
+        def _widen_notebook_html(html_path: Path):
+            try:
+                s = html_path.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                return
+
+            css = """
+        <style id="wide-notebook">
+        /* make nbconvert classic use full width */
+        #notebook-container {
+        width: 100% !important;
+        max-width: none !important;
+        }
+        .container, .container-fluid {
+        width: 100% !important;
+        max-width: none !important;
+        }
+        div#notebook {
+        width: 100% !important;
+        }
+        body {
+        margin: 0 !important;
+        padding: 0 !important;
+        }
+        /* ====== Reduce classic nbconvert left gutter + top gap ====== */
+
+        /* remove o "gutter" / margem esquerda que vira aquele bloco vazio */
+        div.prompt.input_prompt {
+        width: 42px !important;      /* era ~90-110px; ajuste fino aqui */
+        min-width: 42px !important;
+        }
+
+        /* alguns themes usam .prompt */
+        .prompt {
+        width: 42px !important;
+        min-width: 42px !important;
+        }
+
+        /* reduz padding horizontal do notebook (onde sobra ar demais) */
+        #notebook {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        }
+
+        /* reduz padding interno das células (ajuda a “encostar” mais no layout) */
+        div.cell {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        }
+
+        /* mata aquele gap no topo do primeiro conteúdo */
+        #notebook-container {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        }
+
+        /* se o classic estiver colocando sombra/borda feia no container, desliga */
+        #notebook-container {
+        box-shadow: none !important;
+        border: 0 !important;
+        }
+
+        /* garante que o body não crie faixa branca extra */
+        html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        }
+        div.prompt.input_prompt,
+        div.prompt.output_prompt {
+        display: none !important;
+        }
+
+        /* Indent só no conteúdo renderizado do Markdown (não mexe em código/output) */
+        #notebook .text_cell_render p,
+        #notebook .text_cell_render h1,
+        #notebook .text_cell_render h2,
+        #notebook .text_cell_render h3,
+        #notebook .text_cell_render h4,
+        #notebook .text_cell_render h5,
+        #notebook .text_cell_render h6 {
+            text-indent: 55px; /* ajuste aqui */
+        }
+
+        /* Remove indentação de p que esteja dentro de listas */
+        #notebook .text_cell_render ul p,
+        #notebook .text_cell_render ol p{
+        text-indent: 0;
+        }
+
+        #notebook ul,
+        #notebook ol {
+            margin-left: 55px;
+        }
+
+        /* Justificar parágrafos no conteúdo do notebook */
+        #notebook p,
+        #notebook li {
+        text-align: justify;
+        /* text-justify: inter-word;   melhor em alguns browsers */
+        hyphens: auto;              /* hifeniza quando suportado */
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        }
+        </style>
+        """.strip()
+
+            if "id=\"wide-notebook\"" in s:
+                return
+
+            if "</head>" in s:
+                s = s.replace("</head>", css + "\n</head>", 1)
+            elif "<body" in s:
+                s = re.sub(r"(<body[^>]*>)", r"\1\n" + css + "\n", s, count=1)
+            else:
+                s = css + "\n" + s
+
+            html_path.write_text(s, encoding="utf-8")
+
+
         if execute:
             cmd.append("--execute")
         subprocess.run(cmd, check=True)
+        _widen_notebook_html(out_html)
 
         file_node["nb_html"] = str(out_html.relative_to(out)).replace(os.sep, "/")
 
