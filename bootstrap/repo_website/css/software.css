@@ -187,7 +187,7 @@ a.file-notebook {
 
 /* notebook selecionado */
 a.file-notebook.is-active {
-  background: #e33cc2;
+  background: #b41b95;
   font-weight: 600;
   border-radius: 4px;
   /* box-shadow: inset 3px 0 0 #60a5fa; */
