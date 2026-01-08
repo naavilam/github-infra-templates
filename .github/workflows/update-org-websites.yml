@@ -101,11 +101,6 @@ jobs:
               }
               cfg = {k: v for k, v in cfg.items() if v}
 
-              # debug SEM quebrar output: manda pro stderr
-              if len(inc) < 10:
-                  print(f"[DBG] keys for {org}/{name}: {sorted(it.keys())}", file=sys.stderr)
-                  print(f"[DBG] cfg for {org}/{name}: {cfg}", file=sys.stderr)
-
               inc.append({"repo": f"{org}/{name}", "cfg": cfg})
 
           # imprimir o JSON no stdout
