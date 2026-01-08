@@ -201,5 +201,75 @@ jobs:
           fi
 
           git add -A
-          git commit -m "chore: update website"
+          git commit -m "Update files"
           git push origin gh-pages
+
+      - name: Guardrail: ensure gh-pages ref exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ matrix.repo }}
+        run: |
+          set -euo pipefail
+          OWNER="${REPO%/*}"
+          NAME="${REPO#*/}"
+          REF_URL="https://api.github.com/repos/${OWNER}/${NAME}/git/ref/heads/gh-pages"
+
+          echo "Checking ref: ${OWNER}/${NAME} heads/gh-pages"
+
+          ok=0
+          for i in {1..20}; do
+            code="$(curl -sS -o /tmp/ref.json -w "%{http_code}" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "${REF_URL}" || true)"
+
+            if [[ "$code" == "200" ]]; then
+              sha="$(jq -r '.object.sha // empty' /tmp/ref.json || true)"
+              echo "gh-pages exists (sha=${sha})"
+              ok=1
+              break
+            fi
+
+            echo "gh-pages not visible yet (http=${code}) attempt=${i}"
+            sleep 2
+          done
+
+          if [[ "$ok" != "1" ]]; then
+            echo "::error::gh-pages ref not visible after retries; cannot enable Pages safely."
+            exit 1
+          fi
+
+      - name: Enable GitHub Pages (source=gh-pages)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ matrix.repo }}
+        run: |
+          set -euo pipefail
+          OWNER="${REPO%/*}"
+          NAME="${REPO#*/}"
+          API="https://api.github.com/repos/${OWNER}/${NAME}/pages"
+          BODY='{"source":{"branch":"gh-pages","path":"/"}}'
+
+          http="$(curl -sS -o /tmp/pages.json -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${API}" \
+            -d "${BODY}" || true)"
+
+          if [[ "$http" == "409" || "$http" == "422" ]]; then
+            http="$(curl -sS -o /tmp/pages.json -w "%{http_code}" -X PUT \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "${API}" \
+              -d "${BODY}" || true)"
+          fi
+
+          echo "pages http=${http}"
+          cat /tmp/pages.json || true
+
+          if [[ "${http}" -lt 200 || "${http}" -ge 300 ]]; then
+            echo "::error::Failed to configure GitHub Pages (HTTP ${http})."
+            exit 1
+          fi
