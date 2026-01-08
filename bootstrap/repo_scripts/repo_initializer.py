@@ -29,10 +29,13 @@ HEADERS = {
 
 REGISTRY_FILE = Path(".github/registry/repos.yml")
 WORKDIR_BASE = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "repo_init_work"
-TEMPLATE_REPO_PATH = Path(".github/templates/repo")
 
 DISPATCH_SITE = os.environ.get("DISPATCH_SITE", "site-template-updated")
 DISPATCH_README = os.environ.get("DISPATCH_README", "readme-template-updated")
+
+BOOTSTRAP_BASE = Path("bootstrap")
+DISCIPLINE_SRC = BOOTSTRAP_BASE / "repo_discipline"
+WORKFLOWS_SRC = BOOTSTRAP_BASE / "repo_workflows"
 
 # Poll curto pedido por você
 WAIT_SLEEP_S = float(os.environ.get("WAIT_SLEEP_S", "0.5"))
@@ -179,32 +182,44 @@ def ensure_main_checkout(repo_dir: Path) -> None:
 
 def sync_template_into_main(repo_dir: Path) -> bool:
     """
-    Copia TUDO que está em TEMPLATE_REPO_PATH para a raiz do repo alvo.
-    Commit/push se houver diff.
+    Repo recém-criado:
+      - copia bootstrap/repo_discipline -> raiz
+      - copia bootstrap/repo_workflows -> .github/workflows
     """
-    if not TEMPLATE_REPO_PATH.exists():
-        raise RuntimeError(f"missing template path: {TEMPLATE_REPO_PATH}")
+    if not DISCIPLINE_SRC.exists():
+        raise RuntimeError(f"missing discipline source: {DISCIPLINE_SRC}")
 
     ensure_main_checkout(repo_dir)
 
-    # copia template
+    # 1) disciplina -> raiz (autoritativo)
     run([
-    "rsync", "-a", "--delete",
-    "--exclude", ".git",
-    "--exclude", ".DS_Store",
-    "--exclude", "_work",
-    f"{TEMPLATE_REPO_PATH}/",
-    f"{repo_dir}/"
+        "rsync", "-a", "--delete",
+        "--exclude", ".git",
+        "--exclude", ".DS_Store",
+        "--exclude", "_work",
+        "--exclude", ".github/workflows",  # garante que workflows só vêm do WORKFLOWS_SRC
+        f"{DISCIPLINE_SRC}/",
+        f"{repo_dir}/"
     ])
+
+    # 2) workflows -> .github/workflows (autoritativo, se existir)
+    if WORKFLOWS_SRC.exists():
+        (repo_dir / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+        run([
+            "rsync", "-a", "--delete",
+            "--exclude", ".git",
+            "--exclude", ".DS_Store",
+            f"{WORKFLOWS_SRC}/",
+            f"{repo_dir}/.github/workflows/"
+        ])
 
     if not out(["git", "status", "--porcelain"], cwd=repo_dir):
         return False
 
     run(["git", "add", "."], cwd=repo_dir)
-    run(["git", "commit", "-m", "Update files"], cwd=repo_dir)
+    run(["git", "commit", "-m", "Bootstrap discipline repo"], cwd=repo_dir)
     run(["git", "push", "-u", "origin", "main"], cwd=repo_dir)
     return True
-
 
 # ============================================================
 # Wait orchestration (gh-pages created by workflow)
