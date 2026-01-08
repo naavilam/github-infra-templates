@@ -61,22 +61,25 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml requests
+          pip install pyyaml requests pyjwt cryptography
 
       - id: set
-        name: Build matrix (missing repos or single target)
+        name: Build matrix (missing repos or single target) using GitHub App
         env:
-          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
+          APP_ID: ${{ secrets.PROVISIONER_APP_ID }}
+          APP_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           REGISTRY_PATH: ${{ inputs.registry_path }}
           ONE_REPO: ${{ inputs.repo }}
         run: |
           python - <<'PY'
-          import os, json, sys
+          import os, json, sys, time
           from pathlib import Path
           import yaml, requests
+          import jwt  # PyJWT
 
-          token = os.environ["GH_TOKEN"]
-          registry_path = os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml"
+          APP_ID = os.environ["APP_ID"]
+          APP_PEM = os.environ["APP_PEM"]
+          registry_path = (os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml").strip()
           one_repo = (os.environ.get("ONE_REPO") or "").strip()
 
           registry_file = Path("caller") / registry_path
@@ -90,21 +93,54 @@ jobs:
             print("::error::registry.repos must be a list", file=sys.stderr)
             sys.exit(2)
 
-          s = requests.Session()
-          s.headers.update({
-            "Authorization": f"Bearer {token}",
+          s_app = requests.Session()
+          s_app.headers.update({
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
           })
 
-          def exists(org, name):
+          def app_jwt():
+            now = int(time.time())
+            payload = {"iat": now - 30, "exp": now + 9 * 60, "iss": APP_ID}
+            return jwt.encode(payload, APP_PEM, algorithm="RS256")
+
+          def installation_token_for_org(org: str) -> str:
+            j = app_jwt()
+            hdr = {"Authorization": f"Bearer {j}"}
+
+            # pega instalação da org
+            r = s_app.get(f"https://api.github.com/orgs/{org}/installation", headers=hdr, timeout=30)
+            if r.status_code != 200:
+              raise RuntimeError(f"org installation lookup failed {org}: {r.status_code} {r.text}")
+            inst_id = r.json().get("id")
+            if not inst_id:
+              raise RuntimeError(f"no installation id for org {org}")
+
+            # cria token de instalação
+            r2 = s_app.post(f"https://api.github.com/app/installations/{inst_id}/access_tokens", headers=hdr, timeout=30)
+            if r2.status_code != 201:
+              raise RuntimeError(f"installation token failed {org}: {r2.status_code} {r2.text}")
+            return r2.json()["token"]
+
+          tok_cache = {}
+
+          def repo_exists(org: str, name: str) -> bool:
+            if org not in tok_cache:
+              tok_cache[org] = installation_token_for_org(org)
+
+            s = requests.Session()
+            s.headers.update({
+              "Authorization": f"Bearer {tok_cache[org]}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            })
             r = s.get(f"https://api.github.com/repos/{org}/{name}", timeout=30)
             if r.status_code in (200, 404):
               return r.status_code == 200
-            raise RuntimeError(f"exists({org}/{name}) unexpected {r.status_code}: {r.text}")
+            raise RuntimeError(f"repo_exists unexpected {r.status_code}: {r.text}")
 
-          # filtra alvo único (aceita "repo" OU "org/repo")
           selected = []
+
           if one_repo:
             matches = []
             for e in repos:
@@ -117,30 +153,26 @@ jobs:
               print(f"::error::repo '{one_repo}' not found in registry", file=sys.stderr)
               sys.exit(2)
             if len(matches) > 1 and "/" not in one_repo:
-              # se só veio "repo", pode colidir entre orgs
-              print(f"::error::repo '{one_repo}' is ambiguous in registry; use org/repo", file=sys.stderr)
+              print(f"::error::repo '{one_repo}' is ambiguous; use org/repo", file=sys.stderr)
               sys.exit(2)
             selected = matches
 
           else:
-            # lista só os que NÃO existem
             for e in repos:
               org = (e.get("org") or "").strip()
               name = (e.get("name") or "").strip()
               if not org or not name:
                 continue
-              if not exists(org, name):
+              if not repo_exists(org, name):
                 selected.append({"org": org, "repo": name})
 
           matrix = {"include": selected}
           out = json.dumps(matrix)
-          print(f"matrix={out}")
-          print(f"count={len(selected)}")
-
-          # escreve outputs pro GitHub Actions
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
             f.write(f"matrix={out}\n")
             f.write(f"count={len(selected)}\n")
+
+          print(f"[detect] selected={len(selected)}")
           PY
 
   init:
