@@ -1,4 +1,4 @@
-name: Listener Update Websites
+name: Listener Repository Initializer
 
 on:
   workflow_dispatch:
