@@ -10,21 +10,24 @@
   <link rel="stylesheet" href="./css/nav_bar.css" />
   <link rel="stylesheet" href="./css/pages.css" />
   <link rel="stylesheet" href="./css/home.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/img/icons8-caderno-circular-16.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/img/icons8-caderno-circular-32.png">
   <script src="./js/app.js" defer></script>
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EM7FEY66C3"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag() { dataLayer.push(arguments); }
   gtag('js', new Date());
   gtag('config', 'G-EM7FEY66C3');
 </script>
+
 <body>
   <header class="navbar">
     <div class="wrap">
       <!-- Link extra à esquerda -->
       <a class="repo-link" href="https://academic-codex.github.io/" title="Repositório Central">⚛</a>
-      
+
       <div class="brand"><a href="./index.html">Homepage</a></div>
       <nav class="nav">
         <a href="./research.html">References</a>
@@ -41,7 +44,7 @@
       <div class="hero__content">
         <h1 class="hero__title"> {{ TITLE_1 }} • {{ TITLE_2}} </h1>
         <p class="hero__subtitle">
-         {{ SUBTITLE_1 }} . {{ SUBTITLE_2 }}
+          {{ SUBTITLE_1 }} . {{ SUBTITLE_2 }}
         </p>
         <a class="btn btn--light" href="./software.html">Studies</a>
       </div>
@@ -54,11 +57,12 @@
         <div>
           {{ ABOUT }}
 
-          <p class="muted">Last Updated at {{TIMESTAMP}} • Total number of notebooks in this course: <span id="nbcount">{{NBCOUNT}}</span></p>
+          <p class="muted">Last Updated at {{TIMESTAMP}} • Total number of notebooks in this course: <span
+              id="nbcount">{{NBCOUNT}}</span></p>
           <p>
             <strong>Contact:</strong><br>
             nara.moraes@usp.br ·
-            <a href="{{ GITHUB_LINK }}#readme" >GitHub</a>
+            <a href="{{ GITHUB_LINK }}#readme">GitHub</a>
           </p>
         </div>
       </div>
@@ -70,21 +74,21 @@
       <div class="card author">
         <img id="avatar" class="avatar" alt="Foto da autora" />
         <div>
-        <p>
-        I am a graduate researcher at
-        <a href="https://portal.if.usp.br/ifusp/" target="_blank" rel="noreferrer">IFUSP</a>
-        (Institute of Physics, University of São Paulo). I have a bachelor’s degree in Computer Engineering from
-          <a href="https://eesc.usp.br/" target="_blank" rel="noreferrer">EESC</a>
-          (São Carlos School of Engineering, University of São Paulo).
-        </p>
+          <p>
+            I am a graduate researcher at
+            <a href="https://portal.if.usp.br/ifusp/" target="_blank" rel="noreferrer">IFUSP</a>
+            (Institute of Physics, University of São Paulo). I have a bachelor’s degree in Computer Engineering from
+            <a href="https://eesc.usp.br/" target="_blank" rel="noreferrer">EESC</a>
+            (São Carlos School of Engineering, University of São Paulo).
+          </p>
 
-        <p>
-          My research interests include the Standard Model, quantum computing,
-          machine learning, statistics and numerical methods. My current work can be accessed through 
-  <a href="https://naavilam.github.io" rel="noreferrer">
-    my academic page
-  </a>.
-</p>
+          <p>
+            My research interests include the Standard Model, quantum computing,
+            machine learning, statistics and numerical methods. My current work can be accessed through
+            <a href="https://naavilam.github.io" rel="noreferrer">
+              my academic page
+            </a>.
+          </p>
         </div>
       </div>
     </section>
