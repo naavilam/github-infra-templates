@@ -107,17 +107,6 @@ jobs:
               # remove vazios
               cfg = {k: v for k, v in cfg.items() if v}
 
-              # DEBUG safe (primeiros 10)
-              if len(inc) < 10:
-                  keys = sorted(list(it.keys()))
-                  print(f"[DBG] item keys for {org}/{name}: {keys}")
-
-                  print(f"[DBG] cfg for {org}/{name}:")
-                  for k in sorted(cfg.keys()):
-                      v = cfg[k]
-                      preview = v if len(v) <= 200 else (v[:200] + "...")
-                      print(f"  - {k}: {preview}")
-
               inc.append({
                   "repo": f"{org}/{name}",
                   "cfg": cfg,
