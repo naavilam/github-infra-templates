@@ -54,62 +54,74 @@ jobs:
         run: |
           set -euo pipefail
 
-          MATRIX="$(python - <<'PY'
+          MATRIX="$(
+          python - <<'PY'
           import os, json, yaml
           from pathlib import Path
+
+          def _as_str(v):
+              if v is None:
+                  return ""
+              return str(v).strip()
 
           repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
           reg_path = Path(os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml")
           owner = (os.environ.get("GITHUB_REPOSITORY_OWNER") or "").strip()
 
           if not reg_path.exists():
-            print(json.dumps({"include": []}))
-            raise SystemExit(0)
+              print(json.dumps({"include": []}, ensure_ascii=False))
+              raise SystemExit(0)
 
           data = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
           repos = data.get("repos", [])
           if not isinstance(repos, list):
-            repos = []
+              repos = []
 
           inc = []
+
           for it in repos:
-            name = str(it.get("name","")).strip()
-            org  = str(it.get("org","")).strip() or owner
-            if not name:
-              continue
-            if repo_filter and name.lower() != repo_filter:
-              continue
+              if not isinstance(it, dict):
+                  continue
 
-            # cfg flexível
-            cfg = (
-                it.get("website_cfg")
-                or it.get("site_cfg")
-                or it.get("cfg")
-                or it.get("placeholders")
-                or {}
-            )
-            if not isinstance(cfg, dict):
-              cfg = {}
+              name = _as_str(it.get("name"))
+              org  = _as_str(it.get("org")) or owner
+              if not name:
+                  continue
+              if repo_filter and name.lower() != repo_filter:
+                  continue
 
-            # DEBUG (safe): inspeciona estrutura do item do registry
-            if len(inc) < 10:
-              keys = sorted(list(it.keys()))
-              print(f"[DBG] item keys for {org}/{name}: {keys}")
+              # === cfg CANÔNICO (derivado do registry) ===
+              cfg = {
+                  "TITLE_1":   _as_str(it.get("id")),
+                  "TITLE_2":   _as_str(it.get("title")),
+                  "SUBTITLE_1":_as_str(it.get("academic_area")),
+                  "SUBTITLE_2":_as_str(it.get("academic_level")),
+                  "ABOUT":     _as_str(it.get("site_description") or it.get("description")),
+                  "CTA_TEXT":  _as_str(it.get("readme_cta_text")),
+                  "TAGLINE":   _as_str(it.get("readme_tagline")),
+                  "THEME":     _as_str(it.get("readme_theme")),
+                  # se quiser já propagar o hero pro script:
+                  "HERO_FILE": _as_str(it.get("site_hero_image")),
+              }
 
-              for k in ["website_cfg", "cfg", "placeholders", "site_cfg", "website", "site"]:
-                if k in it:
-                  v = it.get(k)
-                  t = type(v).__name__
-                  # preview curto e seguro
-                  preview = str(v)
-                  if len(preview) > 200:
-                    preview = preview[:200] + "..."
-                  print(f"[DBG]  - {k}: type={t} preview={preview}")
-                  
-            inc.append({
-              "repo": f"{org}/{name}",
-              "cfg": cfg
-            })
+              # remove vazios
+              cfg = {k: v for k, v in cfg.items() if v}
+
+              # DEBUG safe (primeiros 10)
+              if len(inc) < 10:
+                  keys = sorted(list(it.keys()))
+                  print(f"[DBG] item keys for {org}/{name}: {keys}")
+
+                  print(f"[DBG] cfg for {org}/{name}:")
+                  for k in sorted(cfg.keys()):
+                      v = cfg[k]
+                      preview = v if len(v) <= 200 else (v[:200] + "...")
+                      print(f"  - {k}: {preview}")
+
+              inc.append({
+                  "repo": f"{org}/{name}",
+                  "cfg": cfg,
+              })
 
           print(json.dumps({"include": inc}, ensure_ascii=False))
           PY
@@ -124,9 +136,9 @@ jobs:
           echo "$MATRIX"
 
           echo "=== matrix (pretty) ==="
-          python - <<PY
-          import json
-          m = r'''$MATRIX'''
+          MATRIX="$MATRIX" python - <<'PY'
+          import os, json
+          m = os.environ.get("MATRIX","{}")
           print(json.dumps(json.loads(m), indent=2, ensure_ascii=False))
           PY
 
