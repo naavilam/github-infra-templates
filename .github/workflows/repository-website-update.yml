@@ -62,118 +62,118 @@ jobs:
         CALLER_REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
         run: |
-        python - <<'PY'
-        import os, sys, json, base64
-        from pathlib import Path
-        import yaml, requests
+          python - <<'PY'
+          import os, sys, json, base64
+          from pathlib import Path
+          import yaml, requests
 
-        gh_token = os.environ["GH_TOKEN"]
-        registry_path = (os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml").strip()
-        repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
-        caller_repo = (os.environ.get("CALLER_REPO") or "").strip()          # org/repo (onde está rodando)
-        owner = (os.environ.get("OWNER") or "").strip()
+          gh_token = os.environ["GH_TOKEN"]
+          registry_path = (os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml").strip()
+          repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
+          caller_repo = (os.environ.get("CALLER_REPO") or "").strip()          # org/repo (onde está rodando)
+          owner = (os.environ.get("OWNER") or "").strip()
 
-        # infer manager repo
-        registry_repo = f"{owner}/{owner}.github.io"
+          # infer manager repo
+          registry_repo = f"{owner}/{owner}.github.io"
 
-        def api_get(url):
-          r = requests.get(
-            url,
-            headers={
-              "Authorization": f"Bearer {gh_token}",
-              "Accept": "application/vnd.github+json",
-              "X-GitHub-Api-Version": "2022-11-28",
-            },
-            timeout=30,
-          )
-          return r
+          def api_get(url):
+            r = requests.get(
+              url,
+              headers={
+                "Authorization": f"Bearer {gh_token}",
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+              },
+              timeout=30,
+            )
+            return r
 
-        def load_registry():
-          # 1) tenta local (quando estiver no manager)
-          p = Path(registry_path)
-          if p.exists():
-            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+          def load_registry():
+            # 1) tenta local (quando estiver no manager)
+            p = Path(registry_path)
+            if p.exists():
+              data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+              return data
+
+            # 2) busca do manager via contents API
+            url = f"https://api.github.com/repos/{registry_repo}/contents/{registry_path}?ref=main"
+            r = api_get(url)
+            if r.status_code != 200:
+              print(f"::error::registry not found locally and cannot fetch from {registry_repo}:{registry_path} (http {r.status_code})", file=sys.stderr)
+              sys.exit(2)
+            j = r.json()
+            content = j.get("content","")
+            if not content:
+              print(f"::error::registry content empty from {registry_repo}:{registry_path}", file=sys.stderr)
+              sys.exit(2)
+            raw = base64.b64decode(content.encode("utf-8"))
+            data = yaml.safe_load(raw.decode("utf-8")) or {}
             return data
 
-          # 2) busca do manager via contents API
-          url = f"https://api.github.com/repos/{registry_repo}/contents/{registry_path}?ref=main"
-          r = api_get(url)
-          if r.status_code != 200:
-            print(f"::error::registry not found locally and cannot fetch from {registry_repo}:{registry_path} (http {r.status_code})", file=sys.stderr)
-            sys.exit(2)
-          j = r.json()
-          content = j.get("content","")
-          if not content:
-            print(f"::error::registry content empty from {registry_repo}:{registry_path}", file=sys.stderr)
-            sys.exit(2)
-          raw = base64.b64decode(content.encode("utf-8"))
-          data = yaml.safe_load(raw.decode("utf-8")) or {}
-          return data
+          data = load_registry()
+          repos = data.get("repos", [])
+          if not isinstance(repos, list):
+            repos = []
 
-        data = load_registry()
-        repos = data.get("repos", [])
-        if not isinstance(repos, list):
-          repos = []
+          # Decide o alvo:
+          # - se inputs.repo veio, usa ele (aceita "name" ou "org/name")
+          # - se inputs.repo vazio:
+          #   - se está rodando no manager repo, modo "all"
+          #   - senão (repo disciplina), modo "single caller"
+          is_manager = (caller_repo.lower() == registry_repo.lower())
+          target = repo_filter
+          if not target:
+            target = "" if is_manager else caller_repo  # manager => all; disciplina => só ele mesmo
 
-        # Decide o alvo:
-        # - se inputs.repo veio, usa ele (aceita "name" ou "org/name")
-        # - se inputs.repo vazio:
-        #   - se está rodando no manager repo, modo "all"
-        #   - senão (repo disciplina), modo "single caller"
-        is_manager = (caller_repo.lower() == registry_repo.lower())
-        target = repo_filter
-        if not target:
-          target = "" if is_manager else caller_repo  # manager => all; disciplina => só ele mesmo
+          def norm(s): return (s or "").strip().lower()
 
-        def norm(s): return (s or "").strip().lower()
+          inc=[]
+          for it in repos:
+            if not isinstance(it, dict):
+              continue
+            name = (it.get("name") or "").strip()
+            org  = (it.get("org") or "").strip() or owner
+            if not name:
+              continue
 
-        inc=[]
-        for it in repos:
-          if not isinstance(it, dict):
-            continue
-          name = (it.get("name") or "").strip()
-          org  = (it.get("org") or "").strip() or owner
-          if not name:
-            continue
+            full = f"{org}/{name}"
 
-          full = f"{org}/{name}"
+            # filtra
+            if target:
+              t = target
+              if "/" not in t:
+                # alvo veio só como name
+                if norm(name) != norm(t):
+                  continue
+              else:
+                if norm(full) != norm(t):
+                  continue
 
-          # filtra
-          if target:
-            t = target
-            if "/" not in t:
-              # alvo veio só como name
-              if norm(name) != norm(t):
-                continue
-            else:
-              if norm(full) != norm(t):
-                continue
+            cfg = {
+              "TITLE_1":    str(it.get("id") or "").strip(),
+              "TITLE_2":    str(it.get("title") or "").strip(),
+              "SUBTITLE_1": str(it.get("academic_area") or "").strip(),
+              "SUBTITLE_2": str(it.get("academic_level") or "").strip(),
+              "ABOUT":      str(it.get("site_description") or "").strip(),
+              "CTA_TEXT":   str(it.get("readme_cta_text") or "").strip(),
+              "TAGLINE":    str(it.get("readme_tagline") or "").strip(),
+              "THEME":      str(it.get("readme_theme") or "").strip(),
+              "HERO_FILE":  str(it.get("site_hero_image") or "").strip(),
+              "GITHUB_LINK": f"https://github.com/{full}",
+              "CENTRAL_REPO": f"https://{org}.github.io"
+            }
+            cfg = {k:v for k,v in cfg.items() if v}
+            inc.append({"repo": full, "cfg": cfg})
 
-          cfg = {
-            "TITLE_1":    str(it.get("id") or "").strip(),
-            "TITLE_2":    str(it.get("title") or "").strip(),
-            "SUBTITLE_1": str(it.get("academic_area") or "").strip(),
-            "SUBTITLE_2": str(it.get("academic_level") or "").strip(),
-            "ABOUT":      str(it.get("site_description") or "").strip(),
-            "CTA_TEXT":   str(it.get("readme_cta_text") or "").strip(),
-            "TAGLINE":    str(it.get("readme_tagline") or "").strip(),
-            "THEME":      str(it.get("readme_theme") or "").strip(),
-            "HERO_FILE":  str(it.get("site_hero_image") or "").strip(),
-            "GITHUB_LINK": f"https://github.com/{full}",
-            "CENTRAL_REPO": f"https://{org}.github.io"
-          }
-          cfg = {k:v for k,v in cfg.items() if v}
-          inc.append({"repo": full, "cfg": cfg})
+          matrix = {"include": inc}
+          print(json.dumps(matrix, ensure_ascii=False))
 
-        matrix = {"include": inc}
-        print(json.dumps(matrix, ensure_ascii=False))
-
-        # outputs
-        out_path = os.environ["GITHUB_OUTPUT"]
-        with open(out_path, "a", encoding="utf-8") as f:
-          f.write("count=%d\n" % len(inc))
-          f.write("matrix=%s\n" % json.dumps(matrix, ensure_ascii=False))
-        PY
+          # outputs
+          out_path = os.environ["GITHUB_OUTPUT"]
+          with open(out_path, "a", encoding="utf-8") as f:
+            f.write("count=%d\n" % len(inc))
+            f.write("matrix=%s\n" % json.dumps(matrix, ensure_ascii=False))
+          PY
 
   apply:
     needs: plan
