@@ -114,10 +114,11 @@ jobs:
           fi
 
           # write output do jeito certo (multiline)
+          DELIM="__MATRIX_EOF_$(date +%s%N)__"
           {
-            echo "matrix<<'EOF'"
+            echo "matrix<<$DELIM"
             echo "$MATRIX"
-            echo "EOF"
+            echo "$DELIM"
           } >> "$GITHUB_OUTPUT"
 
 
