@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-import time
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -27,28 +27,21 @@ HEADERS = {
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
-REGISTRY_FILE = Path(".github/registry/repos.yml")
+REGISTRY_FILE = Path(os.environ.get("REGISTRY_FILE", ".github/registry/repos.yml"))
 WORKDIR_BASE = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "repo_init_work"
 
 DISPATCH_SITE = os.environ.get("DISPATCH_SITE", "site-template-updated")
 DISPATCH_README = os.environ.get("DISPATCH_README", "readme-template-updated")
 
+# Se quiser SEMPRE disparar os 2 workflows, mesmo após push (default true aqui)
+ALWAYS_DISPATCH = os.environ.get("ALWAYS_DISPATCH", "true").lower() == "true"
+
+# Se rodar fora do Actions e precisar autenticar o clone/push via URL
+USE_TOKEN_IN_URL = os.environ.get("USE_TOKEN_IN_URL", "true").lower() == "true"
+
 BOOTSTRAP_BASE = Path("bootstrap")
 DISCIPLINE_SRC = BOOTSTRAP_BASE / "repo_discipline"
 WORKFLOWS_SRC = BOOTSTRAP_BASE / "repo_workflows"
-
-# Poll curto pedido por você
-WAIT_SLEEP_S = float(os.environ.get("WAIT_SLEEP_S", "0.5"))
-
-# Timeout total (recomendo >= 60 para dar tempo do workflow criar gh-pages)
-WAIT_TIMEOUT_S = float(os.environ.get("WAIT_TIMEOUT_S", "60.0"))
-
-# Se seu workflow já faz auth via extraheader, deixe false (default).
-# Se rodar fora do workflow, use: USE_TOKEN_IN_URL=true
-USE_TOKEN_IN_URL = os.environ.get("USE_TOKEN_IN_URL", "false").lower() == "true"
-
-# Se quiser sempre disparar dispatch mesmo após push:
-ALWAYS_DISPATCH = os.environ.get("ALWAYS_DISPATCH", "false").lower() == "true"
 
 
 # ============================================================
@@ -57,6 +50,9 @@ ALWAYS_DISPATCH = os.environ.get("ALWAYS_DISPATCH", "false").lower() == "true"
 
 def log(repo: str, msg: str) -> None:
     print(f"[INIT] {repo}: {msg}", flush=True)
+
+def warn(repo: str, msg: str) -> None:
+    print(f"[WARN] {repo}: {msg}", flush=True)
 
 def err(repo: str, step: str, msg: str) -> None:
     print(f"[ERROR] {repo} step={step}: {msg}", file=sys.stderr, flush=True)
@@ -80,7 +76,7 @@ def create_repo(org: str, repo: str, desc: str, private: bool) -> None:
         "name": repo,
         "description": desc,
         "private": private,
-        "auto_init": True,          # garante origin/main existir
+        "auto_init": True,  # garante origin/main existir
         "has_issues": False,
         "has_projects": False,
         "has_wiki": False,
@@ -90,52 +86,6 @@ def create_repo(org: str, repo: str, desc: str, private: bool) -> None:
         return
     raise RuntimeError(f"create_repo failed {r.status_code}: {r.text}")
 
-def branch_exists_api(org: str, repo: str, branch: str) -> bool:
-    r = gh("GET", f"{API}/repos/{org}/{repo}/branches/{branch}")
-    if r.status_code in (200, 404):
-        return r.status_code == 200
-    raise RuntimeError(f"branch_exists_api unexpected {r.status_code}: {r.text}")
-
-def get_pages(org: str, repo: str) -> Optional[dict]:
-    r = gh("GET", f"{API}/repos/{org}/{repo}/pages")
-    if r.status_code == 200:
-        return r.json()
-    if r.status_code == 404:
-        return None
-    raise RuntimeError(f"get_pages unexpected {r.status_code}: {r.text}")
-
-def enable_pages_once(org: str, repo: str) -> str:
-    """
-    Returns: "enabled" | "noop" | "wait"
-    - wait = ainda não dá (tipicamente branch não existe -> 422)
-    """
-    payload = {"source": {"branch": "gh-pages", "path": "/"}}
-
-    current = get_pages(org, repo)
-    if current is not None:
-        src = (current.get("source") or {})
-        if src.get("branch") == "gh-pages" and src.get("path") == "/":
-            return "noop"
-        # existe mas está diferente -> tenta atualizar
-        r_put = gh("PUT", f"{API}/repos/{org}/{repo}/pages", json=payload)
-        if r_put.status_code in (200, 201, 204):
-            return "enabled"
-        raise RuntimeError(f"pages PUT failed {r_put.status_code}: {r_put.text}")
-
-    # não existe Pages ainda -> tenta criar
-    r_post = gh("POST", f"{API}/repos/{org}/{repo}/pages", json=payload)
-    if r_post.status_code in (201, 204):
-        return "enabled"
-    if r_post.status_code == 422:
-        return "wait"
-
-    # fallback PUT (às vezes funciona como idempotente)
-    r_put = gh("PUT", f"{API}/repos/{org}/{repo}/pages", json=payload)
-    if r_put.status_code in (200, 201, 204):
-        return "enabled"
-
-    raise RuntimeError(f"enable_pages failed post={r_post.status_code} put={r_put.status_code}: {r_put.text}")
-
 def dispatch(org: str, repo: str, event: str) -> None:
     r = gh("POST", f"{API}/repos/{org}/{repo}/dispatches", json={"event_type": event})
     if r.status_code != 204:
@@ -143,7 +93,7 @@ def dispatch(org: str, repo: str, event: str) -> None:
 
 
 # ============================================================
-# GIT helpers (IMPORTANT: do not double-auth)
+# GIT helpers
 # ============================================================
 
 def run(cmd: List[str], cwd: Optional[Path] = None) -> None:
@@ -160,27 +110,24 @@ def ensure_repo_clone(org: str, repo: str) -> Path:
 
     clean_url = f"https://github.com/{org}/{repo}.git"
     token_url = f"https://x-access-token:{GH_TOKEN}@github.com/{org}/{repo}.git"
-
     clone_url = token_url if USE_TOKEN_IN_URL else clean_url
-    run(["git", "clone", "--no-tags", clone_url, str(d)])
 
-    # origin: se você usa extraheader no workflow, mantenha clean_url para evitar duplicate header.
+    run(["git", "clone", "--no-tags", clone_url, str(d)])
     run(["git", "remote", "set-url", "origin", token_url if USE_TOKEN_IN_URL else clean_url], cwd=d)
     run(["git", "fetch", "origin", "--prune"], cwd=d)
 
-    # identidade local (não conflita com extraheader)
+    # identidade local (necessário para commit)
     run(["git", "config", "user.name", os.environ.get("GIT_USER_NAME", "github-actions[bot]")], cwd=d)
     run(["git", "config", "user.email", os.environ.get("GIT_USER_EMAIL", "github-actions[bot]@users.noreply.github.com")], cwd=d)
 
     return d
 
 def ensure_main_checkout(repo_dir: Path) -> None:
-    # repo criado com auto_init => origin/main existe
     run(["git", "checkout", "-B", "main", "origin/main"], cwd=repo_dir)
     run(["git", "reset", "--hard", "origin/main"], cwd=repo_dir)
     run(["git", "clean", "-ffd"], cwd=repo_dir)
 
-def sync_template_into_main(repo_dir: Path) -> bool:
+def sync_bootstrap_into_main(repo_dir: Path) -> bool:
     """
     Repo recém-criado:
       - copia bootstrap/repo_discipline -> raiz
@@ -188,6 +135,8 @@ def sync_template_into_main(repo_dir: Path) -> bool:
     """
     if not DISCIPLINE_SRC.exists():
         raise RuntimeError(f"missing discipline source: {DISCIPLINE_SRC}")
+    if not WORKFLOWS_SRC.exists():
+        raise RuntimeError(f"missing workflows source: {WORKFLOWS_SRC}")
 
     ensure_main_checkout(repo_dir)
 
@@ -197,21 +146,20 @@ def sync_template_into_main(repo_dir: Path) -> bool:
         "--exclude", ".git",
         "--exclude", ".DS_Store",
         "--exclude", "_work",
-        "--exclude", ".github/workflows",  # garante que workflows só vêm do WORKFLOWS_SRC
+        "--exclude", ".github/workflows",  # workflows só vêm do WORKFLOWS_SRC
         f"{DISCIPLINE_SRC}/",
         f"{repo_dir}/"
     ])
 
-    # 2) workflows -> .github/workflows (autoritativo, se existir)
-    if WORKFLOWS_SRC.exists():
-        (repo_dir / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
-        run([
-            "rsync", "-a", "--delete",
-            "--exclude", ".git",
-            "--exclude", ".DS_Store",
-            f"{WORKFLOWS_SRC}/",
-            f"{repo_dir}/.github/workflows/"
-        ])
+    # 2) workflows -> .github/workflows (autoritativo)
+    (repo_dir / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+    run([
+        "rsync", "-a", "--delete",
+        "--exclude", ".git",
+        "--exclude", ".DS_Store",
+        f"{WORKFLOWS_SRC}/",
+        f"{repo_dir}/.github/workflows/"
+    ])
 
     if not out(["git", "status", "--porcelain"], cwd=repo_dir):
         return False
@@ -220,34 +168,6 @@ def sync_template_into_main(repo_dir: Path) -> bool:
     run(["git", "commit", "-m", "Bootstrap discipline repo"], cwd=repo_dir)
     run(["git", "push", "-u", "origin", "main"], cwd=repo_dir)
     return True
-
-# ============================================================
-# Wait orchestration (gh-pages created by workflow)
-# ============================================================
-
-def wait_for_branch(org: str, repo: str, branch: str) -> bool:
-    deadline = time.time() + WAIT_TIMEOUT_S
-    while time.time() < deadline:
-        if branch_exists_api(org, repo, branch):
-            return True
-        time.sleep(WAIT_SLEEP_S)
-    return False
-
-def enable_pages_with_wait(org: str, repo: str) -> str:
-    """
-    Espera gh-pages existir, depois tenta habilitar Pages com retries.
-    Returns: "enabled" | "noop" | "timeout_branch" | "timeout_pages"
-    """
-    if not wait_for_branch(org, repo, "gh-pages"):
-        return "timeout_branch"
-
-    deadline = time.time() + WAIT_TIMEOUT_S
-    while time.time() < deadline:
-        st = enable_pages_once(org, repo)
-        if st in ("enabled", "noop"):
-            return st
-        time.sleep(WAIT_SLEEP_S)
-    return "timeout_pages"
 
 
 # ============================================================
@@ -266,39 +186,27 @@ def process_repo(entry: Dict) -> None:
 
     log(full, "start")
 
-    exists = repo_exists(org, repo)
-    if exists:
-        log(full, "exists — skipped (initializer only creates missing repos)")
+    if repo_exists(org, repo):
+        log(full, "exists — skipped")
         return
 
     create_repo(org, repo, desc, private)
     log(full, "repo created")
 
     repo_dir = ensure_repo_clone(org, repo)
+    pushed = sync_bootstrap_into_main(repo_dir)
+    log(full, "bootstrap pushed" if pushed else "no diff after bootstrap (unexpected for new repo)")
 
-    pushed = sync_template_into_main(repo_dir)
-    if pushed:
-        log(full, "main updated (push should trigger update-site workflow)")
-    else:
-        log(full, "no diff in main (template already in sync)")
-
-    # Opcional: dispatch manual (útil quando não houve push/diff, ou para forçar rebuild)
+    # Dispara os workflows (sempre, por padrão)
     if ALWAYS_DISPATCH or (not pushed):
         dispatch(org, repo, DISPATCH_SITE)
         log(full, f"dispatched {DISPATCH_SITE}")
         dispatch(org, repo, DISPATCH_README)
         log(full, f"dispatched {DISPATCH_README}")
-
-    # Agora: aguardar gh-pages ser criado pelo workflow e então habilitar Pages
-    st = enable_pages_with_wait(org, repo)
-    if st == "enabled":
-        log(full, "Pages enabled (gh-pages:/)")
-    elif st == "noop":
-        log(full, "Pages already enabled")
-    elif st == "timeout_branch":
-        log(full, "timeout: gh-pages not visible yet. Re-run initializer soon.")
     else:
-        log(full, "timeout: Pages still returning 422/wait. Re-run initializer soon.")
+        log(full, "dispatch skipped (ALWAYS_DISPATCH=false and push happened)")
+
+    log(full, "done")
 
 
 def main() -> None:
