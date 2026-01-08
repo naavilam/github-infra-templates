@@ -45,89 +45,140 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      - name: Mint Provisioner GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ github.repository_owner }}
+
       - id: set
-        name: Build matrix from registry
-        shell: bash
+        name: Build matrix (local registry OR manager registry)
         env:
-          REPO_FILTER: ${{ inputs.repo }}
-          REGISTRY_PATH: ${{ inputs.registry_path }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        REGISTRY_PATH: ${{ inputs.registry_path }}
+        REPO_FILTER: ${{ inputs.repo }}
+        CALLER_REPO: ${{ github.repository }}
+        OWNER: ${{ github.repository_owner }}
         run: |
-          set -euo pipefail
+        python - <<'PY'
+        import os, sys, json, base64
+        from pathlib import Path
+        import yaml, requests
 
-          MATRIX="$(
-          python - <<'PY'
-          import os, json, yaml, sys
-          from pathlib import Path
+        gh_token = os.environ["GH_TOKEN"]
+        registry_path = (os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml").strip()
+        repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
+        caller_repo = (os.environ.get("CALLER_REPO") or "").strip()          # org/repo (onde está rodando)
+        owner = (os.environ.get("OWNER") or "").strip()
 
-          def _as_str(v):
-              return "" if v is None else str(v).strip()
+        # infer manager repo
+        registry_repo = f"{owner}/{owner}.github.io"
 
-          repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
-          reg_path = Path(os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml")
-          owner = (os.environ.get("GITHUB_REPOSITORY_OWNER") or "").strip()
+        def api_get(url):
+          r = requests.get(
+            url,
+            headers={
+              "Authorization": f"Bearer {gh_token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            timeout=30,
+          )
+          return r
 
-          if not reg_path.exists():
-              print(json.dumps({"include": []}, ensure_ascii=False))
-              raise SystemExit(0)
+        def load_registry():
+          # 1) tenta local (quando estiver no manager)
+          p = Path(registry_path)
+          if p.exists():
+            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            return data
 
-          data = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
-          repos = data.get("repos", [])
-          if not isinstance(repos, list):
-              repos = []
+          # 2) busca do manager via contents API
+          url = f"https://api.github.com/repos/{registry_repo}/contents/{registry_path}?ref=main"
+          r = api_get(url)
+          if r.status_code != 200:
+            print(f"::error::registry not found locally and cannot fetch from {registry_repo}:{registry_path} (http {r.status_code})", file=sys.stderr)
+            sys.exit(2)
+          j = r.json()
+          content = j.get("content","")
+          if not content:
+            print(f"::error::registry content empty from {registry_repo}:{registry_path}", file=sys.stderr)
+            sys.exit(2)
+          raw = base64.b64decode(content.encode("utf-8"))
+          data = yaml.safe_load(raw.decode("utf-8")) or {}
+          return data
 
-          inc = []
+        data = load_registry()
+        repos = data.get("repos", [])
+        if not isinstance(repos, list):
+          repos = []
 
-          for it in repos:
-              if not isinstance(it, dict):
-                  continue
+        # Decide o alvo:
+        # - se inputs.repo veio, usa ele (aceita "name" ou "org/name")
+        # - se inputs.repo vazio:
+        #   - se está rodando no manager repo, modo "all"
+        #   - senão (repo disciplina), modo "single caller"
+        is_manager = (caller_repo.lower() == registry_repo.lower())
+        target = repo_filter
+        if not target:
+          target = "" if is_manager else caller_repo  # manager => all; disciplina => só ele mesmo
 
-              name = _as_str(it.get("name"))
-              org  = _as_str(it.get("org")) or owner
-              if not name:
-                  continue
-              if repo_filter and name.lower() != repo_filter:
-                  continue
+        def norm(s): return (s or "").strip().lower()
 
-              repo_full = f"{org}/{name}"
-              cfg = {
-                  "TITLE_1":    _as_str(it.get("id")),
-                  "TITLE_2":    _as_str(it.get("title")),
-                  "SUBTITLE_1": _as_str(it.get("academic_area")),
-                  "SUBTITLE_2": _as_str(it.get("academic_level")),
-                  "ABOUT":      _as_str(it.get("site_description")),
-                  "CTA_TEXT":   _as_str(it.get("readme_cta_text")),
-                  "TAGLINE":    _as_str(it.get("readme_tagline")),
-                  "THEME":      _as_str(it.get("readme_theme")),
-                  "HERO_FILE":  _as_str(it.get("site_hero_image")),
-                  "GITHUB_LINK": f"https://github.com/{repo_full}",
-                  "CENTRAL_REPO": f"https://{org}.github.io"
-              }
-              cfg = {k: v for k, v in cfg.items() if v}
+        inc=[]
+        for it in repos:
+          if not isinstance(it, dict):
+            continue
+          name = (it.get("name") or "").strip()
+          org  = (it.get("org") or "").strip() or owner
+          if not name:
+            continue
 
-              inc.append({"repo": f"{org}/{name}", "cfg": cfg})
+          full = f"{org}/{name}"
 
-          # imprimir o JSON no stdout
-          print(json.dumps({"include": inc}, ensure_ascii=False))
-          PY
-          )"
+          # filtra
+          if target:
+            t = target
+            if "/" not in t:
+              # alvo veio só como name
+              if norm(name) != norm(t):
+                continue
+            else:
+              if norm(full) != norm(t):
+                continue
 
-          # fallback: nunca deixa vazio
-          if [[ -z "${MATRIX}" ]]; then
-            MATRIX='{"include":[]}'
-          fi
+          cfg = {
+            "TITLE_1":    str(it.get("id") or "").strip(),
+            "TITLE_2":    str(it.get("title") or "").strip(),
+            "SUBTITLE_1": str(it.get("academic_area") or "").strip(),
+            "SUBTITLE_2": str(it.get("academic_level") or "").strip(),
+            "ABOUT":      str(it.get("site_description") or "").strip(),
+            "CTA_TEXT":   str(it.get("readme_cta_text") or "").strip(),
+            "TAGLINE":    str(it.get("readme_tagline") or "").strip(),
+            "THEME":      str(it.get("readme_theme") or "").strip(),
+            "HERO_FILE":  str(it.get("site_hero_image") or "").strip(),
+            "GITHUB_LINK": f"https://github.com/{full}",
+            "CENTRAL_REPO": f"https://{org}.github.io"
+          }
+          cfg = {k:v for k,v in cfg.items() if v}
+          inc.append({"repo": full, "cfg": cfg})
 
-          # write output do jeito certo (multiline)
-          DELIM="__MATRIX_EOF_$(date +%s%N)__"
-          {
-            echo "matrix<<$DELIM"
-            echo "$MATRIX"
-            echo "$DELIM"
-          } >> "$GITHUB_OUTPUT"
+        matrix = {"include": inc}
+        print(json.dumps(matrix, ensure_ascii=False))
 
+        # outputs
+        out_path = os.environ["GITHUB_OUTPUT"]
+        with open(out_path, "a", encoding="utf-8") as f:
+          f.write("count=%d\n" % len(inc))
+          f.write("matrix=%s\n" % json.dumps(matrix, ensure_ascii=False))
+        PY
 
   apply:
     needs: plan
     runs-on: ubuntu-latest
+    if: ${{ needs.plan.outputs.count != '0' }}
     strategy:
       fail-fast: false
       max-parallel: 10
