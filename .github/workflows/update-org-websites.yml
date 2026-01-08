@@ -204,7 +204,7 @@ jobs:
           git commit -m "Update files"
           git push origin gh-pages
 
-      - name: Guardrail: ensure gh-pages ref exists
+      - name: Guardrail ensure gh-pages ref exists
         shell: bash
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
