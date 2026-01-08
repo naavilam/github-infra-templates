@@ -64,7 +64,44 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyyaml requests
+      
+      - name: Guard – Context
+        run: |
+          echo "github.repository        = ${{ github.repository }}"
+          echo "github.repository_owner  = ${{ github.repository_owner }}"
+          echo "pwd                      = $(pwd)"
+          echo "caller tree:"
+          ls -la caller || true
 
+      - name: Guard – Registry content
+        env:
+          REGISTRY_PATH: ${{ inputs.registry_path }}
+        run: |
+          set -euo pipefail
+          echo "Registry path: caller/${REGISTRY_PATH}"
+          test -f "caller/${REGISTRY_PATH}"
+          echo "---- registry (head) ----"
+          sed -n '1,120p' "caller/${REGISTRY_PATH}"
+    
+      - name: Guard – App token visibility
+        env:
+          ORG: ${{ github.repository_owner }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          echo "Testing token visibility for org: $ORG"
+
+          echo "→ /orgs/$ORG"
+          curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/orgs/$ORG" | jq '.login,.id'
+
+          echo "→ list repos (first 10)"
+          curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/orgs/$ORG/repos?per_page=10" \
+              | jq '.[].name'
+              
       - id: set
         name: Build matrix (missing repos or single target)
         env:
