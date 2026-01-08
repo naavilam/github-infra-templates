@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: ${{ env.MAX_PARALLEL }}
+      max-parallel: env.MAX_PARALLEL
       matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
     env:
       ORG: ${{ github.repository_owner }}
