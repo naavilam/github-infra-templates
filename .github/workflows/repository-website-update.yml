@@ -194,15 +194,27 @@ jobs:
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ github.repository_owner }}
 
-      - name: Checkout target repo (gh-pages)
+      # 1) FONTES (main)
+      - name: Checkout source repo (main)
         uses: actions/checkout@v4
         with:
           repository: ${{ matrix.repo }}
           token: ${{ steps.app-token.outputs.token }}
+          ref: main
+          path: src
+          fetch-depth: 1
+
+      # 2) PUBLICAÇÃO (gh-pages)
+      - name: Checkout publish repo (gh-pages)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ steps.app-token.outputs.token }}
+          ref: gh-pages
           path: target
           fetch-depth: 0
 
-      - name: Ensure gh-pages branch exists and is checked out
+      - name: Ensure gh-pages branch exists (if first publish)
         shell: bash
         run: |
           set -euo pipefail
@@ -232,7 +244,7 @@ jobs:
 
       - run: |
           python -m pip install --upgrade pip
-          pip install pyyaml nbconvert
+          pip install pyyaml nbconvert nbformat jinja2
 
       - name: Write website cfg (from matrix) (safe)
         shell: bash
@@ -249,12 +261,13 @@ jobs:
         env:
           CFG_JSON: ${{ toJson(matrix.cfg) }}
 
-      - name: Build site into _site (gh-pages content)
+      # agora o src é a MAIN (pasta src), e out é _site
+      - name: Build site into _site (from main)
         shell: bash
         run: |
           set -euo pipefail
           python central/bootstrap/repo_scripts/build_site.py \
-            --src target \
+            --src src \
             --out _site \
             --template central/bootstrap/repo_website \
             --title "${{ matrix.repo }}" \
@@ -266,94 +279,19 @@ jobs:
         run: |
           set -euo pipefail
           cd target
-
-          # limpa tudo (menos .git)
           find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
-
-          # copia site gerado
           cp -R ../_site/* .
 
-          # identidade bot por org (agnóstico)
           ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
           BOT="${ORG_LC}-provisioner-app[bot]"
           git config user.name "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
 
-          if git diff --quiet && git status --porcelain | wc -l | grep -q '^0$'; then
+          if git diff --quiet && [[ -z "$(git status --porcelain)" ]]; then
             echo "No changes."
             exit 0
           fi
 
           git add -A
-          git commit -m "Update files"
+          git commit -m "Update site"
           git push origin gh-pages
-
-      - name: Guardrail ensure gh-pages ref exists
-        shell: bash
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          REPO: ${{ matrix.repo }}
-        run: |
-          set -euo pipefail
-          OWNER="${REPO%/*}"
-          NAME="${REPO#*/}"
-          REF_URL="https://api.github.com/repos/${OWNER}/${NAME}/git/ref/heads/gh-pages"
-
-          echo "Checking ref: ${OWNER}/${NAME} heads/gh-pages"
-
-          ok=0
-          for i in {1..20}; do
-            code="$(curl -sS -o /tmp/ref.json -w "%{http_code}" \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "${REF_URL}" || true)"
-
-            if [[ "$code" == "200" ]]; then
-              sha="$(jq -r '.object.sha // empty' /tmp/ref.json || true)"
-              echo "gh-pages exists (sha=${sha})"
-              ok=1
-              break
-            fi
-
-            echo "gh-pages not visible yet (http=${code}) attempt=${i}"
-            sleep 2
-          done
-
-          if [[ "$ok" != "1" ]]; then
-            echo "::error::gh-pages ref not visible after retries; cannot enable Pages safely."
-            exit 1
-          fi
-
-      - name: Enable GitHub Pages (source=gh-pages)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          REPO: ${{ matrix.repo }}
-        run: |
-          set -euo pipefail
-          OWNER="${REPO%/*}"
-          NAME="${REPO#*/}"
-          API="https://api.github.com/repos/${OWNER}/${NAME}/pages"
-          BODY='{"source":{"branch":"gh-pages","path":"/"}}'
-
-          http="$(curl -sS -o /tmp/pages.json -w "%{http_code}" -X POST \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "${API}" \
-            -d "${BODY}" || true)"
-
-          if [[ "$http" == "409" || "$http" == "422" ]]; then
-            http="$(curl -sS -o /tmp/pages.json -w "%{http_code}" -X PUT \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "${API}" \
-              -d "${BODY}" || true)"
-          fi
-
-          echo "pages http=${http}"
-          cat /tmp/pages.json || true
-
-          if [[ "${http}" -lt 200 || "${http}" -ge 300 ]]; then
-            echo "::error::Failed to configure GitHub Pages (HTTP ${http})."
-            exit 1
-          fi
