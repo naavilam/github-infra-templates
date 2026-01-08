@@ -93,6 +93,19 @@ jobs:
 
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
 
+          echo "=== registry_path ==="
+          echo "${{ inputs.registry_path }}"
+
+          echo "=== matrix (raw json) ==="
+          echo "${MATRIX}"
+
+          echo "=== matrix (pretty) ==="
+          python - <<'PY'
+          import json, os
+          m = os.environ.get("MATRIX","{}")
+          print(json.dumps(json.loads(m), indent=2, ensure_ascii=False))
+          PY
+
   apply:
     needs: plan
     runs-on: ubuntu-latest
