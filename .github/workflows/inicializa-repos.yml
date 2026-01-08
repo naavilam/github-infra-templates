@@ -144,57 +144,61 @@ jobs:
           PY
 
   init:
-    needs: detect
-    if: ${{ needs.detect.outputs.count != '0' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: ${{ fromJSON(env.MAX_PARALLEL) }}
-      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
+init:
+  needs: detect
+  if: ${{ needs.detect.outputs.count != '0' }}
+  runs-on: ubuntu-latest
+  strategy:
+    fail-fast: false
+    max-parallel: ${{ fromJSON(env.MAX_PARALLEL) }}
+    matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
 
-    steps:
-      - name: Checkout caller repo
-        uses: actions/checkout@v4
-        with:
-          path: caller
+  steps:
+    - name: Checkout caller repo
+      uses: actions/checkout@v4
+      with:
+        path: caller
 
-      - name: Checkout central repo
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.CENTRAL_REPO }}
-          ref: ${{ env.TEMPLATE_REF }}
-          path: central
+    - name: Checkout central repo
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.CENTRAL_REPO }}
+        ref: ${{ env.TEMPLATE_REF }}
+        path: central
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
 
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml requests
+    - name: Install deps
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml requests
 
-      - name: Configure git identity
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    # token do App provisioner para a ORG-alvo (matrix.org) — usado desde o começo
+    - name: Create provisioner token (per org)
+      id: app-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.PROVISIONER_APP_ID }}
+        private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+        owner: ${{ matrix.org }}
 
-      # garante que o script use o registry do caller (porque ele lê .github/registry/repos.yml relativo ao cwd=central)
-      - name: Copy registry into central
-        env:
-          REGISTRY_PATH: ${{ inputs.registry_path }}
-        run: |
-          set -euo pipefail
-          mkdir -p central/.github/registry
-          cp "caller/${REGISTRY_PATH}" "central/.github/registry/repos.yml"
+    - name: Copy registry into central
+      env:
+        REGISTRY_PATH: ${{ inputs.registry_path }}
+      run: |
+        set -euo pipefail
+        mkdir -p central/.github/registry
+        cp "caller/${REGISTRY_PATH}" "central/.github/registry/repos.yml"
 
-      - name: Run initializer (one repo)
-        working-directory: central
-        env:
-          GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
-          USE_TOKEN_IN_URL: "true"
-          ONE_ORG: ${{ matrix.org }}
-          ONE_REPO: ${{ matrix.repo }}
-        run: |
-          python .github/scripts/repo_initializer.py
+    - name: Run initializer (one repo)
+      working-directory: central
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        USE_TOKEN_IN_URL: "true"
+        ONE_ORG: ${{ matrix.org }}
+        ONE_REPO: ${{ matrix.repo }}
+      run: |
+        python bootstrap/repo_scripts/repo_initializer.py
