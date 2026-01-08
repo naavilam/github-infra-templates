@@ -1,0 +1,205 @@
+name: Update Websites (org)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "Target repository or else all."
+        required: false
+        type: string
+        default: ""
+      registry_path:
+        description: "Path to registry in the caller repo"
+        required: false
+        type: string
+        default: ".github/registry/repos.yml"
+    secrets:
+      PROVISIONER_APP_ID:
+        required: true
+      PROVISIONER_PRIVATE_KEY_PEM:
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+  MAX_PARALLEL: "10"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - id: set
+        name: Build matrix from registry
+        shell: bash
+        env:
+          REPO_FILTER: ${{ inputs.repo }}
+          REGISTRY_PATH: ${{ inputs.registry_path }}
+        run: |
+          set -euo pipefail
+
+          MATRIX="$(python - <<'PY'
+          import os, json, yaml
+          from pathlib import Path
+
+          repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
+          reg_path = Path(os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml")
+          owner = (os.environ.get("GITHUB_REPOSITORY_OWNER") or "").strip()
+
+          if not reg_path.exists():
+            print(json.dumps({"include": []}))
+            raise SystemExit(0)
+
+          data = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
+          repos = data.get("repos", [])
+          if not isinstance(repos, list):
+            repos = []
+
+          inc = []
+          for it in repos:
+            name = str(it.get("name","")).strip()
+            org  = str(it.get("org","")).strip() or owner
+            if not name:
+              continue
+            if repo_filter and name.lower() != repo_filter:
+              continue
+
+            # opcional: permitir cfg específico por repo no registry
+            cfg = it.get("website_cfg") or {}
+            inc.append({
+              "repo": f"{org}/{name}",
+              "cfg": cfg
+            })
+
+          print(json.dumps({"include": inc}))
+          PY
+          )"
+
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+
+    steps:
+      - name: Mint Provisioner GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout target repo (gh-pages)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ steps.app-token.outputs.token }}
+          path: target
+          fetch-depth: 0
+
+      - name: Ensure gh-pages branch exists and is checked out
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git checkout -B gh-pages origin/gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+
+      - name: Checkout central templates + scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: central
+          sparse-checkout: |
+            bootstrap/repo_website
+            bootstrap/repo_scripts/build_site.py
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml nbconvert
+
+      - name: Write website cfg (from matrix) (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _cfg
+          python - <<'PY'
+          import os, json, yaml
+          cfg = json.loads(os.environ.get("CFG_JSON","{}"))
+          with open("_cfg/website.yml","w",encoding="utf-8") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+          print("[ok] wrote _cfg/website.yml")
+          PY
+        env:
+          CFG_JSON: ${{ toJson(matrix.cfg) }}
+
+      - name: Build site into _site (gh-pages content)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python central/bootstrap/repo_scripts/build_site.py \
+            --src target \
+            --out _site \
+            --template central/bootstrap/repo_website \
+            --title "${{ matrix.repo }}" \
+            --execute "false" \
+            --cfg "_cfg/website.yml"
+
+      - name: Replace gh-pages content
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target
+
+          # limpa tudo (menos .git)
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+
+          # copia site gerado
+          cp -R ../_site/* .
+
+          # identidade bot por org (agnóstico)
+          ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          BOT="${ORG_LC}-provisioner-app[bot]"
+          git config user.name "${BOT}"
+          git config user.email "${BOT}@users.noreply.github.com"
+
+          if git diff --quiet && git status --porcelain | wc -l | grep -q '^0$'; then
+            echo "No changes."
+            exit 0
+          fi
+
+          git add -A
+          git commit -m "chore: update website"
+          git push origin gh-pages

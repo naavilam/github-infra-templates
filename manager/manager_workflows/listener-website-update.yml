@@ -1,4 +1,4 @@
-name: Update website
+name: Listener Update Websites
 
 on:
   workflow_dispatch:

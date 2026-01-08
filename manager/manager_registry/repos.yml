@@ -1,24 +1,21 @@
 # ============================================================
-# Academic Codex – Repository Registry (TEST SET)
+# Repository Registry
 # Source of truth (editorial only, flat schema)
 # ============================================================
 
 repos:
 
-  # ------------------------------------------------
-  # Journal
-  # ------------------------------------------------
-  - org: high-energy-physics-research
-    name: Academic-Research-Journal
-    id: AR2026
-    title: Academic Research Journal
-    academic_level: grad
-    academic_area: Research
-    academic_school: University of São Paulo
-    site_hero_image: journaling.jpg
-    site_subtitle: Heavy Ion Collision
-    site_description: Research journaling.
-    readme_tagline: Concepts * Theory * Simulation tools
-    readme_cta_text: Website
-    readme_theme: minimal
+  - org: 
+    name:
+    id: 
+    title: 
+    academic_level: 
+    academic_area: 
+    academic_school: 
+    site_hero_image: 
+    site_subtitle: 
+    site_description: 
+    readme_tagline: 
+    readme_cta_text: 
+    readme_theme: 
 

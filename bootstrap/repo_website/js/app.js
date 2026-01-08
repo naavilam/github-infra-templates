@@ -17,6 +17,21 @@
       }
     }
 
+    function setActiveLink(a) {
+      if (!a) return;
+      // remove ativo anterior
+      elTree.querySelectorAll('a.file-notebook.is-active')
+        .forEach(x => x.classList.remove('is-active'));
+
+      a.classList.add('is-active');
+      openAncestors(a);
+
+      // opcional: manter visível no scroll
+      a.scrollIntoView({ block: 'nearest' });
+
+      // opcional: persistência
+      try { localStorage.setItem('active_nb', a.dataset.path || ''); } catch (_) {}
+    }
     function mkNode(node, { initialOpen = true } = {}) {
       const li = document.createElement('li');
       li.className = 'node ' + (node.type === 'dir' ? 'dir' : 'file');
@@ -46,7 +61,12 @@
           a.textContent = base;
           a.href = '#';
           a.className = 'file-notebook';
-          a.onclick = (e) => { e.preventDefault(); viewer.src = node.nb_html; };
+          a.dataset.path = node.path || node.name; // id estável p/ restaurar
+          a.onclick = (e) => {
+            e.preventDefault();
+            viewer.src = node.nb_html;
+            setActiveLink(a);
+          };
           label.appendChild(a);
         } else {
           label.textContent = node.name;
@@ -89,8 +109,17 @@
       q.addEventListener('input', (e) => render(e.target.value.trim().toLowerCase()));
       render();
     }
-  }
 
+    // restaura seleção (se existir) após re-render (filtro etc.)
+    try {
+      const p = localStorage.getItem('active_nb');
+      if (p) {
+        const a = elTree.querySelector(`a.file-notebook[data-path="${CSS.escape(p)}"]`);
+        if (a) setActiveLink(a);
+      }
+    } catch (_) {}
+    
+  }
 
   (() => {
     'use strict';
@@ -182,5 +211,4 @@
       loadProtectedAvatar();
     }
   })();
-
 })();
