@@ -80,29 +80,38 @@ jobs:
             if repo_filter and name.lower() != repo_filter:
               continue
 
-            # opcional: permitir cfg específico por repo no registry
-            cfg = it.get("website_cfg") or {}
+            # cfg flexível
+            cfg = (
+                it.get("website_cfg")
+                or it.get("site_cfg")
+                or it.get("cfg")
+                or it.get("placeholders")
+                or {}
+            )
+            if not isinstance(cfg, dict):
+              cfg = {}
+
             inc.append({
               "repo": f"{org}/{name}",
               "cfg": cfg
             })
 
-          print(json.dumps({"include": inc}))
+          print(json.dumps({"include": inc}, ensure_ascii=False))
           PY
           )"
 
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
 
           echo "=== registry_path ==="
-          echo "${{ inputs.registry_path }}"
+          echo "${REGISTRY_PATH:-.github/registry/repos.yml}"
 
           echo "=== matrix (raw json) ==="
-          echo "${MATRIX}"
+          echo "$MATRIX"
 
           echo "=== matrix (pretty) ==="
-          python - <<'PY'
-          import json, os
-          m = os.environ.get("MATRIX","{}")
+          python - <<PY
+          import json
+          m = r'''$MATRIX'''
           print(json.dumps(json.loads(m), indent=2, ensure_ascii=False))
           PY
 
