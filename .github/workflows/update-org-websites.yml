@@ -100,6 +100,7 @@ jobs:
                   "THEME":      _as_str(it.get("readme_theme")),
                   "HERO_FILE":  _as_str(it.get("site_hero_image")),
                   "GITHUB_LINK": f"https://github.com/{repo_full}",
+                  "CENTRAL_REPO": f"https://{org}.github.io"
               }
               cfg = {k: v for k, v in cfg.items() if v}
 
