@@ -31,7 +31,6 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-    outputs:
       matrix: ${{ steps.set.outputs.matrix }}
       count:  ${{ steps.set.outputs.count }}
     steps:
