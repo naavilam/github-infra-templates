@@ -7,6 +7,33 @@
     const q = document.getElementById('q');
     const viewer = document.getElementById('viewer');
 
+    function setUrlParamNB(path) {
+      try {
+        const u = new URL(window.location.href);
+        if (path) u.searchParams.set('nb', path);
+        else u.searchParams.delete('nb');
+        // troca SEM recarregar
+        history.replaceState(null, '', u.toString());
+      } catch (_) { }
+    }
+
+    function getUrlParamNB() {
+      try {
+        const u = new URL(window.location.href);
+        return u.searchParams.get('nb') || '';
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function openByPath(path) {
+      if (!path) return false;
+      const a = elTree.querySelector(`a.file-notebook[data-path="${CSS.escape(path)}"]`);
+      if (!a) return false;
+      a.click(); // dispara seu onclick e carrega o iframe
+      return true;
+    }
+
     function openAncestors(el) {
       let cur = el.parentElement;
       while (cur && cur !== elTree) {
@@ -30,7 +57,7 @@
       a.scrollIntoView({ block: 'nearest' });
 
       // opcional: persistência
-      try { localStorage.setItem('active_nb', a.dataset.path || ''); } catch (_) {}
+      try { localStorage.setItem('active_nb', a.dataset.path || ''); } catch (_) { }
     }
     function mkNode(node, { initialOpen = true } = {}) {
       const li = document.createElement('li');
@@ -41,7 +68,7 @@
 
       if (node.type === 'dir') {
         label.textContent = node.name;
-        
+
         label.onclick = () => li.classList.toggle('open');
 
         // >>> estado inicial expandido
@@ -59,13 +86,17 @@
           const a = document.createElement('a');
           const base = node.name.replace(/\.ipynb$/i, '');
           a.textContent = base;
-          a.href = '#';
+          // gera link compartilhável: software.html?nb=...
+          const u = new URL(window.location.href);
+          u.searchParams.set('nb', a.dataset.path);
+          a.href = u.toString();
           a.className = 'file-notebook';
           a.dataset.path = node.path || node.name; // id estável p/ restaurar
           a.onclick = (e) => {
             e.preventDefault();
             viewer.src = node.nb_html;
             setActiveLink(a);
+            setUrlParamNB(a.dataset.path); // <-- aqui!
           };
           label.appendChild(a);
         } else {
@@ -108,6 +139,12 @@
     if (elTree && q) {
       q.addEventListener('input', (e) => render(e.target.value.trim().toLowerCase()));
       render();
+      // Se veio um deep-link (?nb=...), abre automaticamente
+      const nbFromUrl = getUrlParamNB();
+      if (nbFromUrl) {
+        // render já desenhou a árvore, então agora dá pra clicar
+        openByPath(nbFromUrl);
+      }
     }
 
     // restaura seleção (se existir) após re-render (filtro etc.)
@@ -117,8 +154,8 @@
         const a = elTree.querySelector(`a.file-notebook[data-path="${CSS.escape(p)}"]`);
         if (a) setActiveLink(a);
       }
-    } catch (_) {}
-    
+    } catch (_) { }
+
   }
 
   (() => {
@@ -133,17 +170,17 @@
     // function safeAtob(s) { s = (s || '').toString().trim().replace(/[\r\n\s]/g, '').replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return atob(s); }
     // const b64ToU8 = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
     function normB64(s) {
-        s = (s || '').toString().trim()
-          .replace(/[\r\n\s]/g, '')
-          .replace(/-/g, '+')
-          .replace(/_/g, '/');
-        while (s.length % 4) s += '=';
-        return s;
-      }
+      s = (s || '').toString().trim()
+        .replace(/[\r\n\s]/g, '')
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      return s;
+    }
 
-      function safeAtob(s) {
-        return atob(normB64(s));
-      }
+    function safeAtob(s) {
+      return atob(normB64(s));
+    }
 
     const b64ToU8 = (b64) => Uint8Array.from(atob(normB64(b64)), c => c.charCodeAt(0));
     const hexToBytes = (hex) => new Uint8Array((hex.match(/.{1,2}/g) || []).map(h => parseInt(h, 16)));
