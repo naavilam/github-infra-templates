@@ -261,6 +261,10 @@ def collect_tree(src: Path, out: Path, execute: bool):
         -webkit-hyphens: auto;
         -ms-hyphens: auto;
         }
+        .deps_box {
+            max-width: 1200px;
+            margin: 24px auto;
+        }
         </style>
         """.strip()
 
