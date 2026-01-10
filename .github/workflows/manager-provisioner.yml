@@ -22,7 +22,7 @@ jobs:
   mint_token:
     runs-on: ubuntu-latest
     outputs:
-      token: ${{ steps.app_token.outputs.token }}
+      token: ${{ steps.export.outputs.token }}
     steps:
       - name: Create Provisioner installation token
         id: app_token
@@ -32,6 +32,13 @@ jobs:
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
 
+      - name: Export token as job output
+        id: export
+        run: |
+          set -euo pipefail
+          # re-export do output do step anterior
+          echo "token=${{ steps.app_token.outputs.token }}" >> "$GITHUB_OUTPUT"
+  
   provision:
     runs-on: ubuntu-latest
     needs: mint_token
