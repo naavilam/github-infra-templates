@@ -112,6 +112,11 @@ jobs:
           echo "✅ Payload assembled at: $OUT"
           find "$OUT" -maxdepth 3 -type f | sed 's#^'"$OUT"'#OUT#'
 
+      - name: Install python deps for assembly
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+        
       - name: Generate _posts from registry (assembly_posts.py)
         env:
           ORG: ${{ inputs.org }}
@@ -137,6 +142,47 @@ jobs:
 
           echo "_posts generated:"
           ls -la "$OUTPOSTS" || true
+
+      - name: Inject GA tracking id into out/_config.yml
+        env:
+          ORG: ${{ inputs.org }}
+        run: |
+          set -euo pipefail
+
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+          python - <<'PY'
+          import os, yaml
+
+          org = os.environ["ORG"]
+
+          orgs_yml = os.path.join(os.environ["GITHUB_WORKSPACE"], "templates", "orgs.yml")
+          config_yml = os.path.join(os.environ["GITHUB_WORKSPACE"], "out", "_config.yml")
+
+          with open(orgs_yml, "r", encoding="utf-8") as f:
+              data = yaml.safe_load(f) or {}
+
+          orgs = data.get("orgs", [])
+          entry = next((x for x in orgs if x.get("name") == org), None)
+          if not entry:
+              raise SystemExit(f"ORG not found in orgs.yml: {org}")
+
+          ga_id = entry.get("ga_analytics")  # string direta
+
+          with open(config_yml, "r", encoding="utf-8") as f:
+              cfg = yaml.safe_load(f) or {}
+
+          if ga_id:
+              cfg["ga_tracking_id"] = ga_id
+              print(f"Injected ga_tracking_id = {ga_id}")
+          else:
+              cfg.pop("ga_tracking_id", None)
+              print("No GA tracking id found; ga_tracking_id not set")
+
+          with open(config_yml, "w", encoding="utf-8") as f:
+              yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+          PY
 
 
       # 6) Push payload into {org}.github.io using app token
