@@ -18,9 +18,6 @@ on:
 permissions:
   contents: read
 
-
-jobs:
-
 jobs:
   mint_token:
     runs-on: ubuntu-latest
