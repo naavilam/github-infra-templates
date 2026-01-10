@@ -98,6 +98,8 @@ jobs:
             ls -la "$ROOT/templates/manager/manager_registry" >&2 || true
             exit 1
           fi
+
+          mkdir -p "$OUT/.github/registry"
           cp "$REG" "$OUT/.github/registry/registry.yml"
 
           ASSETS_DIR="$ROOT/templates/manager/manager_assets/${ORG}"
