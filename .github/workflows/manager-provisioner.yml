@@ -40,10 +40,7 @@ jobs:
           set -euo pipefail
           tok='${{ steps.app_token.outputs.token }}'
           echo "mint_token: token length = ${#tok}"
-          if [[ "${#tok}" -lt 20 ]]; then
-            echo "Token looks empty/too short. Check create-github-app-token step." >&2
-            exit 1
-          fi
+          [[ "${#tok}" -ge 20 ]]
 
       - name: Export token via GITHUB_OUTPUT (robust)
         id: export
