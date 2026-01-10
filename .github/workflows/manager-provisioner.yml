@@ -20,11 +20,12 @@ permissions:
 
 
 jobs:
+
+jobs:
   mint_token:
     runs-on: ubuntu-latest
     outputs:
       token: ${{ steps.app_token.outputs.token }}
-
     steps:
       - name: Create Provisioner installation token
         id: app_token
