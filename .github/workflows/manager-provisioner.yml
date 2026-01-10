@@ -30,7 +30,7 @@ jobs:
         id: app_token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.PROVISIONER_APP_ID }}
+          app-id: ${{ vars.PROVISIONER_APP_ID }}
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
 
@@ -228,9 +228,9 @@ jobs:
         env:
           GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
-          DISPATCHER_APP_ID: ${{ secrets.DISPATCHER_APP_ID }}
+          DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
           DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
-          PROVISIONER_APP_ID: ${{ secrets.PROVISIONER_APP_ID }}
+          PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
           PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
@@ -248,7 +248,7 @@ jobs:
         env:
           GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
-          AUDITOR_APP_ID: ${{ secrets.AUDITOR_APP_ID }}
+          AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
           AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
