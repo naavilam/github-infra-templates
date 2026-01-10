@@ -20,37 +20,39 @@ permissions:
   id-token: write
 
 jobs:
-  # 1) Mint installation token (root creds from repo vars/secrets; NO environment here)
-  mint_token:
+  provision:
     runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.app_token.outputs.token }}
+    environment: ${{ inputs.org }}
+
     steps:
+      - name: Ensure gh is available
+        run: gh --version
+
+      # 0) Mint token (no mesmo job) + exporta para GH_TOKEN
       - name: Create Provisioner installation token
         id: app_token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.PROVISIONER_APP_ID }}
-          private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+          # ROOT creds (repo-level)
+          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
 
-      - name: Debug minted token length (no leak)
+      - name: Export GH_TOKEN for rest of job (no leak)
         shell: bash
         run: |
           set -euo pipefail
           tok='${{ steps.app_token.outputs.token }}'
-          echo "mint_token: token length = ${#tok}"
+          echo "mint: token length = ${#tok}"
           [[ "${#tok}" -ge 20 ]]
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
 
-  # 2) Provision using minted token + org-specific env vars/secrets
-  provision:
-    runs-on: ubuntu-latest
-    needs: mint_token
-    environment: ${{ inputs.org }}
-    env:
-      GH_TOKEN: ${{ needs.mint_token.outputs.token }}
+      - name: Sanity check auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh auth status
 
-    steps:
       # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
       - name: Checkout templates
         uses: actions/checkout@v4
@@ -59,18 +61,7 @@ jobs:
           ref: ${{ inputs.templates_ref }}
           path: templates
 
-      # 3) Install gh CLI (usually already present, but keep explicit)
-      - name: Ensure gh is available
-        run: gh --version
-
-      - name: Sanity check token present
-        shell: bash
-        run: |
-          set -euo pipefail
-          [[ -n "${GH_TOKEN:-}" ]] || (echo "GH_TOKEN is empty (mint_token output not wired)" >&2; exit 1)
-          gh auth status
-
-      # 4) Create repo {org}.github.io if missing
+      # 2) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
         env:
           ORG: ${{ inputs.org }}
@@ -85,7 +76,7 @@ jobs:
             gh api "orgs/${ORG}/repos" -X POST -f name="$REPO" -f private=false -f description="Org website for ${ORG}" >/dev/null
           fi
 
-      # 5) Build the site payload from templates (website + registry + assets + workflows)
+      # 3) Build payload
       - name: Assemble website payload
         env:
           ORG: ${{ inputs.org }}
@@ -95,45 +86,33 @@ jobs:
           ROOT="$PWD"
           OUT="$ROOT/out"
           rm -rf "$OUT"
-          mkdir -p "$OUT/.github/workflows"
-          mkdir -p "$OUT/.github/registry"
-          mkdir -p "$OUT/_posts"
+          mkdir -p "$OUT/.github/workflows" "$OUT/.github/registry" "$OUT/_posts"
 
-          # --- Website base ---
           rsync -a --delete \
             "$ROOT/templates/manager/manager_website/" \
             "$OUT/"
 
-          # --- Registry for this org ---
           REG="$ROOT/templates/manager/manager_registry/${ORG}-registry.yml"
           if [[ ! -f "$REG" ]]; then
             echo "❌ Missing registry file: $REG" >&2
-            echo "Available registry files:" >&2
             ls -la "$ROOT/templates/manager/manager_registry" >&2 || true
             exit 1
           fi
           cp "$REG" "$OUT/.github/registry/registry.yml"
 
-          # --- Assets for this org ---
           ASSETS_DIR="$ROOT/templates/manager/manager_assets/${ORG}"
           if [[ ! -d "$ASSETS_DIR" ]]; then
             echo "❌ Missing assets dir: $ASSETS_DIR" >&2
-            echo "Available assets dirs:" >&2
             ls -la "$ROOT/templates/manager/manager_assets" >&2 || true
             exit 1
           fi
+          rsync -a "$ASSETS_DIR/" "$OUT/"
 
-          rsync -a \
-            "$ASSETS_DIR/" \
-            "$OUT/"
-
-          # --- Workflows ---
           rsync -a --delete \
             "$ROOT/templates/manager/manager_workflows/" \
             "$OUT/.github/workflows/"
 
           echo "✅ Payload assembled at: $OUT"
-          find "$OUT" -maxdepth 3 -type f | sed 's#^'"$OUT"'#OUT#'
 
       - name: Install python deps for assembly
         run: |
@@ -145,46 +124,35 @@ jobs:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
-          python -V
-
           REG="$GITHUB_WORKSPACE/out/.github/registry/registry.yml"
           OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
           SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
 
-          if [[ ! -f "$SCRIPT" ]]; then
-            echo "Missing script: $SCRIPT" >&2
-            exit 1
-          fi
+          [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
 
           python "$SCRIPT" \
             --org "$ORG" \
             --registry "$REG" \
             --out-posts "$OUTPOSTS"
 
-          echo "_posts generated:"
-          ls -la "$OUTPOSTS" || true
-
       - name: Inject GA tracking id into out/_config.yml
         env:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install pyyaml
-
           python - <<'PY'
           import os, yaml
 
           org = os.environ["ORG"]
+          ws = os.environ["GITHUB_WORKSPACE"]
 
-          orgs_yml = os.path.join(os.environ["GITHUB_WORKSPACE"], "templates", "orgs.yml")
-          config_yml = os.path.join(os.environ["GITHUB_WORKSPACE"], "out", "_config.yml")
+          orgs_yml = os.path.join(ws, "templates", "orgs.yml")
+          config_yml = os.path.join(ws, "out", "_config.yml")
 
           with open(orgs_yml, "r", encoding="utf-8") as f:
               data = yaml.safe_load(f) or {}
 
-          orgs = data.get("orgs", [])
-          entry = next((x for x in orgs if x.get("name") == org), None)
+          entry = next((x for x in (data.get("orgs") or []) if x.get("name") == org), None)
           if not entry:
               raise SystemExit(f"ORG not found in orgs.yml: {org}")
 
@@ -204,7 +172,7 @@ jobs:
               yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
           PY
 
-      # 6) Push payload into {org}.github.io using app token
+      # 4) Push payload into {org}.github.io
       - name: Push content to {org}.github.io
         env:
           ORG: ${{ inputs.org }}
@@ -230,7 +198,7 @@ jobs:
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
           git push -u origin main --force
 
-      # 7) Set org secrets on {org} (dispatcher + provisioner)
+      # 5) Set org secrets
       - name: Set org secrets (dispatcher + provisioner)
         env:
           ORG: ${{ inputs.org }}
@@ -240,15 +208,12 @@ jobs:
           PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
-
           echo "$DISPATCHER_APP_ID"            | gh secret set DISPATCHER_APP_ID            --org "$ORG" --visibility private
           echo "$DISPATCHER_PRIVATE_KEY_PEM"   | gh secret set DISPATCHER_PRIVATE_KEY_PEM   --org "$ORG" --visibility private
           echo "$PROVISIONER_APP_ID"           | gh secret set PROVISIONER_APP_ID           --org "$ORG" --visibility private
           echo "$PROVISIONER_PRIVATE_KEY_PEM"  | gh secret set PROVISIONER_PRIVATE_KEY_PEM  --org "$ORG" --visibility private
 
-          echo "✅ Org secrets set on $ORG"
-
-      # 8) Set repo secrets on {org}.github.io (auditor only)
+      # 6) Set repo secrets (auditor only)
       - name: Set auditor secrets on {org}.github.io
         env:
           ORG: ${{ inputs.org }}
@@ -256,26 +221,17 @@ jobs:
           AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
-
-          REPO="${ORG}.github.io"
-          TARGET="${ORG}/${REPO}"
-
+          TARGET="${ORG}/${ORG}.github.io"
           echo "$AUDITOR_APP_ID"           | gh secret set AUDITOR_APP_ID           --repo "$TARGET"
           echo "$AUDITOR_PRIVATE_KEY_PEM"  | gh secret set AUDITOR_PRIVATE_KEY_PEM  --repo "$TARGET"
 
-          echo "✅ Auditor secrets set on $TARGET"
-
-      # 9) (Optional) Enable Pages
+      # 7) Enable Pages (optional)
       - name: Enable GitHub Pages (optional)
         env:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
           REPO="${ORG}.github.io"
-
           gh api "repos/${ORG}/${REPO}/pages" -X POST \
             -f source[branch]=main \
-            -f source[path]="/" \
-            >/dev/null 2>&1 || true
-
-          echo "✅ Pages enable attempted for ${ORG}/${REPO}"
+            -f source[path]="/" >/dev/null 2>&1 || true
