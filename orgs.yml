@@ -64,7 +64,7 @@ orgs:
         app_name: Quantum-Materials-Provisioner-App
         app_instalation: 103056460
 
-  - name: series-topics-mathematics
+  - name: topics-series-mathematics
     ga_analitics: G-X9ELZLHCW6
     apps:
       dispatcher:
@@ -80,7 +80,7 @@ orgs:
         app_name: Topics-Mathematics-Provisioner-App
         app_instalation: 103586902
 
-  - name: series-topics-physics
+  - name: topics-series-physics
     ga_analitics: G-RSX3P7BLCS
     apps:
       dispatcher:
@@ -96,7 +96,7 @@ orgs:
         app_name: Topics-Physics-Provisioner-App
         app_instalation: 103565036
 
-  - name: series-topics-business
+  - name: topics-series-business
     ga_analitics: G-6R2G5C398V
     apps:
       dispatcher:
@@ -112,7 +112,7 @@ orgs:
         app_name: Business-Topics-Provisioner-App
         app_instalation: 103587547
 
-  - name: series-topics-investiments
+  - name: topics-series-investiments
     ga_analitics: G-MWES6S69W6
     apps:
       dispatcher:
@@ -128,7 +128,7 @@ orgs:
         app_name: Investments-Topics-Provisioner-App
         app_instalation: 103590021
 
-  - name: series-topics-economics
+  - name: topics-series-economics
     ga_analitics: G-EYHJ8C0GLC
     apps:
       dispatcher:
