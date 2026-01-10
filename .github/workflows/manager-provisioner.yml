@@ -39,9 +39,6 @@ jobs:
     needs: mint_token
     environment: ${{ inputs.org }} 
     steps:
-      - name: Ensure gh is available
-        run: gh --version
-    
       # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
       - name: Checkout templates
         uses: actions/checkout@v4
@@ -53,6 +50,14 @@ jobs:
       # 3) Install gh CLI (usually already present, but keep explicit)
       - name: Ensure gh is available
         run: gh --version
+
+      - name: Sanity check token present
+        env:
+          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
+        run: |
+          set -euo pipefail
+          [[ -n "${GH_TOKEN:-}" ]] || (echo "GH_TOKEN is empty (mint_token output not wired)" >&2; exit 1)
+          gh auth status
 
       # 4) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
