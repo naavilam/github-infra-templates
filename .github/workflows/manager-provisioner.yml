@@ -23,7 +23,7 @@ jobs:
   mint_token:
     runs-on: ubuntu-latest
     outputs:
-      token: ${{ steps.app_token.outputs.token }}
+      token: ${{ steps.export.outputs.token }}
 
     steps:
       - name: Create Provisioner installation token
