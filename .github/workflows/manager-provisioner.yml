@@ -23,7 +23,7 @@ jobs:
   mint_token:
     runs-on: ubuntu-latest
     outputs:
-      token: ${{ steps.app_token.outputs.token }}
+      token: ${{ needs.mint_token.outputs.token }}
 
     steps:
       - name: Create Provisioner installation token
@@ -57,7 +57,7 @@ jobs:
       # 4) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
         env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
@@ -198,7 +198,7 @@ jobs:
       # 6) Push payload into {org}.github.io using app token
       - name: Push content to {org}.github.io
         env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
@@ -264,7 +264,7 @@ jobs:
       # 9) (Optional) Enable Pages (for org site it usually just needs repo + settings)
       - name: Enable GitHub Pages (optional)
         env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
@@ -282,7 +282,7 @@ jobs:
       # se o primeiro falhar
       # - name: Enable GitHub Pages on main (root)
       #   env:
-      #     GH_TOKEN: ${{ steps.app_token.outputs.token }}
+      #     GH_TOKEN: ${{ needs.mint_token.outputs.token }}
       #     ORG: ${{ inputs.org }}
       #   run: |
       #     set -euo pipefail
