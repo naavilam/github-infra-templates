@@ -1,0 +1,21 @@
+# ============================================================
+# Repository Registry
+# Source of truth (editorial only, flat schema)
+# ============================================================
+
+repos:
+
+  - org: 
+    name:
+    id: 
+    title: 
+    academic_level: 
+    academic_area: 
+    academic_school: 
+    site_hero_image: 
+    site_subtitle: 
+    site_description: 
+    readme_tagline: 
+    readme_cta_text: 
+    readme_theme: 
+

@@ -1,0 +1,21 @@
+# ============================================================
+# Repository Registry
+# Source of truth (editorial only, flat schema)
+# ============================================================
+
+repos:
+
+  - org: Topics-Series-Physics
+    name: Introduction-to-Special-Relativity
+    id: 8.20
+    title: "Introduction to Special Relativity"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: MIT Open Courses
+    site_hero_image: introduction-to-special-relativity.png
+    site_subtitle: 
+    site_description: "The theory of special relativity, originally proposed by Albert Einstein in his famous 1905 paper, has had profound consequences on our view of physics, space, and time. This course will introduce you to the concepts behind special relativity including, but not limited to, length contraction, time dilation, the Lorentz transformation, relativistic kinematics, Doppler shifts, and even so-called “paradoxes.”"
+    readme_tagline: 
+    readme_cta_text: "Acess full course notes"
+    readme_theme: 
+

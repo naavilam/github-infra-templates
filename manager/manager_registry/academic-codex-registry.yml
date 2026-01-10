@@ -1,0 +1,1424 @@
+# ============================================================
+# Academic Codex – Repository Registry
+# Source of truth
+# ============================================================
+
+repos:
+
+  - org: Academic-Codex
+    name: DPG5011-Formacao-do-Cientista-Empreendedor
+    id: DPG5011
+    title: "Formação do Cientista Empreendedor"
+    academic_level: graduate
+    academic_area: Entrepreneurship
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: cientista-empreendedor-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: EAP5054-Formacao-do-Cientista-Empreendedor-II
+    id: EAP5054
+    title: "Formação do Cientista Empreendedor II"
+    academic_level: graduate
+    academic_area: Entrepreneurship
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: cientista-empreendedor-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: MAC5722-Complexidade-Computacional
+    id: MAC5722
+    title: "Complexidade Computacional"
+    academic_level: graduate
+    academic_area: Computer Science
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: complexidade-computacional.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: MAC5921-Deep-Learning
+    id: MAC5921
+    title: "Deep Learning"
+    academic_level: graduate
+    academic_area: Artificial Intelligence
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: deep-learning.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: MAE5911-Fundamentos-de-Estatistica-e-Machine-Learning
+    id: MAE5911
+    title: "Fundamentos de Estatística e Machine Learning"
+    academic_level: graduate
+    academic_area: Statistics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: estatistica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: MAT5730-Algebra-Linear
+    id: MAT5730
+    title: "Álgebra Linear"
+    academic_level: graduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: algebra-linear.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: MCKZ-Metodos-Quantitativos
+    id: MCKZ
+    title: "Métodos Quantitativos"
+    academic_level: graduate
+    academic_area: Statistics
+    academic_school: Mackenzie
+    status: completed
+    completed_on: 
+    site_hero_image: metodos-quantitativos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5001-Mecanica-Quantica-I
+    id: PGF5001
+    title: "Mecânica Quântica I"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-quantica-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5002-Mecanica-Quantica-II
+    id: PGF5002
+    title: "Mecânica Quântica II"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: planned
+    completed_on: 
+    site_hero_image: mecanica-quantica-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5003-Eletrodinamica
+    id: PGF5003
+    title: "Eletrodinâmica"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: eletrodinamica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5005-Mecanica-Classica
+    id: PGF5005
+    title: "Mecânica Clássica"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-classica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5006-Mecanica-Estatistica
+    id: PGF5006
+    title: "Mecânica Estatística"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-estatistica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5107-Introducao-a-Teoria-Quantica-de-Campos-I
+    id: PGF5107
+    title: "Introdução à Teoria Quântica de Campos I"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: planned
+    completed_on: 
+    site_hero_image: teoria-quantica-campos-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5261-Teoria-de-Grupos-Aplicada-a-Solidos-e-Moleculas
+    id: PGF5261
+    title: "Teoria de Grupos Aplicada a Sólidos e Moléculas"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: teoria-grupos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: PGF5295-Teoria-de-Muitos-Corpos-e-Materia-Condensada
+    id: PGF5295
+    title: "Teoria de Muitos Corpos e Matéria Condensada"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: planned
+    completed_on: 
+    site_hero_image: muitos-corpos-e-materia-condensada.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+# ============================================================
+# Academic Codex – Repository Registry
+# Source of truth - undergraduate
+# ============================================================
+
+
+  - org: Academic-Codex
+    name: FCM0101-Fisica-I
+    id: FCM0101
+    title: "Física I"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IFSC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: FCM0102-Fisica-II
+    id: FCM0102
+    title: "Física II"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IFSC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: FFI0180-Laboratorio-de-Fisica-Geral-I
+    id: FFI0180
+    title: "Laboratório de Física Geral I"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IFSC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: laboratorio-fisica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: FFI0181-Laboratorio-de-Fisica-Geral-II
+    id: FFI0181
+    title: "Laboratório de Física Geral II"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IFSC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: laboratorio-fisica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4300214-Fisica-Experimental-IV
+    id: IF4300214
+    title: "Física Experimental IV"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-experimental-iv.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302111-Fisica-I
+    id: IF4302111
+    title: "Física I"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302112-Fisica-II
+    id: IF4302112
+    title: "Física II"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302112-Fisica-Matematica-I
+    id: IF4302112
+    title: "Física Matemática I"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-matematica-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302211-Fisica-III
+    id: IF4302211
+    title: "Física III"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-iii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302212-Fisica-IV
+    id: IF4302212
+    title: "Física IV"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-iv.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302305-Mecanica-Classica-I
+    id: IF4302305
+    title: "Mecânica Clássica I"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-classica-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302306-Mecanica-Classica-II
+    id: IF4302306
+    title: "Mecânica Clássica II"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-classica-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302307-Fisica-Matematica-II
+    id: IF4302307
+    title: "Física Matemática II"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fisica-matematica-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302403-Mecanica-Quantica-I
+    id: IF4302403
+    title: "Mecânica Quântica I"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-quantica-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: IF4302404-Mecanica-Quantica-II
+    id: IF4302404
+    title: "Mecânica Quântica II"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-quantica-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SAP0679-Humanidades-e-Ciencias-Sociais
+    id: SAP0679
+    title: "Humanidades e Ciências Sociais"
+    academic_level: undergraduate
+    academic_area: Communications
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: ciencias-sociais.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCC0635-Visao-Computacional-em-Robotica
+    id: SCC0635
+    title: "Visão Computacional em Robótica"
+    academic_level: undergraduate
+    academic_area: Artificial Intelligence
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: visao-computacional.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCC0650-Computacao-Grafica
+    id: SCC0650
+    title: "Computação Gráfica"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: computacao-grafica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCC0661-Hipermidia-e-Multimidia
+    id: SCC0661
+    title: "Hipermídia e Multimídia"
+    academic_level: undergraduate
+    academic_area: Communications
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: multimidia-hipermidia.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0245-Algoritmos-Avancados
+    id: SCE0245
+    title: "Algoritmos Avançados"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: algoritmos-avancados.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0294-Laboratorio-de-Algoritmos-Avancados
+    id: SCE0294
+    title: "Laboratório de Algoritmos Avançados"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: algoritmos-avancados.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0601-Introducao-a-Ciencia-da-Computacao-I
+    id: SCE0601
+    title: "Introdução à Ciência da Computação I"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: ciencia-computacao-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0601-Laboratorio-de-Introducao-a-Ciencia-da-Computacao-I
+    id: SCE0601
+    title: "Laboratório de Introdução à Ciência da Computação I"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: ciencia-computacao-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0602-Introducao-Ciencia-Da-Computacao-II
+    id: SCE0602
+    title: "Introdução à Ciência da Computação II"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: ciencia-computacao-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0603-Algoritmos-e-Estrutura-de-Dados-I
+    id: SCE0603
+    title: "Algoritmos e Estrutura de Dados I"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: estrutura-dados-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0605-Teoria-da-Computacao-e-Compiladores
+    id: SCE0605
+    title: "Teoria da Computação e Compiladores"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: compiladores.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0606-Algoritmos-e-Estrutura-de-Dados-II
+    id: SCE0606
+    title: "Algoritmos e Estrutura de Dados II"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: estrutura-dados-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0609-Sistemas-Operacionais-I
+    id: SCE0609
+    title: "Sistemas Operacionais I"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: sistemas-operacionais.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0610-Programacao-Orientada-a-Objetos
+    id: SCE0610
+    title: "Programação Orientada a Objetos"
+    academic_level: undergraduate
+    academic_area: Software Engineering
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: programacao-orientada-objetos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0611-Engenharia-de-Software
+    id: SCE0611
+    title: "Engenharia de Software"
+    academic_level: undergraduate
+    academic_area: Software Engineering
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: engenharia-de-software.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0613-Arquitetura-de-Computadores
+    id: SCE0613
+    title: "Arquitetura de Computadores"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: arquitetura-de-computadores.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0614-Inteligencia-Artificial
+    id: SCE0614
+    title: "Inteligência Artificial"
+    academic_level: undergraduate
+    academic_area: Artificial Intelligence
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: inteligencia-artificial.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0615-Banco-de-Dados
+    id: SCE0615
+    title: "Banco de Dados"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: banco-de-dados.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0616-Sistemas-Computacionais-Distribuidos
+    id: SCE0616
+    title: "Sistemas Computacionais Distribuídos"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: sistemas-distribuidos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0617-Redes-de-Computadores
+    id: SCE0617
+    title: "Redes de Computadores"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: redes-de-computadores.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0620-Analise-e-Projeto-Orientado-a-Objeto
+    id: SCE0620
+    title: "Análise e Projeto Orientado a Objetos"
+    academic_level: undergraduate
+    academic_area: Software Engineering
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: analise-projetos-orientado-objeto.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0344-Antenas
+    id: SEL0344
+    title: "Antenas"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: antenas.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0366-Comunicacoes-Opticas
+    id: SEL0366
+    title: "Comunicações Ópticas"
+    academic_level: undergraduate
+    academic_area: Communications
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: comunicacoes-opticas.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0601-Materiais-Eletricos
+    id: SEL0601
+    title: "Materiais Elétricos"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: materiais-eletricos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0602-Circuitos-Eletricos
+    id: SEL0602
+    title: "Circuitos Elétricos"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: circuitos-eletricos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0604-Sinais-e-Sistemas
+    id: SEL0604
+    title: "Sinais e Sistemas"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: sinais-e-sistemas.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0606-Laboratorio-de-Sistemas-Digitais
+    id: SEL0606
+    title: "Laboratório de Sistemas Digitais"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: sistemas-digitais.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0607-Fundamentos-de-Semicondutores
+    id: SEL0607
+    title: "Fundamentos de Semicondutores"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fundamentos-de-semicondutores.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SCE0607-Organizacao-de-Computadores-Digitais-I
+    id: SCE0607
+    title: "Organização de Computadores Digitais I"
+    status: completed
+    completed_on: 
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: organizacao-de-computadores.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0608-Eletromagnetismo
+    id: SEL0608
+    title: "Eletromagnetismo"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: eletrodinamica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0609-Circuitos-Eletronicos-I
+    id: SEL0609
+    title: "Circuitos Eletrônicos I"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: circuitos-eletronicos-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0610-Laboratorio-de-Circuitos-Eletronicos
+    id: SEL0610
+    title: "Laboratório de Circuitos Eletrônicos"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: laboratorio-circuitos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0611-Fundamentos-de-Controle
+    id: SEL0611
+    title: "Fundamentos de Controle"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fundamentos-controle.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0612-Ondas-Eletromagneticas
+    id: SEL0612
+    title: "Ondas Eletromagnéticas"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: ondas-eletromagneticas.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0614-Microprocessadores-e-Aplicacoes
+    id: SEL0614
+    title: "Microprocessadores e Aplicações"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: microprocessadores.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0615-Circuitos-Eletronicos-II
+    id: SEL0615
+    title: "Circuitos Eletrônicos II"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: circuitos-eletronicos-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0615-Processamento-Digital-de-Sinais
+    id: SEL0615
+    title: "Processamento Digital de Sinais"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: processamento-digital-sinais.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0616-Principios-de-Comunicacao
+    id: SEL0616
+    title: "Princípios de Comunicação"
+    academic_level: undergraduate
+    academic_area: Communications
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: principios-de-comunicacao.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0617-Fundamentos-de-Microeletronica
+    id: SEL0617
+    title: "Fundamentos de Microeletrônica"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fundamentos-microeletronica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0618-Projeto-de-Circuitos-Integrados-Analogicos
+    id: SEL0618
+    title: "Projeto de Circuitos Integrados Analógicos"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: projeto-circuito-integrado-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0618-Projeto-de-Circuitos-Integrados-Digitais-I
+    id: SEL0618
+    title: "Projeto de Circuitos Integrados Digitais I"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: projeto-circuito-integrado-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0619-Comunicacao-Digital
+    id: SEL0619
+    title: "Comunicação Digital"
+    academic_level: undergraduate
+    academic_area: Communications
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: comunicacao-digital.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0620-Controle-Digital
+    id: SEL0620
+    title: "Controle Digital"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: controle-digital.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEL0622-Projeto-de-Circuitos-Integrados-Digitais-II
+    id: SEL0622
+    title: "Projeto de Circuitos Integrados Digitais II"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: projeto-circuito-integrado-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEP0527-Gestao-e-Organizacao
+    id: SEP0527
+    title: "Gestão e Organização"
+    academic_level: undergraduate
+    academic_area: Entrepreneurship
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: gestao-e-organizacao.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SEP0587-Principios-de-Economia
+    id: SEP0587
+    title: "Princípios de Economia"
+    academic_level: undergraduate
+    academic_area: Entrepreneurship
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: principios-de-economia.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SET0623-Mecanica-dos-Solidos
+    id: SET0623
+    title: "Mecânica dos Sólidos"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: mecanica-dos-solidos.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SHS0416-Sistema-de-Gestao-Ambiental
+    id: SHS0416
+    title: "Sistema de Gestão Ambiental"
+    academic_level: undergraduate
+    academic_area: Entrepreneurship
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: gestao-ambiental.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SHS0619-Fenomenos-de-Transporte
+    id: SHS0619
+    title: "Fenômenos de Transporte"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: fenomenos-de-transporte.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SMA0111-Funcoes-de-Variaveis-Complexas
+    id: SMA0111
+    title: "Funções de Variáveis Complexas"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: variaveis-complexas.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SMA0182-Algebra-Linear-e-Equacoes-Diferenciais
+    id: SMA0182
+    title: "Álgebra Linear e Equações Diferenciais"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: algebra-linear.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SMA0300-Geometria-Analitica
+    id: SMA0300
+    title: "Geometria Analítica"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: geometria-analitica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SMA0301-Calculo-I
+    id: SMA0301
+    title: "Cálculo I"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: calculo-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SMA0332-Calculo-II
+    id: SMA0332
+    title: "Cálculo II"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: calculo-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SMA0333-Calculo-III
+    id: SMA0333
+    title: "Cálculo III"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: calculo-iii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SME0320-Estatistica-I
+    id: SME0320
+    title: "Estatística I"
+    academic_level: undergraduate
+    academic_area: Statistics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: estatistica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SME0600-Calculo-Numerico-I
+    id: SME0600
+    title: "Cálculo Numérico I"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: calculo-numerico-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SME0601-Calculo-Numerico-II
+    id: SME0601
+    title: "Cálculo Numérico II"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: calculo-numerico-ii.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SME0610-Programacao-Matematica
+    id: SME0610
+    title: "Programação Matemática"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: programacao-matematica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SQM0405-Quimica-Geral-Experimental
+    id: SQM0405
+    title: "Química Geral Experimental"
+    academic_level: undergraduate
+    academic_area: Chemistry
+    academic_school: IQ/USP
+    status: completed
+    completed_on: 
+    site_hero_image: laboratorio-quimica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SSC0144-Redes-de-Alto-Desempenho
+    id: SSC0144
+    title: "Redes de Alto Desempenho"
+    academic_level: undergraduate
+    academic_area: Computer Science
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: redes-de-alto-desempenho.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SSC0570-Empreendedores-Em-Informatica
+    id: SSC0570
+    title: "Empreendedores em Informática"
+    academic_level: undergraduate
+    academic_area: Entrepreneurship
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: empreendedores-em-informatica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SSC0643-Avaliacao-de-Desempenho
+    id: SSC0643
+    title: "Avaliação de Desempenho"
+    academic_level: undergraduate
+    academic_area: Software Engineering
+    academic_school: EESC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: avaliacao-de-desempenho.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: Academic-Codex
+    name: SSC0748-Redes-Moveis
+    id: SSC0748
+    title: "Redes Móveis"
+    academic_level: undergraduate
+    academic_area: Communications
+    academic_school: ICMC/USP
+    status: completed
+    completed_on: 
+    site_hero_image: redes-moveis.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal

@@ -100,8 +100,8 @@ jobs:
             level = (it.get("academic_level") or "").strip()
             if level:
               lvl = level.lower().strip()
-              if lvl == "undergrad": level = "Undergraduate Course"
-              elif lvl == "grad": level = "Graduate Course"
+              if lvl == "undergraduate": level = "Undergraduate Course"
+              elif lvl == "graduate": level = "Graduate Course"
               else: level = level[:1].upper() + level[1:]
 
             tagline = (it.get("readme_tagline") or "").strip()

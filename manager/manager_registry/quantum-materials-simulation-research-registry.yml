@@ -1,0 +1,66 @@
+# ============================================================
+# Quantum Materials Simulation Research – Repository Registry
+# Source of truth
+# ============================================================
+
+repos:
+
+  - org: Quantum-Materials-Simulation-Research
+    name: variational-approximation
+    id: Variational Approximation
+    title: "Research"
+    academic_level: graduate
+    academic_area: Materials Science
+    academic_school: IF/USP
+    status: 
+    completed_on: 
+    site_hero_image: variational-approximation.png
+    site_description: Notebooks.
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal
+
+  - org: Quantum-Materials-Simulation-Research
+    name: quantum-chemistry
+    id: Quantum Chemistry
+    title: "Research"
+    academic_level: graduate
+    academic_area: Materials Science
+    academic_school: IF/USP
+    status: 
+    completed_on: 
+    site_hero_image: quantum-chemistry.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal
+
+  - org: Quantum-Materials-Simulation-Research
+    name: quantum-monte-carlo
+    id: Quantum Monte Carlo
+    title: "Research"
+    academic_level: graduate
+    academic_area: Materials Science
+    academic_school: IF/USP
+    status: 
+    completed_on: 
+    site_hero_image: quantum-monte-carlo.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal
+
+  - org: Quantum-Materials-Simulation-Research
+    name: quantum-neural-state
+    id: Quantum Neural State
+    title: "Research"
+    academic_level: graduate
+    academic_area: Materials Science
+    academic_school: IF/USP
+    status: 
+    completed_on: 
+    site_hero_image: quantum-neural-state.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal

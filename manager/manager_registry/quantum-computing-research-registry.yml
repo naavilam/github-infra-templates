@@ -1,0 +1,66 @@
+# ============================================================
+# Quantum Computing Research – Repository Registry
+# Source of truth
+# ============================================================
+
+repos:
+
+  - org: Quantum-Computing-Research
+    name: quantum-error-mitigation
+    id: Quantum Error Mitigation
+    title: "Research"
+    academic_level: graduate
+    academic_area: Quantum Computing
+    academic_school: 
+    status: 
+    completed_on: 
+    site_hero_image: quantum-error-mitigation.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal
+
+  - org: Quantum-Computing-Research
+    name: quantum-algorithms
+    id: Quantum Algorithms
+    title: "Research"
+    academic_level: graduate
+    academic_area: Quantum Computing
+    academic_school: 
+    status: 
+    completed_on: 
+    site_hero_image: quantum-algorithms.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal
+
+  - org: Quantum-Computing-Research
+    name: quantum-learning
+    id: Quantum Learning
+    title: "Research"
+    academic_level: graduate
+    academic_area: Quantum Computing
+    academic_school: 
+    status: 
+    completed_on: 
+    site_hero_image: quantum-learning.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Research notebooks"
+    readme_theme: minimal
+
+  - org: Quantum-Computing-Research
+    name: Batalha-Naval-Quantica
+    id: Batalha Naval Quantica
+    title: "Game"
+    academic_level: graduate
+    academic_area: Quantum Computing
+    academic_school: 
+    status: 
+    completed_on: 
+    site_hero_image: batalha-naval-quantica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Play a quantum battleship match"
+    readme_theme: minimal

@@ -1,0 +1,34 @@
+# ============================================================
+# High Energy Physics Research – Repository Registry
+# Source of truth
+# ============================================================
+
+repos:
+
+  - org: High-Energy-Physics-Research
+    name: Academic-Research-Journal
+    id: AR2026
+    title: Academic Research Journal
+    academic_level: graduate
+    academic_area: Heavy Ion Collision
+    academic_school: University of São Paulo
+    site_hero_image: journaling.jpg
+    site_subtitle: Heavy Ion Collision
+    site_description: Research journaling.
+    readme_tagline: Concepts * Theory * Simulation tools
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - org: High-Energy-Physics-Research
+    name: Gaussian-Process-Regression-Research
+    id: Gaussian Processes Regression
+    title: Research
+    academic_level: graduate
+    academic_area: Heavy Ion Collision
+    academic_school: University of São Paulo
+    site_hero_image: gaussian-process.png
+    site_subtitle: Heavy Ion Collision
+    site_description: Gaussian Process.
+    readme_tagline: Studies
+    readme_cta_text: "Open research website."
+    readme_theme: minimal

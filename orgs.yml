@@ -1,20 +1,144 @@
 orgs:
-  - org: high-energy-physics-research
-    manager:
-      - high-energy-physics-research.github.io
-    mode: list
+  - name: high-energy-physics-research
+    ga_analitics: G-JLHP21NXVY
+    apps:
+      dispatcher:
+        app_id: 2576366
+        app_name: High-Energy-Dispatcher-App
+        app_instalation: 102163923
+      auditor:
+        app_id: 2611294
+        app_name: High-Energy-Auditor-App
+        app_instalation: 103057115
+      provisioner:
+        app_id: 2611231
+        app_name: High-Energy-Provisioner-App
+        app_instalation: 103056770
 
-  - org: academic-codex
-    manager:
-      - academic-codex.github.io
-    mode: list
+  - name: academic-codex
+    ga_analitics: G-EM7FEY66C3
+    apps:
+      dispatcher:
+        app_id: 2558549
+        app_name: Academic-Codex-Dispatcher-App
+        app_instalation: 101726732
+      auditor:
+        app_id: 2611329
+        app_name: Academic-Codex-Auditor-App
+        app_instalation: 103057811
+      provisioner:
+        app_id: 2612645
+        app_name: Academic-Codex-Provisioner-App
+        app_instalation: 103092835
 
-  - org: quantum-computing-research
-    manager:
-      - quantum-computing-research.github.io
-    mode: list
+  - name: quantum-computing-research
+    ga_analitics: G-43GLSN1HZQ
+    apps:
+      dispatcher:
+        app_id: 2576394
+        app_name: Quantum-Computing-Dispatcher-App
+        app_instalation: 102164329
+      auditor:
+        app_id: 2611126
+        app_name: Quantum-Computing-Auditor-App
+        app_instalation: 103052802
+      provisioner:
+        app_id: 2611176
+        app_name: Quantum-Computing-Provisioner-App
+        app_instalation: 103054041
 
-  - org: quantum-materials-simulation-research
-    manager:
-      - quantum-materials-simulation-research.github.io
-    mode: list
+  - name: quantum-materials-simulation-research
+    ga_analitics: G-BS975FKGYZ
+    apps:
+      dispatcher:
+        app_id: 2576439
+        app_name: Quantum-Materials-Dispatcher-App
+        app_instalation: 102165497
+      auditor:
+        app_id: 2611251
+        app_name: Quantum-Materials-Auditor-App
+        app_instalation: 103056139
+      provisioner:
+        app_id: 2611266
+        app_name: Quantum-Materials-Provisioner-App
+        app_instalation: 103056460
+
+  - name: series-topics-mathematics
+    ga_analitics: G-X9ELZLHCW6
+    apps:
+      dispatcher:
+        app_id: 2632062
+        app_name: Topics-Mathematics-Dispatcher-App
+        app_instalation: 103586528
+      auditor:
+        app_id: 2632076
+        app_name: Topics-Mathematics-Auditor-App
+        app_instalation: 103586722
+      provisioner:
+        app_id: 2632081
+        app_name: Topics-Mathematics-Provisioner-App
+        app_instalation: 103586902
+
+  - name: series-topics-physics
+    ga_analitics: G-RSX3P7BLCS
+    apps:
+      dispatcher:
+        app_id: 2631271
+        app_name: Topics-Physics-Dispatcher-App
+        app_instalation: 103564496
+      auditor:
+        app_id: Topics-Physics-Auditor-App
+        app_name: 2631297
+        app_instalation: 103564843
+      provisioner:
+        app_id: 2631317
+        app_name: Topics-Physics-Provisioner-App
+        app_instalation: 103565036
+
+  - name: series-topics-business
+    ga_analitics: G-6R2G5C398V
+    apps:
+      dispatcher:
+        app_id: 2632097
+        app_name: Business-Topics-Dispatcher-App
+        app_instalation: 103587256
+      auditor:
+        app_id: Business-Topics-Auditor-App
+        app_name: 2632100
+        app_instalation: 103587414
+      provisioner:
+        app_id: 2632110
+        app_name: Business-Topics-Provisioner-App
+        app_instalation: 103587547
+
+  - name: series-topics-investiments
+    ga_analitics: G-MWES6S69W6
+    apps:
+      dispatcher:
+        app_id: 2632150
+        app_name: Investments-Topics-Dispatcher-App
+        app_instalation: 103588701
+      auditor:
+        app_id: 2632160
+        app_name: Investments-Topics-Auditor-App
+        app_instalation: 103588881
+      provisioner:
+        app_id: 2632205
+        app_name: Investments-Topics-Provisioner-App
+        app_instalation: 103590021
+
+  - name: series-topics-economics
+    ga_analitics: G-EYHJ8C0GLC
+    apps:
+      dispatcher:
+        app_id: 2632131
+        app_name: Economics-Topics-Dispatcher-App
+        app_instalation: 103588107
+      auditor:
+        app_id: 2632138
+        app_name: Economics-Topics-Auditor-App
+        app_instalation: 103588310
+      provisioner:
+        app_id: 2632140
+        app_name: Economics-Topics-Provisioner-App
+        app_instalation: 103588461
