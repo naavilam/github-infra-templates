@@ -20,11 +20,11 @@ permissions:
   id-token: write
 
 jobs:
+  # 1) Mint installation token (root creds from repo vars/secrets; NO environment here)
   mint_token:
     runs-on: ubuntu-latest
     outputs:
-      token: ${{ steps.export.outputs.token }}
-
+      token: ${{ steps.app_token.outputs.token }}
     steps:
       - name: Create Provisioner installation token
         id: app_token
@@ -42,17 +42,14 @@ jobs:
           echo "mint_token: token length = ${#tok}"
           [[ "${#tok}" -ge 20 ]]
 
-      - name: Export token via GITHUB_OUTPUT (robust)
-        id: export
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "token=${{ steps.app_token.outputs.token }}" >> "$GITHUB_OUTPUT"
-  
+  # 2) Provision using minted token + org-specific env vars/secrets
   provision:
     runs-on: ubuntu-latest
     needs: mint_token
-    environment: ${{ inputs.org }} 
+    environment: ${{ inputs.org }}
+    env:
+      GH_TOKEN: ${{ needs.mint_token.outputs.token }}
+
     steps:
       # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
       - name: Checkout templates
@@ -67,8 +64,7 @@ jobs:
         run: gh --version
 
       - name: Sanity check token present
-        env:
-          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
+        shell: bash
         run: |
           set -euo pipefail
           [[ -n "${GH_TOKEN:-}" ]] || (echo "GH_TOKEN is empty (mint_token output not wired)" >&2; exit 1)
@@ -77,7 +73,6 @@ jobs:
       # 4) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
         env:
-          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
@@ -102,10 +97,9 @@ jobs:
           rm -rf "$OUT"
           mkdir -p "$OUT/.github/workflows"
           mkdir -p "$OUT/.github/registry"
-          mkdir -p "$OUT/_posts" 
+          mkdir -p "$OUT/_posts"
 
           # --- Website base ---
-          # copies everything from manager_website/ into repo root
           rsync -a --delete \
             "$ROOT/templates/manager/manager_website/" \
             "$OUT/"
@@ -129,7 +123,6 @@ jobs:
             exit 1
           fi
 
-          # Copy assets "as-is" into repo root (preserves internal structure)
           rsync -a \
             "$ASSETS_DIR/" \
             "$OUT/"
@@ -146,7 +139,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyyaml
-        
+
       - name: Generate _posts from registry (assembly_posts.py)
         env:
           ORG: ${{ inputs.org }}
@@ -156,12 +149,10 @@ jobs:
 
           REG="$GITHUB_WORKSPACE/out/.github/registry/registry.yml"
           OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
-
-          # ajuste o caminho do script conforme você decidir onde ele fica no templates repo
           SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
 
           if [[ ! -f "$SCRIPT" ]]; then
-            echo " Missing script: $SCRIPT" >&2
+            echo "Missing script: $SCRIPT" >&2
             exit 1
           fi
 
@@ -178,7 +169,6 @@ jobs:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
-
           python -m pip install --upgrade pip
           pip install pyyaml
 
@@ -198,7 +188,7 @@ jobs:
           if not entry:
               raise SystemExit(f"ORG not found in orgs.yml: {org}")
 
-          ga_id = entry.get("ga_analytics")  # string direta
+          ga_id = entry.get("ga_analytics")
 
           with open(config_yml, "r", encoding="utf-8") as f:
               cfg = yaml.safe_load(f) or {}
@@ -214,11 +204,9 @@ jobs:
               yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
           PY
 
-
       # 6) Push payload into {org}.github.io using app token
       - name: Push content to {org}.github.io
         env:
-          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
@@ -234,7 +222,6 @@ jobs:
           git init
           git branch -M main
 
-          # Add all assembled files
           rsync -a "$GITHUB_WORKSPACE/out/" .
 
           git add -A
@@ -243,10 +230,9 @@ jobs:
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
           git push -u origin main --force
 
-      # 7) Set 6 org secrets on {org}
+      # 7) Set org secrets on {org} (dispatcher + provisioner)
       - name: Set org secrets (dispatcher + provisioner)
         env:
-          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
           DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
           DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
@@ -255,7 +241,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # You asked for 6 org secrets: IDs + PEMs for dispatcher and provisioner
           echo "$DISPATCHER_APP_ID"            | gh secret set DISPATCHER_APP_ID            --org "$ORG" --visibility private
           echo "$DISPATCHER_PRIVATE_KEY_PEM"   | gh secret set DISPATCHER_PRIVATE_KEY_PEM   --org "$ORG" --visibility private
           echo "$PROVISIONER_APP_ID"           | gh secret set PROVISIONER_APP_ID           --org "$ORG" --visibility private
@@ -266,7 +251,6 @@ jobs:
       # 8) Set repo secrets on {org}.github.io (auditor only)
       - name: Set auditor secrets on {org}.github.io
         env:
-          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
           AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
           AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
@@ -281,44 +265,17 @@ jobs:
 
           echo "✅ Auditor secrets set on $TARGET"
 
-      # 9) (Optional) Enable Pages (for org site it usually just needs repo + settings)
+      # 9) (Optional) Enable Pages
       - name: Enable GitHub Pages (optional)
         env:
-          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
           REPO="${ORG}.github.io"
 
-          # Try to enable Pages from main branch root. If already enabled, ignore.
           gh api "repos/${ORG}/${REPO}/pages" -X POST \
             -f source[branch]=main \
             -f source[path]="/" \
             >/dev/null 2>&1 || true
 
           echo "✅ Pages enable attempted for ${ORG}/${REPO}"
-
-
-      # se o primeiro falhar
-      # - name: Enable GitHub Pages on main (root)
-      #   env:
-      #     GH_TOKEN: ${{ needs.mint_token.outputs.token }}
-      #     ORG: ${{ inputs.org }}
-      #   run: |
-      #     set -euo pipefail
-      #     REPO="${ORG}.github.io"
-
-      #     # Cria Pages se não existir; se existir, atualiza.
-      #     # POST pode falhar se já existir, então tentamos POST e depois PUT.
-      #     gh api "repos/${ORG}/${REPO}/pages" -X POST \
-      #       -f source[branch]=main \
-      #       -f source[path]="/" \
-      #       >/dev/null 2>&1 || true
-
-      #     # Atualiza a fonte para main:/ (idempotente)
-      #     gh api "repos/${ORG}/${REPO}/pages" -X PUT \
-      #       -f source[branch]=main \
-      #       -f source[path]="/" \
-      #       >/dev/null 2>&1 || true
-
-      #     echo "✅ Pages set to main:/ for ${ORG}/${REPO}"
