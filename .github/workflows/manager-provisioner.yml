@@ -9,7 +9,7 @@ on:
       templates_repo:
         description: "Templates repo (owner/name)"
         required: false
-        default: "naavila/github-infra-templates"
+        default: "naavilam/github-infra-templates"
       templates_ref:
         description: "Branch/tag/sha in templates repo"
         required: false
