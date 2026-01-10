@@ -18,20 +18,14 @@ on:
 permissions:
   contents: read
 
+
 jobs:
-  provision:
+  mint_token:
     runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.app_token.outputs.token }}
 
     steps:
-      # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
-      - name: Checkout templates
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.templates_repo }}
-          ref: ${{ inputs.templates_ref }}
-          path: templates
-
-      # 2) Create an installation token for Provisioner App scoped to the target org
       - name: Create Provisioner installation token
         id: app_token
         uses: actions/create-github-app-token@v1
@@ -39,6 +33,22 @@ jobs:
           app-id: ${{ secrets.PROVISIONER_APP_ID }}
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
+
+  provision:
+    runs-on: ubuntu-latest
+    needs: mint_token
+    environment: ${{ inputs.org }} 
+    steps:
+      - name: Ensure gh is available
+        run: gh --version
+    
+      # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
+      - name: Checkout templates
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.templates_repo }}
+          ref: ${{ inputs.templates_ref }}
+          path: templates
 
       # 3) Install gh CLI (usually already present, but keep explicit)
       - name: Ensure gh is available
@@ -216,7 +226,7 @@ jobs:
       # 7) Set 6 org secrets on {org}
       - name: Set org secrets (dispatcher + provisioner)
         env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
           DISPATCHER_APP_ID: ${{ secrets.DISPATCHER_APP_ID }}
           DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
@@ -231,28 +241,25 @@ jobs:
           echo "$PROVISIONER_APP_ID"           | gh secret set PROVISIONER_APP_ID           --org "$ORG" --visibility private
           echo "$PROVISIONER_PRIVATE_KEY_PEM"  | gh secret set PROVISIONER_PRIVATE_KEY_PEM  --org "$ORG" --visibility private
 
-          # Você listou 4 nomes aqui; como você disse "6", eu deixei os 4 explícitos.
-          # Se os outros 2 forem, por exemplo, INSTALLATION_IDs ou WEBHOOK_SECRET,
-          # adicione aqui exatamente com os nomes desejados.
-
           echo "✅ Org secrets set on $ORG"
 
-      # 8) Set 2 repo secrets on {org}.github.io (auditor)
-      - name: Set repo secrets on {org}.github.io (auditor)
+      # 8) Set repo secrets on {org}.github.io (auditor only)
+      - name: Set auditor secrets on {org}.github.io
         env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_TOKEN: ${{ needs.mint_token.outputs.token }}
           ORG: ${{ inputs.org }}
           AUDITOR_APP_ID: ${{ secrets.AUDITOR_APP_ID }}
           AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
+
           REPO="${ORG}.github.io"
           TARGET="${ORG}/${REPO}"
 
-          echo "$AUDITOR_APP_ID"            | gh secret set AUDITOR_APP_ID            --repo "$TARGET"
-          echo "$AUDITOR_PRIVATE_KEY_PEM"   | gh secret set AUDITOR_PRIVATE_KEY_PEM   --repo "$TARGET"
+          echo "$AUDITOR_APP_ID"           | gh secret set AUDITOR_APP_ID           --repo "$TARGET"
+          echo "$AUDITOR_PRIVATE_KEY_PEM"  | gh secret set AUDITOR_PRIVATE_KEY_PEM  --repo "$TARGET"
 
-          echo "✅ Repo secrets set on $TARGET"
+          echo "✅ Auditor secrets set on $TARGET"
 
       # 9) (Optional) Enable Pages (for org site it usually just needs repo + settings)
       - name: Enable GitHub Pages (optional)

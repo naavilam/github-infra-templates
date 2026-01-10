@@ -1,6 +1,7 @@
 orgs:
   - name: high-energy-physics-research
     ga_analitics: G-JLHP21NXVY
+    github_environment: 
     apps:
       dispatcher:
         app_id: 2576366
