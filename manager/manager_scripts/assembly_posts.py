@@ -17,15 +17,22 @@ def load_registry(path: str) -> List[Dict]:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    # suporta registry como lista direta ou como dict com chave "orgs"/"items"
+    # Lista direta
     if isinstance(data, list):
         return data
-    if isinstance(data, dict):
-        for key in ("items", "orgs", "entries"):
-            if key in data and isinstance(data[key], list):
-                return data[key]
 
-    raise ValueError("Registry format not supported")
+    # Dict com listas em chaves conhecidas
+    if isinstance(data, dict):
+        for key in ("repos", "repositories", "items", "orgs", "entries"):
+            val = data.get(key)
+            if isinstance(val, list):
+                return val
+
+    raise ValueError(
+        f"Registry format not supported: expected list or dict with one of "
+        f"[repos, repositories, items, orgs, entries]. Got: {type(data).__name__} "
+        f"keys={list(data.keys()) if isinstance(data, dict) else 'n/a'}"
+    )
 
 
 def ensure_dir(path: str):
