@@ -100,6 +100,35 @@ def render_index(index_src: str, title: str, nb_count: int, tree: dict) -> str:
 import sys, subprocess
 from pathlib import Path
 
+def ensure_minimal_cell(ipynb_path: Path):
+    """
+    Garante que o notebook tenha pelo menos 1 célula renderizável.
+    - Se cells == []  -> injeta 1 markdown.
+    - Se não existir nenhuma célula do tipo markdown/code -> injeta 1 markdown no topo.
+    """
+    try:
+        nb = json.loads(ipynb_path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+
+    cells = nb.get("cells", [])
+    has_md_or_code = any(
+        isinstance(c, dict) and c.get("cell_type") in ("markdown", "code")
+        for c in cells
+    )
+
+    if (not cells) or (not has_md_or_code):
+        nb["cells"] = [{
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": ["_Notebook criado — conteúdo em construção._\n"]
+        }] + (cells if isinstance(cells, list) else [])
+
+        ipynb_path.write_text(
+            json.dumps(nb, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+
 def collect_tree(src: Path, out: Path, execute: bool):
     """
     Varre src; converte apenas .ipynb -> .html em out.
@@ -136,6 +165,9 @@ def collect_tree(src: Path, out: Path, execute: bool):
         # Se não for .ipynb → ignora
         if path.suffix.lower() != ".ipynb":
             continue
+
+        # Garante que notebooks vazios (ou sem md/code) não quebrem o nbconvert
+        ensure_minimal_cell(path)
 
         # Converte notebook
         rel = path.relative_to(src)
