@@ -23,7 +23,8 @@ jobs:
   mint_token:
     runs-on: ubuntu-latest
     outputs:
-      token: ${{ steps.export.outputs.token }}
+      token: ${{ steps.app_token.outputs.token }}
+
     steps:
       - name: Create Provisioner installation token
         id: app_token
@@ -33,11 +34,22 @@ jobs:
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
 
-      - name: Export token as job output
-        id: export
+      - name: Debug minted token length (no leak)
+        shell: bash
         run: |
           set -euo pipefail
-          # re-export do output do step anterior
+          tok='${{ steps.app_token.outputs.token }}'
+          echo "mint_token: token length = ${#tok}"
+          if [[ "${#tok}" -lt 20 ]]; then
+            echo "Token looks empty/too short. Check create-github-app-token step." >&2
+            exit 1
+          fi
+
+      - name: Export token via GITHUB_OUTPUT (robust)
+        id: export
+        shell: bash
+        run: |
+          set -euo pipefail
           echo "token=${{ steps.app_token.outputs.token }}" >> "$GITHUB_OUTPUT"
   
   provision:
