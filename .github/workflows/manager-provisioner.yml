@@ -133,7 +133,6 @@ jobs:
           [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
 
           python "$SCRIPT" \
-            --org "$ORG" \
             --registry "$REG" \
             --out-posts "$OUTPOSTS"
 
