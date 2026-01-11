@@ -27,7 +27,29 @@ HEADERS = {
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
-REGISTRY_FILE = Path(os.environ.get("REGISTRY_FILE", ".github/registry/repos.yml"))
+def _default_registry_file() -> Path:
+    """
+    Novo layout:
+      org/org_registry/{org-lower}-registry.yml
+
+    Este script roda no repo central (checkout).
+    Então o path é relativo ao CWD do central.
+    """
+    # se o workflow passar REGISTRY_FILE explicitamente, respeita
+    explicit = (os.environ.get("REGISTRY_FILE") or "").strip()
+    if explicit:
+        return Path(explicit)
+
+    # tenta inferir org do runtime
+    org = (os.environ.get("ONE_ORG") or os.environ.get("ORG") or "").strip()
+    if org:
+        return Path("org") / "org_registry" / f"{org.lower()}-registry.yml"
+
+    # fallback (legado) — só pra não explodir sem contexto
+    return Path(".github/registry/repos.yml")
+
+REGISTRY_FILE = _default_registry_file()
+
 WORKDIR_BASE = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "repo_init_work"
 
 DISPATCH_SITE = os.environ.get("DISPATCH_SITE", "site-template-updated")
@@ -212,6 +234,8 @@ def process_repo(entry: Dict) -> None:
 def main() -> None:
     if not REGISTRY_FILE.exists():
         print(f"[ERROR] registry not found: {REGISTRY_FILE}", file=sys.stderr)
+        print("[HINT] expected new path: org/org_registry/{org-lower}-registry.yml", file=sys.stderr)
+        print("[HINT] set ONE_ORG or ORG env, or pass REGISTRY_FILE explicitly.", file=sys.stderr)
         sys.exit(2)
 
     data = yaml.safe_load(REGISTRY_FILE.read_text(encoding="utf-8")) or {}
