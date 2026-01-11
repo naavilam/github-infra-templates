@@ -238,6 +238,14 @@ def main() -> None:
         print("[ERROR] registry.repos must be a list", file=sys.stderr)
         sys.exit(2)
 
+    # No schema novo, o org vem no topo do arquivo (data["org"]) e os itens em repos não têm "org".
+    top_org = (data.get("org") or "").strip()
+
+    if top_org:
+        for e in repos:
+            if isinstance(e, dict) and not (e.get("org") or "").strip():
+                e["org"] = top_org
+                
     for entry in repos:
         full = f"{(entry.get('org') or '').strip()}/{(entry.get('name') or '').strip()}"
         try:
