@@ -12,7 +12,19 @@ repos:
     title: "Introduction to Lie Groups"
     academic_level: undergraduate
     academic_area: Mathematics
-    academic_school: MIT Open Courses
+    academic_school: MIT OpenCourseWare
+    site_hero_image: introduction-to-lie-groups.png
+    site_description: "This course is devoted to the theory of Lie Groups with emphasis on its connections with Differential Geometry. The text for this class is Differential Geometry, Lie Groups and Symmetric Spaces by Sigurdur Helgason (American Mathematical Society, 2001)."
+    status: completed
+    completed_on: 2004-06-30
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: MIT(18.755)
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
     site_hero_image: 
     site_subtitle: 
     site_description: 
@@ -20,3 +32,334 @@ repos:
     readme_cta_text: "Acess full course notes"
     readme_theme: 
 
+  - name: MIT-18.034--Honors-Diferential-Equations
+    id: MIT(18.034)
+    title: "Honors Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: honors-diferential-equations.png
+    site_description: "This course covers the same material as Differential Equations (18.03) with more emphasis on theory. In addition, it treats mathematical aspects of ordinary differential equations such as existence theorems."
+    status: completed
+    completed_on: 2009-11-30
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: 
+    id: 
+    title: 
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    site_hero_image: 
+    site_description: ""
+    status: completed
+    completed_on: 
+    readme_cta_text: "Acess full course notes"
+
+  - name: MIT-18.034--Honors-Differential-Equations
+    id: MIT(18.034)
+    title: "Honors Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-034-honors-differential-equations-spring-2004/"
+    site_hero_image: honors-differential-equations.png
+    site_description: "Covers the same material as 18.03 with greater emphasis on theory, including first-order equations, initial value problems, systems, linear equations, and qualitative analysis of planar systems."
+    status: completed
+    completed_on: 2004-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.330--Introduction-to-Numerical-Analysis
+    id: MIT(18.330)
+    title: "Introduction to Numerical Analysis"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2004/"
+    site_hero_image: introduction-to-numerical-analysis.png
+    site_description: "Introduces fundamental numerical methods for scientific computing, including root finding, interpolation, approximation, numerical integration, differential equations, and linear algebra techniques."
+    status: completed
+    completed_on: 2004-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.101--Analysis-II
+    id: MIT(18.101)
+    title: "Analysis II"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-101-analysis-ii-fall-2005/"
+    site_hero_image: analysis-ii.png
+    site_description: "A continuation of rigorous analysis, covering multivariable calculus and an introduction to differential forms on Euclidean spaces and manifolds."
+    status: completed
+    completed_on: 2005-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.152--Introduction-to-Partial-Differential-Equations--Fall-2005
+    id: MIT(18.152)
+    title: "Introduction to Partial Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2005/"
+    site_hero_image: introduction-to-partial-differential-equations.png
+    site_description: "Provides a rigorous introduction to partial differential equations, focusing on linear second-order equations of elliptic and parabolic type."
+    status: completed
+    completed_on: 2005-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.152--Introduction-to-Partial-Differential-Equations--Fall-2011
+    id: MIT(18.152)
+    title: "Introduction to Partial Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2011/"
+    site_hero_image: introduction-to-partial-differential-equations.png
+    site_description: "Introduces the three fundamental types of partial differential equations—elliptic, parabolic, and hyperbolic—along with mathematical tools and real-world applications."
+    status: completed
+    completed_on: 2011-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.03SC--Differential-Equations
+    id: MIT(18.03SC)
+    title: "Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/"
+    site_hero_image: differential-equations.png
+    site_description: "Focuses on modeling natural phenomena using differential equations, emphasizing solution techniques and interpretation relevant to science and engineering."
+    status: completed
+    completed_on: 2011-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.303--Linear-Partial-Differential-Equations
+    id: MIT(18.303)
+    title: "Linear Partial Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-fall-2006/"
+    site_hero_image: linear-partial-differential-equations.png
+    site_description: "Studies classical linear partial differential equations such as diffusion, Laplace, Poisson, and wave equations, with solution methods including Fourier series and Green’s functions."
+    status: completed
+    completed_on: 2006-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.950--Differential-Geometry
+    id: MIT(18.950)
+    title: "Differential Geometry"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-950-differential-geometry-fall-2008/"
+    site_hero_image: differential-geometry.png
+    site_description: "A rigorous introduction to differential geometry with an emphasis on concrete examples and the geometric concept of curvature."
+    status: completed
+    completed_on: 2008-06-30
+    readme_cta_text: "Access full course notes"
