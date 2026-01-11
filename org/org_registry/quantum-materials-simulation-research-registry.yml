@@ -2,11 +2,11 @@
 # Quantum Materials Simulation Research – Repository Registry
 # Source of truth
 # ============================================================
+org: Quantum-Materials-Simulation-Research
 
 repos:
 
-  - org: Quantum-Materials-Simulation-Research
-    name: variational-approximation
+  - name: variational-approximation
     id: Variational Approximation
     title: "Research"
     academic_level: graduate
@@ -20,8 +20,7 @@ repos:
     readme_cta_text: "Research notebooks"
     readme_theme: minimal
 
-  - org: Quantum-Materials-Simulation-Research
-    name: quantum-chemistry
+  - name: quantum-chemistry
     id: Quantum Chemistry
     title: "Research"
     academic_level: graduate
@@ -35,8 +34,7 @@ repos:
     readme_cta_text: "Research notebooks"
     readme_theme: minimal
 
-  - org: Quantum-Materials-Simulation-Research
-    name: quantum-monte-carlo
+  - name: quantum-monte-carlo
     id: Quantum Monte Carlo
     title: "Research"
     academic_level: graduate
@@ -50,8 +48,7 @@ repos:
     readme_cta_text: "Research notebooks"
     readme_theme: minimal
 
-  - org: Quantum-Materials-Simulation-Research
-    name: quantum-neural-state
+  - name: quantum-neural-state
     id: Quantum Neural State
     title: "Research"
     academic_level: graduate

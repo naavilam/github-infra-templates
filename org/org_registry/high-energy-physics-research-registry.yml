@@ -2,11 +2,11 @@
 # High Energy Physics Research – Repository Registry
 # Source of truth
 # ============================================================
+org: high-energy-physics-research
 
 repos:
 
-  - org: High-Energy-Physics-Research
-    name: Academic-Research-Journal
+  - name: Academic-Research-Journal
     id: AR2026
     title: Academic Research Journal
     academic_level: graduate
@@ -19,8 +19,7 @@ repos:
     readme_cta_text: "Open full course website."
     readme_theme: minimal
 
-  - org: High-Energy-Physics-Research
-    name: Gaussian-Process-Regression-Research
+  - name: Gaussian-Process-Regression-Research
     id: Gaussian Processes Regression
     title: Research
     academic_level: graduate

@@ -2,11 +2,11 @@
 # Repository Registry
 # Source of truth (editorial only, flat schema)
 # ============================================================
+org: 
 
 repos:
 
-  - org: 
-    name:
+  - name:
     id: 
     title: 
     academic_level: 

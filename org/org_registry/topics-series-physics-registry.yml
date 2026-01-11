@@ -2,11 +2,11 @@
 # Repository Registry
 # Source of truth (editorial only, flat schema)
 # ============================================================
+org: topics-series-physics
 
 repos:
 
-  - org: Topics-Series-Physics
-    name: MIT(8.20)-Introduction-to-Special-Relativity
+  - name: MIT(8.20)-Introduction-to-Special-Relativity
     id: MIT(8.20)
     title: "Introduction to Special Relativity"
     academic_level: undergraduate

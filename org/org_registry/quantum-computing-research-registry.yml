@@ -2,11 +2,11 @@
 # Quantum Computing Research – Repository Registry
 # Source of truth
 # ============================================================
+org: Quantum-Computing-Research
 
 repos:
 
-  - org: Quantum-Computing-Research
-    name: quantum-error-mitigation
+  - name: quantum-error-mitigation
     id: Quantum Error Mitigation
     title: "Research"
     academic_level: graduate
@@ -20,8 +20,7 @@ repos:
     readme_cta_text: "Research notebooks"
     readme_theme: minimal
 
-  - org: Quantum-Computing-Research
-    name: quantum-algorithms
+  - name: quantum-algorithms
     id: Quantum Algorithms
     title: "Research"
     academic_level: graduate
@@ -35,8 +34,7 @@ repos:
     readme_cta_text: "Research notebooks"
     readme_theme: minimal
 
-  - org: Quantum-Computing-Research
-    name: quantum-learning
+  - name: quantum-learning
     id: Quantum Learning
     title: "Research"
     academic_level: graduate
@@ -50,8 +48,7 @@ repos:
     readme_cta_text: "Research notebooks"
     readme_theme: minimal
 
-  - org: Quantum-Computing-Research
-    name: Batalha-Naval-Quantica
+  - name: Batalha-Naval-Quantica
     id: Batalha Naval Quantica
     title: "Game"
     academic_level: graduate
