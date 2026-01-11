@@ -1,12 +1,16 @@
 name: Provision Manager Website + Secrets
 
 on:
+  workflow_call:
+    inputs:
+    org:
+      description: "Target organization"
+      required: true
   workflow_dispatch:
     inputs:
       org:
         description: "Target organization"
         required: true
-        default: "topics-series-physics"
       templates_repo:
         description: "Templates repo (owner/name)"
         required: false
