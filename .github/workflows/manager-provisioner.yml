@@ -7,6 +7,13 @@ on:
         description: "Target organization"
         required: true
         type: string
+    
+    secrets:
+      PROVISIONER_APP_ID:
+        required: true
+      PROVISIONER_PRIVATE_KEY_PEM:
+        required: true
+  
   workflow_dispatch:
     inputs:
       org:
