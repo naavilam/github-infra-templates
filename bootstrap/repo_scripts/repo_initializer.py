@@ -208,6 +208,7 @@ def process_repo(entry: Dict) -> None:
 
     create_repo(org, repo, desc, private)
     log(full, "repo created")
+    wait_repo_ready(org, repo) 
 
     repo_dir = ensure_repo_clone(org, repo)
     pushed = sync_bootstrap_into_main(repo_dir)
@@ -224,6 +225,32 @@ def process_repo(entry: Dict) -> None:
 
     log(full, "done")
 
+import time
+
+def wait_repo_ready(org: str, repo: str, attempts: int = 12) -> None:
+    """
+    Aguarda o repo ficar disponível tanto na API quanto no endpoint de clone.
+    Evita race condition: API cria, mas git backend ainda não "subiu".
+    """
+    # 1) aguarda API confirmar existência
+    for i in range(1, attempts + 1):
+        r = gh("GET", f"{API}/repos/{org}/{repo}")
+        if r.status_code == 200:
+            break
+        time.sleep(min(2 * i, 10))
+    else:
+        raise RuntimeError(f"repo not reachable via API after retries: {org}/{repo}")
+
+    # 2) aguarda endpoint de clone responder (info/refs)
+    #    200 = ok público; 401/403 pode ocorrer em privado; 404 é o problema aqui
+    url = f"https://github.com/{org}/{repo}.git/info/refs?service=git-upload-pack"
+    for i in range(1, attempts + 1):
+        rr = requests.get(url, timeout=15)
+        if rr.status_code != 404:
+            return
+        time.sleep(min(2 * i, 10))
+
+    raise RuntimeError(f"repo git endpoint still 404 after retries: {org}/{repo}")
 
 def main() -> None:
     if not REGISTRY_FILE.exists():
@@ -245,7 +272,7 @@ def main() -> None:
         for e in repos:
             if isinstance(e, dict) and not (e.get("org") or "").strip():
                 e["org"] = top_org
-                
+
     for entry in repos:
         full = f"{(entry.get('org') or '').strip()}/{(entry.get('name') or '').strip()}"
         try:
