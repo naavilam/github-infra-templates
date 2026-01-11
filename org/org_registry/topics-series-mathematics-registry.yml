@@ -7,16 +7,16 @@ org:
 
 repos:
 
-  - name:
-    id: 
-    title: 
-    academic_level: 
-    academic_area: 
-    academic_school: 
+  - name: MIT-18.755--Introduction-to-Lie-Groups
+    id: MIT(18.755)
+    title: "Introduction to Lie Groups"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT Open Courses
     site_hero_image: 
     site_subtitle: 
     site_description: 
     readme_tagline: 
-    readme_cta_text: 
+    readme_cta_text: "Acess full course notes"
     readme_theme: 
 

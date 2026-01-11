@@ -75,7 +75,7 @@ jobs:
           set -euo pipefail
 
           org_lc="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-          reg_path="org/org_registry/${org_lc}-registry.yml"
+          reg_path="central/org/org_registry/${org_lc}-registry.yml"
           echo "PWD=$(pwd)"
           echo "REPO_FILTER='${REPO_FILTER}'"
           echo "REGISTRY_PATH='${reg_path}'"
