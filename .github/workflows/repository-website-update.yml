@@ -173,6 +173,7 @@ jobs:
             area  = (it.get("academic_area") or "").strip()
             level = (it.get("academic_level") or "").strip()
             about = (it.get("site_description") or "").strip()
+            course_url = (it.get("course_url") or "").strip()
 
             tagline = (it.get("readme_tagline") or "").strip()
             if not tagline:
@@ -195,7 +196,8 @@ jobs:
               "CENTRAL_REPO": f"https://{org_lc}.github.io",
               "ABOUT": about,
               "SUBTITLE_1": area,
-              "SUBTITLE_2": level
+              "SUBTITLE_2": level,
+              "COURSE_URL": course_url
             }
             cfg = {k: v for k, v in cfg.items() if v}
 
