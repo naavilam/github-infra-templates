@@ -133,7 +133,7 @@ repos:
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: MIT OpenCourseWare
-    course_url: "https://ocw.mit.edu/courses/8-001-applied-geometric-algebra-spring-2009/"
+    course_url: "https://ocw.mit.edu/courses/res-8-001-applied-geometric-algebra-spring-2009/"
     site_hero_image: applied-geometric-algebra.png
     site_description: "Introduces geometric algebra as a unified mathematical language for geometry, physics, and engineering applications."
     status: completed
@@ -218,18 +218,18 @@ repos:
     completed_on: 2014-06-30
     readme_cta_text: "Access full course notes"
 
-  - name: MIT-18.009--Learning-Differential-Equations
-    id: MIT(18.009)
-    title: "Learning Differential Equations"
-    academic_level: undergraduate
-    academic_area: Mathematics
-    academic_school: MIT OpenCourseWare
-    course_url: "https://ocw.mit.edu/courses/18-009-learn-differential-equations-up-close-fall-2015/"
-    site_hero_image: learning-differential-equations.png
-    site_description: "An intuitive, hands-on approach to differential equations emphasizing visualization, computation, and modeling."
-    status: completed
-    completed_on: 2015-06-30
-    readme_cta_text: "Access full course notes"
+  # - name: MIT-18.009--Learning-Differential-Equations
+  #   id: MIT(18.009)
+  #   title: "Learning Differential Equations"
+  #   academic_level: undergraduate
+  #   academic_area: Mathematics
+  #   academic_school: MIT OpenCourseWare
+  #   course_url: "https://ocw.mit.edu/courses/18-009-learn-differential-equations-up-close-fall-2015/"
+  #   site_hero_image: learning-differential-equations.png
+  #   site_description: "An intuitive, hands-on approach to differential equations emphasizing visualization, computation, and modeling."
+  #   status: completed
+  #   completed_on: 2015-06-30
+  #   readme_cta_text: "Access full course notes"
 
   - name: MIT-18.100A--Real-Analysis
     id: MIT(18.100A)
@@ -247,21 +247,6 @@ repos:
 
 
 
-
-
-
-  - name: MIT-18.755--Introduction-to-Lie-Groups
-    id: MIT(18.755)
-    title: "Introduction to Lie Groups"
-    academic_level: undergraduate
-    academic_area: Mathematics
-    academic_school: MIT OpenCourseWare
-    course_url: "https://ocw.mit.edu/courses/18-755-introduction-to-lie-groups-fall-2004/"
-    site_hero_image: introduction-to-lie-groups.png
-    site_description: "Introduces the basic theory of Lie groups and Lie algebras, with emphasis on examples and structure theory."
-    status: completed
-    completed_on: 2004-06-30
-    readme_cta_text: "Access full course notes"
 
   - name: MIT-18.769--Topics-in-Lie-Theory
     id: MIT(18.769)
