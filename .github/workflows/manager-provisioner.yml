@@ -56,7 +56,7 @@ jobs:
           # ROOT creds (repo-level)
           app-id: ${{ vars.ROOT_PROVISIONER_APP_ID || inputs.app_id}}
           private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM || secrets.PROVISIONER_PRIVATE_KEY_PEM }}
-          owner: ${{ inputs.org }}
+          owner: ${{ inputs.org || github.event.inputs.org}}
 
       - name: Debug runner + workspace
         run: |
