@@ -121,7 +121,6 @@ jobs:
           def slug_repo(name: str) -> str:
             s = (name or "").strip()
             s = s.replace("(", "-").replace(")", "-")
-            s = re.sub(r"-{2,}", "-", s).strip("-")
             return s
 
           # -------------------------
