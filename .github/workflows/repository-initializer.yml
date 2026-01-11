@@ -8,10 +8,7 @@ on:
         required: false
         type: string
         default: ""
-      registry_path:
-        type: string
-        required: false
-        default: ".github/registry/repos.yml"
+
     secrets:
       PROVISIONER_APP_ID:
         required: true
