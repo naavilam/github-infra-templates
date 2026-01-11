@@ -353,6 +353,7 @@ jobs:
 
       # 6) Set repo secrets (auditor only)
       - name: Set auditor secrets on {org}.github.io
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
           ORG: ${{ inputs.org || github.event.inputs.org }}
           AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
