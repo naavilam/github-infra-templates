@@ -350,6 +350,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+
           HERO_FILE="$(python - <<'PY'
           import yaml
           from pathlib import Path
@@ -363,11 +365,12 @@ jobs:
             exit 0
           fi
 
-          SRC="central/manager/manager_assets/${{ github.repository_owner }}/img/portfolio/${HERO_FILE}"
+          SRC="central/manager/manager_assets/${ORG_LC}/img/portfolio/${HERO_FILE}"
+
           if [[ ! -f "$SRC" ]]; then
-            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado no central templates em $SRC"
-            echo "Conteúdo de central/manager/manager_assets/${{ github.repository_owner }}/img/portfolio:"
-            ls -la "central/manager/manager_assets/${{ github.repository_owner }}/img/portfolio" || true
+            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado em $SRC"
+            echo "Conteúdo de central/manager/manager_assets/${ORG_LC}/img/portfolio:"
+            ls -la "central/manager/manager_assets/${ORG_LC}/img/portfolio" || true
             exit 1
           fi
 
@@ -375,7 +378,6 @@ jobs:
           cp "$SRC" _site/assets/img/hero.png
           echo "[ok] hero copiado: $SRC -> _site/assets/img/hero.png"
 
-          # garante que o template use a imagem local publicada (robusto)
           python - <<'PY'
           import yaml
           from pathlib import Path
