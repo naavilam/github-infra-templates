@@ -211,7 +211,14 @@ jobs:
           python "$SCRIPT" \
             --registry "$REG" \
             --out-posts "$OUTPOSTS"
-
+    
+      - name: Write site URL to README.md
+        env:
+          ORG: ${{ inputs.org }}
+        run: |
+          set -euo pipefail
+          echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
+          
       - name: Inject GA tracking id + title + url into out/_config.yml
         env:
           ORG: ${{ inputs.org }}
