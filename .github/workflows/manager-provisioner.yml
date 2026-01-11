@@ -6,11 +6,13 @@ on:
       org:
         description: "Target organization"
         required: true
+        type: string
   workflow_dispatch:
     inputs:
       org:
         description: "Target organization"
         required: true
+        type: string
       templates_repo:
         description: "Templates repo (owner/name)"
         required: false
