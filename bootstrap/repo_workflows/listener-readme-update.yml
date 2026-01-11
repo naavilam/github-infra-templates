@@ -15,5 +15,5 @@ jobs:
     with:
       repo: ${{ github.repository }}
     secrets:
-      PROVISIONER_APP_ID: ${{ secrets.PROVISIONER_APP_ID }}
+      PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
       PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
