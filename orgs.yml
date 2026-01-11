@@ -85,7 +85,7 @@ orgs:
         app_name: Topics-Mathematics-Provisioner-App
         app_instalation: 103586902
 
-  - name: topics-series-Physics
+  - name: topics-series-physics
     title: "Physics Topics Series"
     ga_analytics: G-RSX3P7BLCS
     apps:
