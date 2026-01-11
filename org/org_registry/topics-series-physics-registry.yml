@@ -15,7 +15,7 @@ repos:
     course_url: "https://ocw.mit.edu/courses/8-20-introduction-to-special-relativity-january-iap-2021/"
     site_hero_image: introduction-to-special-relativity.png
     site_subtitle: 
-    site_description: "The theory of special relativity, originally proposed by Albert Einstein in his famous 1905 paper, has had profound consequences on our view of physics, space, and time. This course will introduce you to the concepts behind special relativity including, but not limited to, length contraction, time dilation, the Lorentz transformation, relativistic kinematics, Doppler shifts, and even so-called “paradoxes.”"
+    site_description: "The theory of special relativity, originally proposed by Albert Einstein in his famous 1905 paper, has had profound consequences on our view of physics, space, and time. This course will introduce you to the concepts behind special relativity including, but not limited to, length contraction, time dilation, the Lorentz transformation, relativistic kinematics, Doppler shifts, and even so-called “paradoxes.” - Prof. Markus Klute"
     readme_tagline: 
     readme_cta_text: "Acess full course notes"
     readme_theme: 
