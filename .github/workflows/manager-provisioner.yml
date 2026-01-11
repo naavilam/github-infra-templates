@@ -76,6 +76,14 @@ jobs:
             gh api "orgs/${ORG}/repos" -X POST -f name="$REPO" -f private=false -f description="Org website for ${ORG}" >/dev/null
           fi
 
+          # Enforce PUBLIC (covers existing repos created as private)
+          echo "Ensuring repo is PUBLIC: ${FULL}"
+          gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null
+
+          # Optional: show current visibility (no secrets)
+          VIS=$(gh api "repos/${FULL}" -q '.private')
+          echo "Repo private? ${VIS}"
+
       # 3) Build payload
       - name: Assemble website payload
         env:
@@ -94,7 +102,7 @@ jobs:
 
           REG="$ROOT/templates/manager/manager_registry/${ORG}-registry.yml"
           if [[ ! -f "$REG" ]]; then
-            echo "❌ Missing registry file: $REG" >&2
+            echo "Missing registry file: $REG" >&2
             ls -la "$ROOT/templates/manager/manager_registry" >&2 || true
             exit 1
           fi
@@ -104,7 +112,7 @@ jobs:
 
           ASSETS_DIR="$ROOT/templates/manager/manager_assets/${ORG}"
           if [[ ! -d "$ASSETS_DIR" ]]; then
-            echo "❌ Missing assets dir: $ASSETS_DIR" >&2
+            echo "Missing assets dir: $ASSETS_DIR" >&2
             ls -la "$ROOT/templates/manager/manager_assets" >&2 || true
             exit 1
           fi
@@ -114,7 +122,7 @@ jobs:
             "$ROOT/templates/manager/manager_workflows/" \
             "$OUT/.github/workflows/"
 
-          echo "✅ Payload assembled at: $OUT"
+          echo "Payload assembled at: $OUT"
 
       - name: Install python deps for assembly
         run: |
@@ -181,8 +189,8 @@ jobs:
           set -euo pipefail
           REPO="${ORG}.github.io"
 
-          git config --global user.name  "provisioner[bot]"
-          git config --global user.email "provisioner[bot]@users.noreply.github.com"
+          git config --global user.name  "naavilam-provisioner-app[bot]"
+          git config --global user.email "naavilam-provisioner-app[bot]@users.noreply.github.com"
 
           rm -rf target
           mkdir -p target
@@ -194,7 +202,7 @@ jobs:
           rsync -a "$GITHUB_WORKSPACE/out/" .
 
           git add -A
-          git commit -m "Provision manager website for ${ORG}" || echo "Nothing to commit."
+          git commit -m "Update files" || echo "Nothing to commit."
 
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
           git push -u origin main --force

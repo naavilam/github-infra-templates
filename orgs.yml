@@ -80,7 +80,7 @@ orgs:
         app_name: Topics-Mathematics-Provisioner-App
         app_instalation: 103586902
 
-  - name: topics-series-physics
+  - name: Topics-Series-Physics
     ga_analitics: G-RSX3P7BLCS
     apps:
       dispatcher:

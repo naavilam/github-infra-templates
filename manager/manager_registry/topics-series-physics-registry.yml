@@ -6,8 +6,8 @@
 repos:
 
   - org: Topics-Series-Physics
-    name: Introduction-to-Special-Relativity
-    id: 8.20
+    name: MIT(8.20)-Introduction-to-Special-Relativity
+    id: MIT(8.20)
     title: "Introduction to Special Relativity"
     academic_level: undergraduate
     academic_area: Physics
