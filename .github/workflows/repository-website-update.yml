@@ -54,7 +54,7 @@ jobs:
         name: Build matrix from CENTRAL org registry (with embedded cfg)
         shell: bash
         env:
-          ORG: ${{ env.ORG }}
+          ORG: ${{ github.repository_owner }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO_FILTER: ${{ inputs.repo }}
           CENTRAL_REPO: ${{ env.CENTRAL_REPO }}  
