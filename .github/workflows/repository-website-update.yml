@@ -54,154 +54,67 @@ jobs:
         name: Build matrix from CENTRAL org registry (with embedded cfg)
         shell: bash
         env:
-          ORG: ${{ github.repository_owner }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ORG: ${{ github.repository_owner }}        
           REPO_FILTER: ${{ inputs.repo }}
-          CENTRAL_REPO: ${{ env.CENTRAL_REPO }}  
-          CENTRAL_REF:  ${{ env.TEMPLATE_REF }}
         run: |
           set -euo pipefail
 
-          MATRIX="$(python - <<'PY'
-          import os, sys, json, base64, requests, yaml
-          from urllib.parse import quote
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, json, yaml, base64
+          from pathlib import Path
 
-          org = (os.environ.get("ORG") or "").strip()
+          org = (os.environ.get("ORG") or "").strip().lower()
           if not org:
-            print("::error::ORG env is required", file=sys.stderr)
-            sys.exit(2)
+            raise SystemExit("::error::ORG env is required")
 
-          org_lc = org.lower()
+          repo_filter = (os.environ.get("REPO_FILTER") or "").strip().lower()
 
-          gh_token = os.environ["GH_TOKEN"]
-          repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
-          central_repo = (os.environ.get("CENTRAL_REPO") or "").strip()
-          central_ref  = (os.environ.get("CENTRAL_REF")  or "main").strip()
+          reg = Path("central/org/org_registry") / f"{org}-registry.yml"
+          if not reg.exists():
+            # sem registry => matrix vazia
+            matrix = {"include": []}
+            print(f"matrix={json.dumps(matrix, ensure_ascii=False)}")
+            print("count=0")
+            raise SystemExit(0)
 
-          if not central_repo:
-            print("::error::CENTRAL_REPO env is required", file=sys.stderr)
-            sys.exit(2)
-
-          # novo caminho do registry por org
-          registry_path = f"org/org_registry/{org_lc}-registry.yml"
-
-          s = requests.Session()
-          s.headers.update({
-            "Authorization": f"Bearer {gh_token}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-          })
-
-          # baixa via contents API
-          url = f"https://api.github.com/repos/{central_repo}/contents/{quote(registry_path)}?ref={quote(central_ref)}"
-          r = s.get(url, timeout=30)
-          if r.status_code != 200:
-            print(f"::error::cannot fetch registry from {central_repo}:{registry_path}@{central_ref} (http {r.status_code})", file=sys.stderr)
-            try:
-              print(r.text, file=sys.stderr)
-            except Exception:
-              pass
-            sys.exit(2)
-
-          j = r.json()
-          content_b64 = j.get("content","")
-          if not content_b64:
-            print(f"::error::registry content empty: {central_repo}:{registry_path}@{central_ref}", file=sys.stderr)
-            sys.exit(2)
-
-          raw = base64.b64decode(content_b64.encode("utf-8")).decode("utf-8")
-          data = yaml.safe_load(raw) or {}
-
-          # novo schema: repos:
+          data = yaml.safe_load(reg.read_text(encoding="utf-8")) or {}
           items = data.get("repos", [])
           if not isinstance(items, list):
             items = []
 
-          def norm(s: str) -> str:
-            return (s or "").strip().lower()
-
-          # filtro aceita "name" OU "org/name"
-          target_full = None
-          target_name = None
-          if repo_filter:
-            if "/" in repo_filter:
-              target_full = norm(repo_filter)
-            else:
-              target_name = norm(repo_filter)
-
           include = []
-
           for it in items:
-            if not isinstance(it, dict):
-              continue
-
             name = str(it.get("name","")).strip()
             if not name:
               continue
-
-            # org default = org do arquivo (ou do env)
-            org_item = str(it.get("org","")).strip() or org_lc
-            full = f"{org_item}/{name}"
-
-            # aplica filtro
-            if target_full and norm(full) != target_full:
-              continue
-            if target_name and norm(name) != target_name:
+            if repo_filter and name.lower() != repo_filter:
               continue
 
-            # placeholders mínimos pro README/site builder
-            course_id = (str(it.get("id") or "").strip()
-                        or (name.split("-",1)[0] if "-" in name else name))
-
-            title = str(it.get("title") or "").strip()
-            if not title:
-              rest = name.split("-", 1)[1] if "-" in name else name
-              title = rest.replace("-", " ").strip()
-
-            site_url = str(it.get("site_url") or "").strip()
-            if not site_url:
-              site_url = f"https://{org_item}.github.io/{name}"
-
-            area  = str(it.get("academic_area") or "").strip()
-            level = str(it.get("academic_level") or "").strip()
-            if level:
-              lvl = level.lower().strip()
-              if lvl == "undergraduate": level = "Undergraduate Course"
-              elif lvl == "graduate": level = "Graduate Course"
-              else: level = level[:1].upper() + level[1:]
-
-            tagline = str(it.get("readme_tagline") or "").strip()
-            if not tagline:
-              parts = [p for p in [area, level] if p]
-              tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
-
+            # cfg embutido
             cfg = {
-              "TITLE_1": course_id,
-              "TITLE_2": title,
-              "REPO_TAGLINE": tagline,
-              "CTA_TEXT": str((it.get("readme_cta_text") or "Access the full course website")).strip(),
-              "THEME": str((it.get("readme_theme") or "coding")).strip(),
-              "SITE_URL": site_url,
-              "ASSETS_DIR": str((it.get("readme_assets_dir") or ".github/readme")).strip(),
-              "HERO_FILE": str((it.get("site_hero_image") or "")).strip(),
+              "TITLE_1": (it.get("id") or "").strip(),
+              "TITLE_2": (it.get("title") or "").strip(),
+              "SUBTITLE_1": (it.get("academic_area") or "").strip(),
+              "SUBTITLE_2": (it.get("academic_level") or "").strip(),
+              "ABOUT": (it.get("site_description") or "").strip(),
+              "CTA_TEXT": (it.get("readme_cta_text") or "").strip(),
+              "TAGLINE": (it.get("readme_tagline") or "").strip(),
+              "THEME": (it.get("readme_theme") or "").strip(),
+              "HERO_FILE": (it.get("site_hero_image") or "").strip(),
+              "GITHUB_LINK": f"https://github.com/{org}/{name}",
+              "CENTRAL_REPO": f"https://{org}.github.io",
             }
+            cfg = {k:v for k,v in cfg.items() if v}
 
             payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
             cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
 
-            include.append({"repo": full, "cfg_b64": cfg_b64})
+            include.append({"repo": f"{org}/{name}", "cfg_b64": cfg_b64})
 
-          print(json.dumps({"include": include}, ensure_ascii=False))
+          matrix = {"include": include}
+          print(f"matrix={json.dumps(matrix, ensure_ascii=False)}")
+          print(f"count={len(include)}")
           PY
-          )"
-
-          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
-          echo "count=$(python - <<'PY'
-          import os, json
-          m = json.loads(os.environ["MATRIX"])
-          print(len(m.get("include",[])))
-          PY
-          )" >> "$GITHUB_OUTPUT"
 
   apply:
     needs: plan
