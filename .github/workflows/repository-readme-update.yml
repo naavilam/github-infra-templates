@@ -42,7 +42,7 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml
+          pip install pyyaml requests
 
       - id: set
         name: Build matrix from CENTRAL org registry (with embedded cfg)
