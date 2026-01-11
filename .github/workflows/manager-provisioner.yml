@@ -281,10 +281,14 @@ jobs:
           PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
-          echo "$DISPATCHER_APP_ID"            | gh secret set DISPATCHER_APP_ID            --org "$ORG" --visibility private
-          echo "$DISPATCHER_PRIVATE_KEY_PEM"   | gh secret set DISPATCHER_PRIVATE_KEY_PEM   --org "$ORG" --visibility private
-          echo "$PROVISIONER_APP_ID"           | gh secret set PROVISIONER_APP_ID           --org "$ORG" --visibility private
-          echo "$PROVISIONER_PRIVATE_KEY_PEM"  | gh secret set PROVISIONER_PRIVATE_KEY_PEM  --org "$ORG" --visibility private
+
+          # --- ORG VARIABLES (non-sensitive) ---
+          echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG"
+          echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG"
+
+          # --- ORG SECRETS (sensitive) ---
+          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility private
+          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility private
 
       # 6) Set repo secrets (auditor only)
       - name: Set auditor secrets on {org}.github.io
@@ -295,8 +299,12 @@ jobs:
         run: |
           set -euo pipefail
           TARGET="${ORG}/${ORG}.github.io"
-          echo "$AUDITOR_APP_ID"           | gh secret set AUDITOR_APP_ID           --repo "$TARGET"
-          echo "$AUDITOR_PRIVATE_KEY_PEM"  | gh secret set AUDITOR_PRIVATE_KEY_PEM  --repo "$TARGET"
+          
+          # --- REPO VARIABLES (non-sensitive) ---
+          echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
+
+          # --- REPO SECRETS (sensitive) ---
+          echo "$AUDITOR_PRIVATE_KEY_PEM" | gh secret set AUDITOR_PRIVATE_KEY_PEM --repo "$TARGET"
 
       # 7) Enable Pages (optional)
       - name: Enable GitHub Pages (optional)
