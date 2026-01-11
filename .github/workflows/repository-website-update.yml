@@ -175,9 +175,17 @@ jobs:
             course_id = (it.get("id") or "").strip() or name
             title = (it.get("title") or "").strip()
             area  = (it.get("academic_area") or "").strip()
-            level = (it.get("academic_level") or "").strip()
             about = (it.get("site_description") or "").strip()
             course_url = (it.get("course_url") or "").strip()
+
+            LEVEL_MAP = {
+                "undergraduate": "Undergraduate Course",
+                "graduate": "Graduate Course",
+            }
+
+            raw_level = (it.get("academic_level") or "").strip().lower()
+            level = LEVEL_MAP.get(raw_level, raw_level)
+
 
             tagline = (it.get("readme_tagline") or "").strip()
             if not tagline:
