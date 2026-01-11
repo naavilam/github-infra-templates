@@ -35,18 +35,12 @@ def _default_registry_file() -> Path:
     Este script roda no repo central (checkout).
     Então o path é relativo ao CWD do central.
     """
-    # se o workflow passar REGISTRY_FILE explicitamente, respeita
-    explicit = (os.environ.get("REGISTRY_FILE") or "").strip()
-    if explicit:
-        return Path(explicit)
 
     # tenta inferir org do runtime
     org = (os.environ.get("ONE_ORG") or os.environ.get("ORG") or "").strip()
     if org:
         return Path("org") / "org_registry" / f"{org.lower()}-registry.yml"
 
-    # fallback (legado) — só pra não explodir sem contexto
-    return Path(".github/registry/repos.yml")
 
 REGISTRY_FILE = _default_registry_file()
 
