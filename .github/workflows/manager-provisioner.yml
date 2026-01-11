@@ -162,7 +162,8 @@ jobs:
           ROOT="$PWD"
           OUT="$ROOT/out"
           rm -rf "$OUT"
-          mkdir -p "$OUT/.github/workflows" "$OUT/_posts"
+
+          mkdir -p "$OUT/.github" "$OUT/.github/workflows" "$OUT/_posts"
 
           rsync -a --delete \
             "$ROOT/templates/manager/manager_website/" \
