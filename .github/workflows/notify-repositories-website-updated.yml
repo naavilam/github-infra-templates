@@ -3,11 +3,11 @@ name: Notify orgs site's template updated
 env:
   GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
 
-on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'bootstrap/repo_website/**' 
+# on:
+  # push:
+    # branches: [ main ]
+    # paths:
+    #   - 'bootstrap/repo_website/**' 
 
 jobs:
   notify:
