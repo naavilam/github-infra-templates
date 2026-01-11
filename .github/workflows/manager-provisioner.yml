@@ -328,8 +328,8 @@ jobs:
           echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG"
 
           # --- ORG SECRETS (sensitive) ---
-          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility private
-          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility private
+          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG"
+          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG"
 
       # 6) Set repo secrets (auditor only)
       - name: Set auditor secrets on {org}.github.io
