@@ -255,7 +255,7 @@ jobs:
           sparse-checkout-cone-mode: false
           fetch-depth: 1
 
-      - name: Fetch hero image (from manager)
+      - name: Fetch hero image (from central templates)
         shell: bash
         run: |
           set -euo pipefail
@@ -273,11 +273,11 @@ jobs:
             exit 0
           fi
 
-          SRC="manager/img/portfolio/${HERO_FILE}"
+          SRC="central/manager/manager_assets/${{ github.repository_owner }}/img/portfolio/${HERO_FILE}"
           if [[ ! -f "$SRC" ]]; then
-            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado no manager em $SRC"
-            echo "Conteúdo de manager/img/portfolio:"
-            ls -la manager/img/portfolio || true
+            echo "::error::HERO_FILE '${HERO_FILE}' não encontrado no central templates em $SRC"
+            echo "Conteúdo de central/manager/manager_assets/${{ github.repository_owner }}/img/portfolio:"
+            ls -la "central/manager/manager_assets/${{ github.repository_owner }}/img/portfolio" || true
             exit 1
           fi
 
@@ -347,5 +347,5 @@ jobs:
           fi
 
           git add -A
-          git commit -m "Update site"
+          git commit -m "Update files"
           git push origin gh-pages
