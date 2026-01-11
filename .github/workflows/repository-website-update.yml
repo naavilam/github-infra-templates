@@ -172,6 +172,7 @@ jobs:
             title = (it.get("title") or "").strip()
             area  = (it.get("academic_area") or "").strip()
             level = (it.get("academic_level") or "").strip()
+            about = (it.get("site_description") or "").strip()
 
             tagline = (it.get("readme_tagline") or "").strip()
             if not tagline:
@@ -192,6 +193,9 @@ jobs:
               "HERO_FILE": (it.get("site_hero_image") or "").strip(),
               "GITHUB_LINK": f"https://github.com/{full}",
               "CENTRAL_REPO": f"https://{org_lc}.github.io",
+              "ABOUT": about,
+              "SUBTITLE_1": area,
+              "SUBTITLE_2": level
             }
             cfg = {k: v for k, v in cfg.items() if v}
 
