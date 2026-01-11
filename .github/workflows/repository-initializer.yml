@@ -198,14 +198,6 @@ jobs:
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ env.ORG }}
 
-      - name: Copy registry into central
-        env:
-          REGISTRY_PATH: ${{ inputs.registry_path }}
-        run: |
-          set -euo pipefail
-          mkdir -p central/.github/registry
-          cp "caller/${REGISTRY_PATH}" "central/.github/registry/repos.yml"
-
       - name: Run initializer (one repo)
         working-directory: central
         env:
