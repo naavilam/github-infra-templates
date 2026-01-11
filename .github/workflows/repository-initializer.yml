@@ -68,16 +68,6 @@ jobs:
           echo "pwd                      = $(pwd)"
           echo "caller tree:"
           ls -la caller || true
-
-      - name: Guard – Registry content
-        env:
-          REGISTRY_PATH: ${{ inputs.registry_path }}
-        run: |
-          set -euo pipefail
-          echo "Registry path: caller/${REGISTRY_PATH}"
-          test -f "caller/${REGISTRY_PATH}"
-          echo "---- registry (head) ----"
-          sed -n '1,120p' "caller/${REGISTRY_PATH}"
     
       - name: Guard – App token visibility
         env:
