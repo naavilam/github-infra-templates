@@ -1,6 +1,7 @@
 name: Listener Update Website
 
 on:
+  workflow_call:
   workflow_dispatch:
 
 permissions:
