@@ -45,6 +45,31 @@ jobs:
           echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
           ls -la
 
+
+      - name: Export GH_TOKEN for rest of job (no leak)
+        shell: bash
+        run: |
+          set -euo pipefail
+          tok='${{ steps.app_token.outputs.token }}'
+          echo "mint: token length = ${#tok}"
+          [[ "${#tok}" -ge 20 ]]
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+
+      - name: Sanity check auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh auth status
+
+      # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
+      - name: Checkout templates
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.templates_repo }}
+          ref: ${{ inputs.templates_ref }}
+          path: templates
+
+
       - name: Debug templates HEAD (prove what you are using)
         run: |
           set -euo pipefail
@@ -69,29 +94,6 @@ jobs:
           echo
           echo "Registry file:"
           ls -la "templates/manager/manager_registry/${ORG}-registry.yml" || true
-
-      - name: Export GH_TOKEN for rest of job (no leak)
-        shell: bash
-        run: |
-          set -euo pipefail
-          tok='${{ steps.app_token.outputs.token }}'
-          echo "mint: token length = ${#tok}"
-          [[ "${#tok}" -ge 20 ]]
-          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
-
-      - name: Sanity check auth
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh auth status
-
-      # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
-      - name: Checkout templates
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.templates_repo }}
-          ref: ${{ inputs.templates_ref }}
-          path: templates
 
       # 2) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
