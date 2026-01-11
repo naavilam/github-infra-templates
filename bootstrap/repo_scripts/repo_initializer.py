@@ -181,7 +181,7 @@ def sync_bootstrap_into_main(repo_dir: Path) -> bool:
         return False
 
     run(["git", "add", "."], cwd=repo_dir)
-    run(["git", "commit", "-m", "Bootstrap discipline repo"], cwd=repo_dir)
+    run(["git", "commit", "-m", "Update files"], cwd=repo_dir)
     run(["git", "push", "-u", "origin", "main"], cwd=repo_dir)
     return True
 
