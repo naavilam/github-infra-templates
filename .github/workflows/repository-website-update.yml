@@ -308,20 +308,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml nbconvert nbformat jinja2
 
-      - name: Write website cfg (from matrix) (safe)
+      - name: Write website cfg (from matrix.cfg_b64) + print
         shell: bash
+        env:
+          CFG_B64: ${{ matrix.cfg_b64 }}
         run: |
           set -euo pipefail
           mkdir -p _cfg
+
           python - <<'PY'
-          import os, json, yaml
-          cfg = json.loads(os.environ.get("CFG_JSON","{}"))
-          with open("_cfg/website.yml","w",encoding="utf-8") as f:
+          import os, json, base64, yaml
+          b64 = (os.environ.get("CFG_B64") or "").strip()
+          if not b64:
+            raise SystemExit("::error::CFG_B64 is empty (matrix.cfg_b64 missing).")
+
+          raw = base64.urlsafe_b64decode(b64.encode("ascii")).decode("utf-8")
+          cfg = json.loads(raw)
+
+          with open("_cfg/website.yml", "w", encoding="utf-8") as f:
             yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+
           print("[ok] wrote _cfg/website.yml")
+          print("---- _cfg/website.yml ----")
+          print(open("_cfg/website.yml", "r", encoding="utf-8").read())
           PY
-        env:
-          CFG_JSON: ${{ toJson(matrix.cfg) }}
 
       - name: Checkout manager assets (hero)
         uses: actions/checkout@v4
