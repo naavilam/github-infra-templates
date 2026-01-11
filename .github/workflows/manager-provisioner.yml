@@ -38,6 +38,38 @@ jobs:
           private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
 
+      - name: Debug runner + workspace
+        run: |
+          set -euo pipefail
+          echo "PWD=$PWD"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          ls -la
+
+      - name: Debug templates HEAD (prove what you are using)
+        run: |
+          set -euo pipefail
+          echo "templates_repo=${{ inputs.templates_repo }}"
+          echo "templates_ref=${{ inputs.templates_ref }}"
+          cd templates
+          echo "HEAD:"
+          git rev-parse HEAD
+          git log -1 --oneline
+          echo "Recent changes (last commit files):"
+          git show --name-only --pretty="" HEAD | sed '/^$/d' || true
+
+      - name: Debug orgs.yml + registry chosen
+        env:
+          ORG: ${{ inputs.org }}
+        run: |
+          set -euo pipefail
+          echo "Looking for org in templates/orgs.yml"
+          ls -la templates/orgs.yml
+          echo "grep ORG name:"
+          grep -n "name: ${ORG}" -n templates/orgs.yml || true
+          echo
+          echo "Registry file:"
+          ls -la "templates/manager/manager_registry/${ORG}-registry.yml" || true
+
       - name: Export GH_TOKEN for rest of job (no leak)
         shell: bash
         run: |
