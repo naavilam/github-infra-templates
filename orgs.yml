@@ -1,6 +1,6 @@
 orgs:
   - name: high-energy-physics-research
-    ga_analitics: G-JLHP21NXVY
+    ga_analytics: G-JLHP21NXVY
     github_environment: 
     apps:
       dispatcher:
@@ -17,7 +17,7 @@ orgs:
         app_instalation: 103056770
 
   - name: academic-codex
-    ga_analitics: G-EM7FEY66C3
+    ga_analytics: G-EM7FEY66C3
     apps:
       dispatcher:
         app_id: 2558549
@@ -33,7 +33,7 @@ orgs:
         app_instalation: 103092835
 
   - name: quantum-computing-research
-    ga_analitics: G-43GLSN1HZQ
+    ga_analytics: G-43GLSN1HZQ
     apps:
       dispatcher:
         app_id: 2576394
@@ -49,7 +49,7 @@ orgs:
         app_instalation: 103054041
 
   - name: quantum-materials-simulation-research
-    ga_analitics: G-BS975FKGYZ
+    ga_analytics: G-BS975FKGYZ
     apps:
       dispatcher:
         app_id: 2576439
@@ -65,7 +65,7 @@ orgs:
         app_instalation: 103056460
 
   - name: topics-series-mathematics
-    ga_analitics: G-X9ELZLHCW6
+    ga_analytics: G-X9ELZLHCW6
     apps:
       dispatcher:
         app_id: 2632062
@@ -81,7 +81,7 @@ orgs:
         app_instalation: 103586902
 
   - name: topics-series-physics
-    ga_analitics: G-RSX3P7BLCS
+    ga_analytics: G-RSX3P7BLCS
     apps:
       dispatcher:
         app_id: 2631271
@@ -97,7 +97,7 @@ orgs:
         app_instalation: 103565036
 
   - name: topics-series-business
-    ga_analitics: G-6R2G5C398V
+    ga_analytics: G-6R2G5C398V
     apps:
       dispatcher:
         app_id: 2632097
@@ -113,7 +113,7 @@ orgs:
         app_instalation: 103587547
 
   - name: topics-series-investiments
-    ga_analitics: G-MWES6S69W6
+    ga_analytics: G-MWES6S69W6
     apps:
       dispatcher:
         app_id: 2632150
@@ -129,7 +129,7 @@ orgs:
         app_instalation: 103590021
 
   - name: topics-series-economics
-    ga_analitics: G-EYHJ8C0GLC
+    ga_analytics: G-EYHJ8C0GLC
     apps:
       dispatcher:
         app_id: 2632131
