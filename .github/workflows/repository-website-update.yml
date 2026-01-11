@@ -50,6 +50,18 @@ jobs:
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ github.repository_owner }}
     
+      - name: Checkout central (registry only)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          token: ${{ steps.app-token.outputs.token }}
+          path: central
+          sparse-checkout: |
+            org/org_registry
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
       - id: set
         name: Build matrix from CENTRAL org registry (with embedded cfg)
         shell: bash
