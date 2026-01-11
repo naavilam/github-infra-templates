@@ -1,0 +1,21 @@
+name: Listener Update Websites
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target repository or else all"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    uses: naavilam/github-infra-templates/.github/workflows/update-org-websites.yml@main
+    with:
+      repo: ${{ inputs.target }}
+    secrets:
+      PROVISIONER_APP_ID: ${{ secrets.PROVISIONER_APP_ID }}
+      PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
