@@ -297,7 +297,7 @@ jobs:
           sparse-checkout: |
             bootstrap/repo_website
             bootstrap/repo_scripts/build_site.py
-            img/portfolio
+            manager/manager_assets
           sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
@@ -332,18 +332,6 @@ jobs:
           print("---- _cfg/website.yml ----")
           print(open("_cfg/website.yml", "r", encoding="utf-8").read())
           PY
-
-      - name: Checkout manager assets (hero)
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/${{ github.repository_owner }}.github.io
-          token: ${{ steps.app-token.outputs.token }}
-          ref: main
-          path: manager
-          sparse-checkout: |
-            img/portfolio
-          sparse-checkout-cone-mode: false
-          fetch-depth: 1
 
       - name: Fetch hero image (from central templates)
         shell: bash
