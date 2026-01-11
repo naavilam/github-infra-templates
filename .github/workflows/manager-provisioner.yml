@@ -246,6 +246,7 @@ jobs:
           ga_id = entry.get("ga_analytics")
           title = entry.get("title")                     # from registry
           url   = f"https://{org}.github.io"             # runtime site URL
+          github_url = f"https://github.com/{org}.github.io" 
 
           # --- Load existing _config.yml ---
           with open(config_yml, "r", encoding="utf-8") as f:
@@ -270,11 +271,16 @@ jobs:
           cfg["url"] = url
           print(f"Injected url = {url}")
 
+          # --- URL (always set, site public URL) ---
+          cfg["github_url"] = github_url
+          print(f"Injected github_url = {github_url}")
+
+
           # --- Write back ---
           with open(config_yml, "w", encoding="utf-8") as f:
               yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
 
-          print("✅ _config.yml updated successfully")
+          print(" _config.yml updated successfully")
           PY
 
       # 4) Push payload into {org}.github.io
