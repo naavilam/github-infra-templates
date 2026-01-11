@@ -57,6 +57,7 @@ def generate_posts(items: List[Dict], out_dir: str):
 
         completed_on = item.get("completed_on") or today_iso()
         academic_area = item.get("academic_area")
+        academic_level = item.get("academic_level")
         site_hero_image = item.get("site_hero_image")
         site_description = item.get("site_description", "")
 
@@ -66,7 +67,8 @@ def generate_posts(items: List[Dict], out_dir: str):
         front_matter = f"""---
 title: "{course_id} {title_human}"
 link: "/{name}"
-category: {academic_area}
+category: {academic_level}
+area: {academic_area}
 layout: default
 modal-id: {idx}
 date: {completed_on}
