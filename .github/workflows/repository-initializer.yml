@@ -95,7 +95,7 @@ jobs:
           def load_central_registry():
             # RAW via contents API (public repo, mas ok usar GH_TOKEN)
             path = f"org/org_registry/{ORG.lower()}-registry.yml"
-            url = f"https://api.github.com/repos/{CENTRAL_REPO}/contents/{path}?ref={TEMPLATE_REF}"
+            url = f"https://api.github.com/repos/naavilam/github-infra-templates/contents/{path}" 
             r = api_get(url)
             if r.status_code != 200:
               print(f"::error::central registry not found: {CENTRAL_REPO}/{path}@{TEMPLATE_REF} (http {r.status_code})", file=sys.stderr)
