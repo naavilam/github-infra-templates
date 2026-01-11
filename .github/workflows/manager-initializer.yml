@@ -1,28 +1,12 @@
-name: Provision Manager Website + Secrets
+name: Provision Manager Website and Secrets
 
 on:
-  workflow_call:
-    inputs:
-      org:
-        description: "Target organization"
-        required: true
-        type: string
-      app_id:
-        description: "Provisioner app-id"
-        required: true
-        type: string  
-  
-    secrets:
-      PROVISIONER_PRIVATE_KEY_PEM:
-        required: true
-  
   workflow_dispatch:
     inputs:
       org:
         description: "Target organization"
         required: true
         type: string
-
 
 permissions:
   contents: read
@@ -52,9 +36,9 @@ jobs:
         uses: actions/create-github-app-token@v1
         with:
           # ROOT creds (repo-level)
-          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID || inputs.app_id}}
-          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM || secrets.PROVISIONER_PRIVATE_KEY_PEM }}
-          owner: ${{ inputs.org || github.event.inputs.org}}
+          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ inputs.org }}
 
       - name: Debug runner + workspace
         run: |
@@ -331,7 +315,6 @@ jobs:
 
       # 5) Set org secrets
       - name: Set org secrets (dispatcher + provisioner)
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
           ORG: ${{ inputs.org || github.event.inputs.org }}
           DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
