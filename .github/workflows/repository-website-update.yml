@@ -429,3 +429,26 @@ jobs:
           git add -A
           git commit -m "Update files"
           git push origin gh-pages
+
+      - name: Enable GitHub Pages (source: gh-pages /)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          REPO="${{ matrix.repo }}"
+
+          # tenta criar Pages (se ainda não existe)
+          # se já existir, cai no fallback de update
+          gh api -X POST "repos/${REPO}/pages" \
+            -H "Accept: application/vnd.github+json" \
+            -f "source[branch]=gh-pages" \
+            -f "source[path]=/" \
+          || gh api -X PUT "repos/${REPO}/pages" \
+            -H "Accept: application/vnd.github+json" \
+            -f "source[branch]=gh-pages" \
+            -f "source[path]=/"
+
+          # opcional: mostrar status
+          gh api "repos/${REPO}/pages" -q '{html_url: .html_url, status: .status, source: .source}'
