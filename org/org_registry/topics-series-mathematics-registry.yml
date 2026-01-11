@@ -1,10 +1,9 @@
 # ============================================================
 # Repository Registry
-# Source of truth (editorial only, flat schema)
+# Source of truth 
 # ============================================================
 
-org: 
-
+org: topics-series-mathematics
 repos:
 
   - name: MIT-18.755--Introduction-to-Lie-Groups
@@ -124,9 +123,6 @@ repos:
     completed_on: 2008-06-30
     readme_cta_text: "Access full course notes"
 
-
-
-
   - name: MIT-8.001--Applied-Geometric-Algebra
     id: MIT(8.001)
     title: "Applied Geometric Algebra"
@@ -140,7 +136,7 @@ repos:
     completed_on: 2009-11-30
     readme_cta_text: "Access full course notes"
 
-  - name: MIT-18.034--Honors-Differential-Equations--Spring-2009
+  - name: MIT-18.034--Honors-Differential-Equations
     id: MIT(18.034)
     title: "Honors Differential Equations"
     academic_level: undergraduate
@@ -179,7 +175,7 @@ repos:
     completed_on: 2012-06-30
     readme_cta_text: "Access full course notes"
 
-  - name: MIT-18.330--Introduction-to-Numerical-Analysis--Spring-2012
+  - name: MIT-18.330--Introduction-to-Numerical-Analysis
     id: MIT(18.330)
     title: "Introduction to Numerical Analysis"
     academic_level: undergraduate
@@ -205,32 +201,6 @@ repos:
     completed_on: 2012-11-30
     readme_cta_text: "Access full course notes"
 
-  - name: MIT-18.303--Learning-Partial-Differential-Equations--Fall-2014
-    id: MIT(18.303)
-    title: "Learning Partial Differential Equations"
-    academic_level: undergraduate
-    academic_area: Mathematics
-    academic_school: MIT OpenCourseWare
-    course_url: "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-fall-2014/"
-    site_hero_image: learning-partial-differential-equations.png
-    site_description: "Explores partial differential equations through classical methods and modern perspectives, emphasizing understanding of solutions."
-    status: completed
-    completed_on: 2014-06-30
-    readme_cta_text: "Access full course notes"
-
-  # - name: MIT-18.009--Learning-Differential-Equations
-  #   id: MIT(18.009)
-  #   title: "Learning Differential Equations"
-  #   academic_level: undergraduate
-  #   academic_area: Mathematics
-  #   academic_school: MIT OpenCourseWare
-  #   course_url: "https://ocw.mit.edu/courses/18-009-learn-differential-equations-up-close-fall-2015/"
-  #   site_hero_image: learning-differential-equations.png
-  #   site_description: "An intuitive, hands-on approach to differential equations emphasizing visualization, computation, and modeling."
-  #   status: completed
-  #   completed_on: 2015-06-30
-  #   readme_cta_text: "Access full course notes"
-
   - name: MIT-18.100A--Real-Analysis
     id: MIT(18.100A)
     title: "Real Analysis"
@@ -244,14 +214,10 @@ repos:
     completed_on: 2020-06-30
     readme_cta_text: "Access full course notes"
 
-
-
-
-
   - name: MIT-18.769--Topics-in-Lie-Theory
     id: MIT(18.769)
     title: "Topics in Lie Theory: Tensor Categories"
-    academic_level: undergraduate
+    academic_level: graduate
     academic_area: Mathematics
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-769-topics-in-lie-theory-tensor-categories-spring-2009/"
@@ -277,7 +243,7 @@ repos:
   - name: MIT-18.175--Theory-of-Probability
     id: MIT(18.175)
     title: "Theory of Probability"
-    academic_level: undergraduate
+    academic_level: graduate
     academic_area: Mathematics
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/"
@@ -290,7 +256,7 @@ repos:
   - name: MIT-18.745--Lie-Groups-and-Lie-Algebras-I
     id: MIT(18.745)
     title: "Lie Groups and Lie Algebras I"
-    academic_level: undergraduate
+    academic_level: graduate
     academic_area: Mathematics
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-745-lie-groups-and-lie-algebras-i-fall-2020/"
@@ -303,7 +269,7 @@ repos:
   - name: MIT-18.757--Representations-of-Lie-Groups
     id: MIT(18.757)
     title: "Representations of Lie Groups"
-    academic_level: undergraduate
+    academic_level: graduate
     academic_area: Mathematics
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-757-representations-of-lie-groups-fall-2023/"
