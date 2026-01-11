@@ -192,7 +192,7 @@ jobs:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
-          REG="$GITHUB_WORKSPACE/out/.github/registry/registry.yml"
+          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG}-registry.yml"
           OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
           SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
 
