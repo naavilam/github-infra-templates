@@ -49,7 +49,10 @@ def generate_posts(items: List[Dict], out_dir: str):
         return (date, name)
 
     items_sorted = sorted(items, key=sort_key)
-
+    def slug_repo(name: str) -> str:
+        s = (name or "").strip()
+        s = s.replace("(", "-").replace(")", "-")
+        return s
     for idx, item in enumerate(items_sorted, start=1):
         name = item["name"]
         course_id = item["id"]
@@ -63,10 +66,11 @@ def generate_posts(items: List[Dict], out_dir: str):
 
         filename = f"{completed_on}-{name}.markdown"
         filepath = os.path.join(out_dir, filename)
+        link = slug_repo(name)
 
         front_matter = f"""---
 title: "{course_id} {title_human}"
-link: "/{name}"
+link: "/{link}"
 category: {academic_level}
 area: {academic_area}
 layout: default
