@@ -196,8 +196,6 @@ jobs:
           print(len(m.get("include",[])))
           PY
           )" >> "$GITHUB_OUTPUT"
-        env:
-          MATRIX: ${{ steps.set.outputs.matrix }}
 
   apply:
     needs: plan
