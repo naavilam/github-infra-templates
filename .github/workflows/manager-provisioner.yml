@@ -162,21 +162,11 @@ jobs:
           ROOT="$PWD"
           OUT="$ROOT/out"
           rm -rf "$OUT"
-          mkdir -p "$OUT/.github/workflows" "$OUT/.github/registry" "$OUT/_posts"
+          mkdir -p "$OUT/.github/workflows" "$OUT/_posts"
 
           rsync -a --delete \
             "$ROOT/templates/manager/manager_website/" \
             "$OUT/"
-
-          REG="$ROOT/templates/org/org_registry/${ORG}-registry.yml"
-          if [[ ! -f "$REG" ]]; then
-            echo "Missing registry file: $REG" >&2
-            ls -la "$ROOT/templates/org/org_registry" >&2 || true
-            exit 1
-          fi
-
-          mkdir -p "$OUT/.github/registry"
-          cp "$REG" "$OUT/.github/registry/registry.yml"
 
           ASSETS_DIR="$ROOT/templates/manager/manager_assets/${ORG}"
           if [[ ! -d "$ASSETS_DIR" ]]; then
