@@ -94,7 +94,7 @@ jobs:
           grep -n "name: ${ORG}" -n templates/orgs.yml || true
           echo
           echo "Registry file:"
-          ls -la "templates/manager/manager_registry/${ORG}-registry.yml" || true
+          ls -la "templates/org/org_registry/${ORG}-registry.yml" || true
 
       # 2) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
@@ -168,10 +168,10 @@ jobs:
             "$ROOT/templates/manager/manager_website/" \
             "$OUT/"
 
-          REG="$ROOT/templates/manager/manager_registry/${ORG}-registry.yml"
+          REG="$ROOT/templates/org/org_registry/${ORG}-registry.yml"
           if [[ ! -f "$REG" ]]; then
             echo "Missing registry file: $REG" >&2
-            ls -la "$ROOT/templates/manager/manager_registry" >&2 || true
+            ls -la "$ROOT/templates/org/org_registry" >&2 || true
             exit 1
           fi
 
