@@ -22,14 +22,7 @@ on:
         description: "Target organization"
         required: true
         type: string
-      templates_repo:
-        description: "Templates repo (owner/name)"
-        required: false
-        default: "naavilam/github-infra-templates"
-      templates_ref:
-        description: "Branch/tag/sha in templates repo"
-        required: false
-        default: "main"
+
 
 permissions:
   contents: read
@@ -38,6 +31,11 @@ permissions:
 concurrency:
   group: manager
   cancel-in-progress: true
+
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+  MAX_PARALLEL: "10"
 
 jobs:
   provision:
@@ -85,16 +83,16 @@ jobs:
       - name: Checkout templates
         uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.templates_repo }}
-          ref: ${{ inputs.templates_ref }}
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
           path: templates
 
 
       - name: Debug templates HEAD (prove what you are using)
         run: |
           set -euo pipefail
-          echo "templates_repo=${{ inputs.templates_repo }}"
-          echo "templates_ref=${{ inputs.templates_ref }}"
+          echo "templates_repo=${{ env.CENTRAL_REPO }}"
+          echo "templates_ref=${{ env.TEMPLATE_REF }}"
           cd templates
           echo "HEAD:"
           git rev-parse HEAD
@@ -104,7 +102,7 @@ jobs:
 
       - name: Debug orgs.yml + registry chosen
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
           echo "Looking for org in templates/orgs.yml"
@@ -118,7 +116,7 @@ jobs:
       # 2) Create repo {org}.github.io if missing
       - name: Create {org}.github.io repo (if missing)
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
 
@@ -174,7 +172,7 @@ jobs:
       # 3) Build payload
       - name: Assemble website payload
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
 
@@ -214,7 +212,7 @@ jobs:
 
       - name: Generate _posts from registry (assembly_posts.py)
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
           REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG}-registry.yml"
@@ -229,14 +227,14 @@ jobs:
     
       - name: Write site URL to README.md
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
           echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
           
       - name: Inject GA tracking id + title + url into out/_config.yml
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
 
@@ -308,7 +306,7 @@ jobs:
       # 4) Push payload into {org}.github.io
       - name: Push content to {org}.github.io
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
           REPO="${ORG}.github.io"
@@ -334,7 +332,7 @@ jobs:
       # 5) Set org secrets
       - name: Set org secrets (dispatcher + provisioner)
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
           DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
           DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
           PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
@@ -355,7 +353,7 @@ jobs:
       # 6) Set repo secrets (auditor only)
       - name: Set auditor secrets on {org}.github.io
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
           AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
           AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
         run: |
@@ -371,7 +369,7 @@ jobs:
       # 7) Enable Pages (optional)
       - name: Enable GitHub Pages (optional)
         env:
-          ORG: ${{ inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
           REPO="${ORG}.github.io"
