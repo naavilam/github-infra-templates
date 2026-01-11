@@ -430,7 +430,7 @@ jobs:
           git commit -m "Update files"
           git push origin gh-pages
 
-      - name: Enable GitHub Pages (source: gh-pages /)
+      - name: Enable GitHub Pages (source gh-pages /)
         shell: bash
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
