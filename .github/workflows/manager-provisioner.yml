@@ -52,8 +52,8 @@ jobs:
         uses: actions/create-github-app-token@v1
         with:
           # ROOT creds (repo-level)
-          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
-          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID || github.event.secrets.PROVISIONER_APP_ID}}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM || github.event.secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ inputs.org }}
 
       - name: Debug runner + workspace
