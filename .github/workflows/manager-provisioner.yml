@@ -253,7 +253,7 @@ jobs:
           ga_id = entry.get("ga_analytics")
           title = entry.get("title")                     # from registry
           url   = f"https://{org}.github.io"             # runtime site URL
-          github_url = f"https://github.com/{org}.github.io" 
+          github_url = f"https://github.com/{org}/{org}.github.io" 
 
           # --- Load existing _config.yml ---
           with open(config_yml, "r", encoding="utf-8") as f:
