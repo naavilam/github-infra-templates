@@ -183,6 +183,13 @@ jobs:
           print(f"[ok] selected={len(include)} from {reg_path}")
           PY
 
+      - name: Debug plan outputs
+        shell: bash
+        run: |
+          echo "count (from step.set.outputs.count) = '${{ steps.set.outputs.count }}'"
+          echo "matrix (from step.set.outputs.matrix) ="
+          echo '${{ steps.set.outputs.matrix }}'
+
   apply:
     needs: plan
     runs-on: ubuntu-latest
