@@ -3,9 +3,9 @@ name: Provision Manager Website + Secrets
 on:
   workflow_call:
     inputs:
-    org:
-      description: "Target organization"
-      required: true
+      org:
+        description: "Target organization"
+        required: true
   workflow_dispatch:
     inputs:
       org:
