@@ -432,10 +432,10 @@ def render_references_html(refs: list[dict]) -> str:
         note = html.escape(str(r.get("note", "")).strip())
         url = str(r.get("url", "")).strip()
 
-        # monta linha “bonita” e mono
+        # título vira link se tiver url
         if url:
             safe_url = html.escape(url, quote=True)
-            title_html = f"<a href='{safe_url}' target='_blank' rel='noreferrer'><strong>{title}</strong></a>"
+            title_html = f"<a href='{safe_url}' target='_blank' rel='noopener noreferrer'><strong>{title}</strong></a>"
         else:
             title_html = f"<strong>{title}</strong>"
 
@@ -446,6 +446,8 @@ def render_references_html(refs: list[dict]) -> str:
             parts.append(f"<div class='ref-meta'>{meta}</div>")
         if note:
             parts.append(f"<div class='ref-note'><em>{note}</em></div>")
+
+        items.append("<li class='ref-item'>" + "\n".join(parts) + "</li>")
 
     return "<ul class='ref-list'>\n" + "\n".join(items) + "\n</ul>"
     
