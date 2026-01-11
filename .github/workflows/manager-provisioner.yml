@@ -102,23 +102,55 @@ jobs:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
+
+          : "${ORG:?ORG is required}"
+
           REPO="${ORG}.github.io"
           FULL="${ORG}/${REPO}"
 
-          if gh api "repos/${ORG}/${REPO}" >/dev/null 2>&1; then
-            echo "Repo already exists: ${ORG}/${REPO}"
+          echo "Target repo: ${FULL}"
+
+          # 1) Create repo if missing
+          if gh api "repos/${FULL}" >/dev/null 2>&1; then
+            echo "Repo already exists: ${FULL}"
           else
-            echo "Creating repo: ${ORG}/${REPO}"
-            gh api "orgs/${ORG}/repos" -X POST -f name="$REPO" -f private=false -f description="Org website for ${ORG}" >/dev/null
+            echo "Creating repo: ${FULL}"
+            gh api "orgs/${ORG}/repos" -X POST \
+              -f name="$REPO" \
+              -f private=false \
+              -f description="Org website for ${ORG}" >/dev/null
           fi
 
-          # Enforce PUBLIC (covers existing repos created as private)
-          echo "Ensuring repo is PUBLIC: ${FULL}"
-          gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null
+          # 2) Wait until GitHub finishes repo provisioning
+          echo "Waiting for repo to be fully provisioned: ${FULL}"
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
+              echo " Repo reachable (attempt $i/10)"
+              break
+            fi
+            echo "…repo not reachable yet (attempt $i/10). Waiting..."
+            sleep $((i * 2))
+          done
 
-          # Optional: show current visibility (no secrets)
-          VIS=$(gh api "repos/${FULL}" -q '.private')
-          echo "Repo private? ${VIS}"
+          # 3) Enforce PUBLIC (handles repos created as private by org defaults/policies)
+          echo "Ensuring repo is PUBLIC: ${FULL}"
+          for i in 1 2 3 4 5 6; do
+            if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
+              echo " Repo visibility set to public"
+              break
+            fi
+
+            echo "…cannot update visibility yet (attempt $i/6). Likely previous repo operation still in progress. Waiting..."
+            sleep $((i * 3))
+          done
+
+          # 4) Verify
+          is_private="$(gh api "repos/${FULL}" -q '.private')"
+          echo "Repo private? ${is_private}"
+          if [[ "$is_private" == "true" ]]; then
+            echo " Repo still private after retries: ${FULL}" >&2
+            exit 1
+          fi
 
       # 3) Build payload
       - name: Assemble website payload
@@ -299,7 +331,7 @@ jobs:
         run: |
           set -euo pipefail
           TARGET="${ORG}/${ORG}.github.io"
-          
+
           # --- REPO VARIABLES (non-sensitive) ---
           echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
 
