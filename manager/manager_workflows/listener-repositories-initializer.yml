@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   run:
-    uses: naavilam/github-infra-templates/.github/workflows/repository-initializer.yml@main
+    uses: naavilam/github-infra-templates/.github/workflows/repositories-initializer.yml@main
     with:
       repo: ${{ inputs.target }}
     secrets:
