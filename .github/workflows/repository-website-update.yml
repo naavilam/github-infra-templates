@@ -62,6 +62,15 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "PWD=$(pwd)"
+          echo "REPO_FILTER='${REPO_FILTER}'"
+          echo "REGISTRY_PATH='${REGISTRY_PATH}'"
+          ls -la
+          echo "---- find registry candidates ----"
+          find . -maxdepth 4 -type f \( -name "*registry*.yml" -o -name "*repos*.yml" \) -print
+          echo "---- show registry file (if exists) ----"
+          test -f "${REGISTRY_PATH}" && sed -n '1,120p' "${REGISTRY_PATH}" || echo "registry file not found at REGISTRY_PATH"
+         
           python - <<'PY'
           import os, sys, json, base64, re
           import requests, yaml
