@@ -1,4 +1,4 @@
-name: Listener Repository Initializer
+name: Listener Repositories Update README.md
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   run:
-    uses: naavilam/github-infra-templates/.github/workflows/repository-initializer.yml@main
+    uses: naavilam/github-infra-templates/.github/workflows/repositories-readme-update.yml@main
     with:
       repo: ${{ inputs.target }}
     secrets:
