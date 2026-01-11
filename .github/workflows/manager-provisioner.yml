@@ -103,6 +103,7 @@ jobs:
         run: |
           set -euo pipefail
           REPO="${ORG}.github.io"
+          FULL="${ORG}/${REPO}"
 
           if gh api "repos/${ORG}/${REPO}" >/dev/null 2>&1; then
             echo "Repo already exists: ${ORG}/${REPO}"
