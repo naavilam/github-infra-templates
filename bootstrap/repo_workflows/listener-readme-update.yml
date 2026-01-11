@@ -1,9 +1,6 @@
-name: Listener Update Websites
+name: Listener Update README.md
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:

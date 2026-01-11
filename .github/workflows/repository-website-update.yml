@@ -51,111 +51,157 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - id: set
-        name: Build matrix (local registry OR manager registry)
+        name: Build matrix from CENTRAL org registry (with embedded cfg)
+        shell: bash
         env:
+          ORG: ${{ env.ORG }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO_FILTER: ${{ inputs.repo }}
-          OWNER: ${{ github.repository_owner }}
+          CENTRAL_REPO: ${{ env.CENTRAL_REPO }}  
+          CENTRAL_REF:  ${{ env.TEMPLATE_REF }}
         run: |
-          python - <<'PY'
-          import os, sys, json, base64
-          from pathlib import Path
-          import yaml, requests
+          set -euo pipefail
+
+          MATRIX="$(python - <<'PY'
+          import os, sys, json, base64, requests, yaml
+          from urllib.parse import quote
+
+          org = (os.environ.get("ORG") or "").strip()
+          if not org:
+            print("::error::ORG env is required", file=sys.stderr)
+            sys.exit(2)
+
+          org_lc = org.lower()
 
           gh_token = os.environ["GH_TOKEN"]
           repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
-          owner = (os.environ.get("OWNER") or "").strip()  # org atual
+          central_repo = (os.environ.get("CENTRAL_REPO") or "").strip()
+          central_ref  = (os.environ.get("CENTRAL_REF")  or "main").strip()
 
-          CENTRAL_REPO = "naavilam/github-infra-templates"
-          CENTRAL_REF  = "main"
-          CENTRAL_PATH = f"org/org_registry/{owner}-registry.yml"
-
-          def api_get(url: str) -> requests.Response:
-            return requests.get(
-              url,
-              headers={
-                "Authorization": f"Bearer {gh_token}",
-                "Accept": "application/vnd.github+json",
-                "X-GitHub-Api-Version": "2022-11-28",
-              },
-              timeout=30,
-            )
-
-          def load_registry_from_central() -> dict:
-            url = f"https://api.github.com/repos/{CENTRAL_REPO}/contents/{CENTRAL_PATH}?ref={CENTRAL_REF}"
-            r = api_get(url)
-            if r.status_code != 200:
-              print(f"::error::cannot fetch registry from {CENTRAL_REPO}:{CENTRAL_PATH} (http {r.status_code})", file=sys.stderr)
-              sys.exit(2)
-
-            j = r.json()
-            content = j.get("content", "")
-            if not content:
-              print(f"::error::empty registry content from {CENTRAL_REPO}:{CENTRAL_PATH}", file=sys.stderr)
-              sys.exit(2)
-
-            raw = base64.b64decode(content.encode("utf-8"))
-            return yaml.safe_load(raw.decode("utf-8")) or {}
-
-          data = load_registry_from_central()
-
-          repos = data.get("repos", [])
-          if not isinstance(repos, list):
-            print("::error::registry.repos must be a list", file=sys.stderr)
+          if not central_repo:
+            print("::error::CENTRAL_REPO env is required", file=sys.stderr)
             sys.exit(2)
+
+          # novo caminho do registry por org
+          registry_path = f"org/org_registry/{org_lc}-registry.yml"
+
+          s = requests.Session()
+          s.headers.update({
+            "Authorization": f"Bearer {gh_token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          })
+
+          # baixa via contents API
+          url = f"https://api.github.com/repos/{central_repo}/contents/{quote(registry_path)}?ref={quote(central_ref)}"
+          r = s.get(url, timeout=30)
+          if r.status_code != 200:
+            print(f"::error::cannot fetch registry from {central_repo}:{registry_path}@{central_ref} (http {r.status_code})", file=sys.stderr)
+            try:
+              print(r.text, file=sys.stderr)
+            except Exception:
+              pass
+            sys.exit(2)
+
+          j = r.json()
+          content_b64 = j.get("content","")
+          if not content_b64:
+            print(f"::error::registry content empty: {central_repo}:{registry_path}@{central_ref}", file=sys.stderr)
+            sys.exit(2)
+
+          raw = base64.b64decode(content_b64.encode("utf-8")).decode("utf-8")
+          data = yaml.safe_load(raw) or {}
+
+          # novo schema: repos:
+          items = data.get("repos", [])
+          if not isinstance(items, list):
+            items = []
 
           def norm(s: str) -> str:
             return (s or "").strip().lower()
 
-          # alvo:
-          # - se inputs.repo veio: filtra por nome (aceita "org/name" mas ignora org)
-          # - se vazio: pega todos
-          target_name = ""
+          # filtro aceita "name" OU "org/name"
+          target_full = None
+          target_name = None
           if repo_filter:
-            target_name = repo_filter.split("/")[-1].strip()
+            if "/" in repo_filter:
+              target_full = norm(repo_filter)
+            else:
+              target_name = norm(repo_filter)
 
-          inc = []
-          for it in repos:
+          include = []
+
+          for it in items:
             if not isinstance(it, dict):
               continue
 
-            name = (it.get("name") or "").strip()
+            name = str(it.get("name","")).strip()
             if not name:
               continue
 
-            if target_name and norm(name) != norm(target_name):
+            # org default = org do arquivo (ou do env)
+            org_item = str(it.get("org","")).strip() or org_lc
+            full = f"{org_item}/{name}"
+
+            # aplica filtro
+            if target_full and norm(full) != target_full:
+              continue
+            if target_name and norm(name) != target_name:
               continue
 
-            full = f"{owner}/{name}"
+            # placeholders mínimos pro README/site builder
+            course_id = (str(it.get("id") or "").strip()
+                        or (name.split("-",1)[0] if "-" in name else name))
+
+            title = str(it.get("title") or "").strip()
+            if not title:
+              rest = name.split("-", 1)[1] if "-" in name else name
+              title = rest.replace("-", " ").strip()
+
+            site_url = str(it.get("site_url") or "").strip()
+            if not site_url:
+              site_url = f"https://{org_item}.github.io/{name}"
+
+            area  = str(it.get("academic_area") or "").strip()
+            level = str(it.get("academic_level") or "").strip()
+            if level:
+              lvl = level.lower().strip()
+              if lvl == "undergraduate": level = "Undergraduate Course"
+              elif lvl == "graduate": level = "Graduate Course"
+              else: level = level[:1].upper() + level[1:]
+
+            tagline = str(it.get("readme_tagline") or "").strip()
+            if not tagline:
+              parts = [p for p in [area, level] if p]
+              tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
 
             cfg = {
-              "TITLE_1":     str(it.get("id") or "").strip(),
-              "TITLE_2":     str(it.get("title") or "").strip(),
-              "SUBTITLE_1":  str(it.get("academic_area") or "").strip(),
-              "SUBTITLE_2":  str(it.get("academic_level") or "").strip(),
-              "ABOUT":       str(it.get("site_description") or "").strip(),
-              "CTA_TEXT":    str(it.get("readme_cta_text") or "").strip(),
-              "TAGLINE":     str(it.get("readme_tagline") or "").strip(),
-              "THEME":       str(it.get("readme_theme") or "").strip(),
-              "HERO_FILE":   str(it.get("site_hero_image") or "").strip(),
-              "GITHUB_LINK": f"https://github.com/{full}",
-              "CENTRAL_REPO": f"https://{owner}.github.io",
+              "TITLE_1": course_id,
+              "TITLE_2": title,
+              "REPO_TAGLINE": tagline,
+              "CTA_TEXT": str((it.get("readme_cta_text") or "Access the full course website")).strip(),
+              "THEME": str((it.get("readme_theme") or "coding")).strip(),
+              "SITE_URL": site_url,
+              "ASSETS_DIR": str((it.get("readme_assets_dir") or ".github/readme")).strip(),
+              "HERO_FILE": str((it.get("site_hero_image") or "")).strip(),
             }
-            cfg = {k: v for k, v in cfg.items() if v}
 
-            inc.append({"repo": full, "cfg": cfg})
+            payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+            cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
 
-          matrix = {"include": inc}
+            include.append({"repo": full, "cfg_b64": cfg_b64})
 
-          # debug log visível no job
-          print(json.dumps(matrix, ensure_ascii=False))
-
-          # outputs
-          out_path = os.environ["GITHUB_OUTPUT"]
-          with open(out_path, "a", encoding="utf-8") as f:
-            f.write(f"count={len(inc)}\n")
-            f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
+          print(json.dumps({"include": include}, ensure_ascii=False))
           PY
+          )"
+
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          echo "count=$(python - <<'PY'
+          import os, json
+          m = json.loads(os.environ["MATRIX"])
+          print(len(m.get("include",[])))
+          PY
+          )" >> "$GITHUB_OUTPUT"
 
   apply:
     needs: plan
