@@ -180,41 +180,69 @@ jobs:
             --registry "$REG" \
             --out-posts "$OUTPOSTS"
 
-      - name: Inject GA tracking id into out/_config.yml
+      - name: Inject GA tracking id + title + url into out/_config.yml
         env:
           ORG: ${{ inputs.org }}
         run: |
           set -euo pipefail
+
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
           python - <<'PY'
-          import os, yaml
+          import os, yaml, sys
 
           org = os.environ["ORG"]
-          ws = os.environ["GITHUB_WORKSPACE"]
+          ws  = os.environ["GITHUB_WORKSPACE"]
 
-          orgs_yml = os.path.join(ws, "templates", "orgs.yml")
+          orgs_yml   = os.path.join(ws, "templates", "orgs.yml")
           config_yml = os.path.join(ws, "out", "_config.yml")
 
+          # --- Load orgs.yml ---
           with open(orgs_yml, "r", encoding="utf-8") as f:
               data = yaml.safe_load(f) or {}
 
-          entry = next((x for x in (data.get("orgs") or []) if x.get("name") == org), None)
+          entry = next(
+              (x for x in (data.get("orgs") or []) if x.get("name") == org),
+              None
+          )
+
           if not entry:
               raise SystemExit(f"ORG not found in orgs.yml: {org}")
 
+          # --- Values to inject ---
           ga_id = entry.get("ga_analytics")
+          title = entry.get("title")                     # from registry
+          url   = f"https://{org}.github.io"             # runtime site URL
 
+          # --- Load existing _config.yml ---
           with open(config_yml, "r", encoding="utf-8") as f:
               cfg = yaml.safe_load(f) or {}
 
+          # --- GA tracking id ---
           if ga_id:
               cfg["ga_tracking_id"] = ga_id
               print(f"Injected ga_tracking_id = {ga_id}")
           else:
               cfg.pop("ga_tracking_id", None)
-              print("No GA tracking id found; ga_tracking_id not set")
+              print("No GA tracking id found; ga_tracking_id removed")
 
+          # --- Title ---
+          if title:
+              cfg["title"] = title
+              print(f"Injected title = {title}")
+          else:
+              print("No title found in orgs.yml; keeping existing title")
+
+          # --- URL (always set, site public URL) ---
+          cfg["url"] = url
+          print(f"Injected url = {url}")
+
+          # --- Write back ---
           with open(config_yml, "w", encoding="utf-8") as f:
               yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
+
+          print("✅ _config.yml updated successfully")
           PY
 
       # 4) Push payload into {org}.github.io
