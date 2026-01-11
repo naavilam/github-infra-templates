@@ -31,7 +31,7 @@ concurrency:
 jobs:
   provision:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.org }}
+    environment: ${{ inputs.org || github.event.inputs.org }}
 
     steps:
       - name: Ensure gh is available
