@@ -6,6 +6,7 @@ on:
       org:
         description: "Target organization"
         required: true
+        default: "topics-series-physics"
       templates_repo:
         description: "Templates repo (owner/name)"
         required: false
