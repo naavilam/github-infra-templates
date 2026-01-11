@@ -51,23 +51,32 @@
     </section>
 
     <!-- ABOUT -->
-    <section id="about" class="section">
-      <h2>About</h2>
-      <div class="card grid">
-        <div>
-          {{ ABOUT }}
-          {{COURSE_URL}}
+    <div class="about-card">
 
-          <p class="muted">Last Updated at {{TIMESTAMP}} • Total number of notebooks in this course: <span
-              id="nbcount">{{NBCOUNT}}</span></p>
-          <p>
-            <strong>Contact:</strong><br>
-            nara.moraes@usp.br ·
-            <a href="{{ GITHUB_LINK }}#readme">GitHub</a>
-          </p>
-        </div>
-      </div>
-    </section>
+      <p class="about-text">
+        {{ ABOUT }}
+      </p>
+
+      {% if COURSE_URL %}
+      <p class="about-link">
+        <a href="{{ COURSE_URL }}" target="_blank" rel="noopener">
+          → Lecture Notes
+        </a>
+      </p>
+      {% endif %}
+
+      <p class="muted">
+        Last Updated at {{TIMESTAMP}} • Total number of notebooks in this course:
+        <span id="nbcount">{{NBCOUNT}}</span>
+      </p>
+
+      <p class="about-contact">
+        <strong>Contact:</strong><br>
+        nara.moraes@usp.br ·
+        <a href="{{ GITHUB_LINK }}#readme">GitHub</a>
+      </p>
+
+    </div>
 
     <!-- BIO -->
     <section class="section">
