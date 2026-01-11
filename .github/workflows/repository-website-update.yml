@@ -62,7 +62,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          reg_path = f"org/org_registry/{org_lc}-registry.yml"
+          org_lc="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          reg_path="org/org_registry/${org_lc}-registry.yml"
           echo "PWD=$(pwd)"
           echo "REPO_FILTER='${REPO_FILTER}'"
           echo "REGISTRY_PATH='${reg_path}'"
