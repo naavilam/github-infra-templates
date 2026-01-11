@@ -243,3 +243,87 @@ repos:
     status: completed
     completed_on: 2020-06-30
     readme_cta_text: "Access full course notes"
+
+
+
+
+
+
+
+  - name: MIT-18.755--Introduction-to-Lie-Groups
+    id: MIT(18.755)
+    title: "Introduction to Lie Groups"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-755-introduction-to-lie-groups-fall-2004/"
+    site_hero_image: introduction-to-lie-groups.png
+    site_description: "Introduces the basic theory of Lie groups and Lie algebras, with emphasis on examples and structure theory."
+    status: completed
+    completed_on: 2004-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.769--Topics-in-Lie-Theory
+    id: MIT(18.769)
+    title: "Topics in Lie Theory: Tensor Categories"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-769-topics-in-lie-theory-tensor-categories-spring-2009/"
+    site_hero_image: topics-in-lie-theory.png
+    site_description: "Explores advanced topics in Lie theory, focusing on tensor categories and their applications in representation theory."
+    status: completed
+    completed_on: 2009-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.712--Introduction-to-Representation-Theory
+    id: MIT(18.712)
+    title: "Introduction to Representation Theory"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-712-introduction-to-representation-theory-fall-2010/"
+    site_hero_image: introduction-to-representation-theory.png
+    site_description: "Introduces the representation theory of finite groups and Lie algebras, emphasizing examples and structural results."
+    status: completed
+    completed_on: 2010-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.175--Theory-of-Probability
+    id: MIT(18.175)
+    title: "Theory of Probability"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/"
+    site_hero_image: theory-of-probability.png
+    site_description: "A rigorous introduction to probability theory, including random variables, distributions, expectation, and convergence."
+    status: completed
+    completed_on: 2014-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.745--Lie-Groups-and-Lie-Algebras-I
+    id: MIT(18.745)
+    title: "Lie Groups and Lie Algebras I"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-745-lie-groups-and-lie-algebras-i-fall-2020/"
+    site_hero_image: lie-groups-and-lie-algebras.png
+    site_description: "Studies Lie groups and Lie algebras, including structure theory, representations, and connections to geometry."
+    status: completed
+    completed_on: 2020-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.757--Representations-of-Lie-Groups
+    id: MIT(18.757)
+    title: "Representations of Lie Groups"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-757-representations-of-lie-groups-fall-2023/"
+    site_hero_image: representations-of-lie-groups.png
+    site_description: "An advanced course on representation theory of Lie groups, including highest weight theory and unitary representations."
+    status: completed
+    completed_on: 2023-06-30
+    readme_cta_text: "Access full course notes"

@@ -251,28 +251,42 @@ jobs:
           path: src
           fetch-depth: 1
 
+      # 2) TARGET: clona repo (qualquer branch existente) para poder criar gh-pages se precisar
+      - name: Checkout publish repo workspace (default/main)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ steps.app-token.outputs.token }}
+          ref: main
+          path: target
+          fetch-depth: 0
+
       - name: Ensure gh-pages branch exists (if first publish)
         shell: bash
         run: |
           set -euo pipefail
           cd target
-          git fetch origin gh-pages || true
-          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+
+          # identidade pro commit inicial
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin --prune
+
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            echo "[ok] gh-pages exists on remote"
             git checkout -B gh-pages origin/gh-pages
           else
+            echo "[create] gh-pages does not exist; creating orphan branch and pushing initial commit"
             git checkout --orphan gh-pages
             git rm -rf . >/dev/null 2>&1 || true
+
+            # commit vazio só pra branch existir no remoto
+            touch .nojekyll
+            git add .nojekyll
+            git commit -m "Initialize gh-pages"
+            git push -u origin gh-pages
           fi
-          
-      # 2) PUBLICAÇÃO (gh-pages)
-      - name: Checkout publish repo (gh-pages)
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.repo }}
-          token: ${{ steps.app-token.outputs.token }}
-          ref: gh-pages
-          path: target
-          fetch-depth: 0
 
       - name: Checkout central templates + scripts
         uses: actions/checkout@v4
