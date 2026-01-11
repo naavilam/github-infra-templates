@@ -192,7 +192,10 @@ def sync_bootstrap_into_main(repo_dir: Path) -> bool:
 
 def process_repo(entry: Dict) -> None:
     org = (entry.get("org") or "").strip()
-    repo = (entry.get("name") or "").strip()
+    
+    raw_repo = (entry.get("name") or "").strip()
+    repo = normalize_repo_name(raw_repo)
+
     desc = (entry.get("description") or entry.get("title") or "").strip()
     private = bool(entry.get("private", False))
     full = f"{org}/{repo}"
@@ -251,6 +254,18 @@ def wait_repo_ready(org: str, repo: str, attempts: int = 12) -> None:
         time.sleep(min(2 * i, 10))
 
     raise RuntimeError(f"repo git endpoint still 404 after retries: {org}/{repo}")
+
+import re
+
+def normalize_repo_name(name: str) -> str:
+    """
+    Replica o slug que o GitHub gera para nomes com caracteres especiais.
+    Ex:
+      MIT(8.20)-Intro -> MIT-8-20--Intro
+    """
+    s = name.strip()
+    s = s.replace("(", "-").replace(")", "-")
+    return s
 
 def main() -> None:
     if not REGISTRY_FILE.exists():
