@@ -123,3 +123,123 @@ repos:
     status: completed
     completed_on: 2008-06-30
     readme_cta_text: "Access full course notes"
+
+
+
+
+  - name: MIT-8.001--Applied-Geometric-Algebra
+    id: MIT(8.001)
+    title: "Applied Geometric Algebra"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/8-001-applied-geometric-algebra-spring-2009/"
+    site_hero_image: applied-geometric-algebra.png
+    site_description: "Introduces geometric algebra as a unified mathematical language for geometry, physics, and engineering applications."
+    status: completed
+    completed_on: 2009-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.034--Honors-Differential-Equations--Spring-2009
+    id: MIT(18.034)
+    title: "Honors Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-034-honors-differential-equations-spring-2009/"
+    site_hero_image: honors-differential-equations.png
+    site_description: "Covers ordinary differential equations with an emphasis on theory, including existence and uniqueness theorems and qualitative behavior of solutions."
+    status: completed
+    completed_on: 2009-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.100B--Analysis-I
+    id: MIT(18.100B)
+    title: "Analysis I"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-100b-analysis-i-fall-2010/"
+    site_hero_image: analysis-i2010.png
+    site_description: "Introduces rigorous real analysis, covering limits, continuity, differentiation, and integration with proofs."
+    status: completed
+    completed_on: 2010-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.100A--Introduction-to-Analysis
+    id: MIT(18.100A)
+    title: "Introduction to Analysis"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-100a-introduction-to-analysis-fall-2012/"
+    site_hero_image: introduction-to-analysis.png
+    site_description: "A first course in rigorous real analysis focusing on proofs, sequences, limits, continuity, and differentiation."
+    status: completed
+    completed_on: 2012-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.330--Introduction-to-Numerical-Analysis--Spring-2012
+    id: MIT(18.330)
+    title: "Introduction to Numerical Analysis"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/"
+    site_hero_image: introduction-to-numerical-analysis2012.png
+    site_description: "Covers numerical methods for approximation, integration, differential equations, and linear algebra with an emphasis on analysis and implementation."
+    status: completed
+    completed_on: 2012-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.781--Theory-of-Numbers
+    id: MIT(18.781)
+    title: "Theory of Numbers"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-781-theory-of-numbers-spring-2012/"
+    site_hero_image: theory-of-numbers.png
+    site_description: "Introduces elementary and analytic number theory, including divisibility, primes, congruences, and arithmetic functions."
+    status: completed
+    completed_on: 2012-11-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.303--Learning-Partial-Differential-Equations--Fall-2014
+    id: MIT(18.303)
+    title: "Learning Partial Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-fall-2014/"
+    site_hero_image: learning-partial-differential-equations.png
+    site_description: "Explores partial differential equations through classical methods and modern perspectives, emphasizing understanding of solutions."
+    status: completed
+    completed_on: 2014-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.009--Learning-Differential-Equations
+    id: MIT(18.009)
+    title: "Learning Differential Equations"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-009-learn-differential-equations-up-close-fall-2015/"
+    site_hero_image: learning-differential-equations.png
+    site_description: "An intuitive, hands-on approach to differential equations emphasizing visualization, computation, and modeling."
+    status: completed
+    completed_on: 2015-06-30
+    readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.100A--Real-Analysis
+    id: MIT(18.100A)
+    title: "Real Analysis"
+    academic_level: undergraduate
+    academic_area: Mathematics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/"
+    site_hero_image: real-analysis.png
+    site_description: "A rigorous course in real analysis covering sequences, series, continuity, differentiation, and integration with proofs."
+    status: completed
+    completed_on: 2020-06-30
+    readme_cta_text: "Access full course notes"

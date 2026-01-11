@@ -251,16 +251,6 @@ jobs:
           path: src
           fetch-depth: 1
 
-      # 2) PUBLICAÇÃO (gh-pages)
-      - name: Checkout publish repo (gh-pages)
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.repo }}
-          token: ${{ steps.app-token.outputs.token }}
-          ref: gh-pages
-          path: target
-          fetch-depth: 0
-
       - name: Ensure gh-pages branch exists (if first publish)
         shell: bash
         run: |
@@ -273,6 +263,16 @@ jobs:
             git checkout --orphan gh-pages
             git rm -rf . >/dev/null 2>&1 || true
           fi
+          
+      # 2) PUBLICAÇÃO (gh-pages)
+      - name: Checkout publish repo (gh-pages)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ steps.app-token.outputs.token }}
+          ref: gh-pages
+          path: target
+          fetch-depth: 0
 
       - name: Checkout central templates + scripts
         uses: actions/checkout@v4
