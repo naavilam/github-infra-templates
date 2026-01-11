@@ -331,6 +331,7 @@ jobs:
 
       # 5) Set org secrets
       - name: Set org secrets (dispatcher + provisioner)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
           ORG: ${{ inputs.org || github.event.inputs.org }}
           DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
