@@ -141,3 +141,12 @@ section.section a:hover {
 .about-contact {
   margin-top: 12px;
 }
+
+.about-quote {
+  margin: 0 0 12px 0;
+  padding-left: 16px;
+  border-left: 3px solid rgba(125, 211, 252, 0.9);
+  color: #e6e9ef;
+  font-style: italic;
+  line-height: 1.6;
+}
