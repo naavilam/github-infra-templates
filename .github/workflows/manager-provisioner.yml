@@ -324,12 +324,12 @@ jobs:
           set -euo pipefail
 
           # --- ORG VARIABLES (non-sensitive) ---
-          echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG"
-          echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG"
+          echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
+          echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
 
           # --- ORG SECRETS (sensitive) ---
-          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG"
-          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG"
+          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility all
+          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility all
 
       # 6) Set repo secrets (auditor only)
       - name: Set auditor secrets on {org}.github.io
