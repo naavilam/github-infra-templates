@@ -17,6 +17,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: readme
+  cancel-in-progress: true
+
 env:
   CENTRAL_REPO: naavilam/github-infra-templates
   TEMPLATE_REF: main

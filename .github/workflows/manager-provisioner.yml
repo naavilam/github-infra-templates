@@ -20,6 +20,10 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: manager
+  cancel-in-progress: true
+
 jobs:
   provision:
     runs-on: ubuntu-latest
