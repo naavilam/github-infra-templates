@@ -328,6 +328,8 @@ jobs:
           set -euo pipefail
 
           # --- ORG VARIABLES (non-sensitive) ---
+          echo "$ORG"  | gh variable set ORG  --org "$ORG" --visibility all
+          
           echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
           echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
 
