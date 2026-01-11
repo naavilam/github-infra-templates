@@ -1,21 +1,6 @@
 name: Provision Manager Website + Secrets
 
-on:
-  workflow_call:
-    inputs:
-      org:
-        description: "Target organization"
-        required: true
-        type: string
-      appId:
-        description: "Provisioner app-id"
-        required: true
-        type: string  
-  
-    secrets:
-      PROVISIONER_PRIVATE_KEY_PEM:
-        required: true
-  
+on:  
   workflow_dispatch:
     inputs:
       org:
@@ -30,6 +15,20 @@ on:
         description: "Branch/tag/sha in templates repo"
         required: false
         default: "main"
+
+  workflow_call:
+    inputs:
+      org:
+        description: "Target organization"
+        required: true
+        type: string
+      app_id:
+        description: "Provisioner app id"
+        required: true
+        type: string
+    secrets:
+      PROVISIONER_PRIVATE_KEY_PEM:
+        required: true
 
 permissions:
   contents: read
@@ -54,8 +53,8 @@ jobs:
         uses: actions/create-github-app-token@v1
         with:
           # ROOT creds (repo-level)
-          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID || inputs.app_id}}
-          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM || secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+          app-id: ${{ github.event_name == 'workflow_call' && inputs.app_id || vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ github.event_name == 'workflow_call' && secrets.PROVISIONER_PRIVATE_KEY_PEM || secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}          
           owner: ${{ inputs.org }}
 
       - name: Debug runner + workspace
