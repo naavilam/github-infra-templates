@@ -62,33 +62,24 @@ jobs:
           pip install pyyaml requests
 
       - id: set
-        name: Build matrix (missing repos or single target)
+        name: Build matrix (missing repos or single target) — CENTRAL registry
         env:
           ORG: ${{ env.ORG }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          REGISTRY_PATH: ${{ inputs.registry_path }}
           ONE_REPO: ${{ inputs.repo }}
+          CENTRAL_REPO: ${{ env.CENTRAL_REPO }}          
+          TEMPLATE_REF: ${{ env.TEMPLATE_REF }}      ]
         run: |
           python - <<'PY'
           import os, json, sys
-          from pathlib import Path
-          import yaml, requests
+          import requests, yaml
 
           ORG = os.environ["ORG"].strip()
           GH_TOKEN = os.environ["GH_TOKEN"]
-          registry_path = (os.environ.get("REGISTRY_PATH") or ".github/registry/repos.yml").strip()
           one_repo = (os.environ.get("ONE_REPO") or "").strip()
 
-          registry_file = Path("caller") / registry_path
-          if not registry_file.exists():
-            print(f"::error::registry not found: {registry_file}", file=sys.stderr)
-            sys.exit(2)
-
-          data = yaml.safe_load(registry_file.read_text(encoding="utf-8")) or {}
-          repos = data.get("repos", [])
-          if not isinstance(repos, list):
-            print("::error::registry.repos must be a list", file=sys.stderr)
-            sys.exit(2)
+          CENTRAL_REPO = (os.environ.get("CENTRAL_REPO") or "naavilam/github-infra-templates").strip()
+          TEMPLATE_REF = (os.environ.get("TEMPLATE_REF") or "main").strip()
 
           s = requests.Session()
           s.headers.update({
@@ -97,38 +88,77 @@ jobs:
             "X-GitHub-Api-Version": "2022-11-28",
           })
 
-          def repo_exists(name: str) -> bool:
-            r = s.get(f"https://api.github.com/repos/{ORG}/{name}", timeout=30)
+          def api_get(url: str):
+            r = s.get(url, timeout=30)
+            return r
+
+          def load_central_registry():
+            # RAW via contents API (public repo, mas ok usar GH_TOKEN)
+            path = f"org/org_registry/{ORG}-registry.yml"
+            url = f"https://api.github.com/repos/{CENTRAL_REPO}/contents/{path}?ref={TEMPLATE_REF}"
+            r = api_get(url)
+            if r.status_code != 200:
+              print(f"::error::central registry not found: {CENTRAL_REPO}/{path}@{TEMPLATE_REF} (http {r.status_code})", file=sys.stderr)
+              try:
+                print(r.text[:5000], file=sys.stderr)
+              except Exception:
+                pass
+              sys.exit(2)
+
+            j = r.json()
+            import base64
+            content = (j.get("content") or "").strip()
+            if not content:
+              print(f"::error::central registry content empty: {CENTRAL_REPO}/{path}@{TEMPLATE_REF}", file=sys.stderr)
+              sys.exit(2)
+
+            raw = base64.b64decode(content.encode("utf-8")).decode("utf-8")
+            data = yaml.safe_load(raw) or {}
+            return data
+
+          def repo_exists(full: str) -> bool:
+            r = api_get(f"https://api.github.com/repos/{full}")
             if r.status_code in (200, 404):
               return r.status_code == 200
             raise RuntimeError(f"repo_exists unexpected {r.status_code}: {r.text}")
 
-          # lista de nomes do registry (filtra só os da ORG, por segurança)
+          data = load_central_registry()
+
+          # aceita: {repos: [...] } ou já lista direta (robusto)
+          repos = data.get("repos", data)
+          if not isinstance(repos, list):
+            print("::error::central registry must contain a list under 'repos:'", file=sys.stderr)
+            sys.exit(2)
+
+          # lista de repos do registry (aceita name ou org/name)
           names = []
           for e in repos:
-            org = (e.get("org") or "").strip()
+            if not isinstance(e, dict):
+              continue
             name = (e.get("name") or "").strip()
+            org  = (e.get("org") or ORG).strip()
             if not name:
               continue
-            if org and org != ORG:
-              continue
-            names.append(name)
+            full = f"{org}/{name}" if "/" not in name else name
+            names.append(full)
 
           selected = []
           if one_repo:
-            target = one_repo.split("/")[-1]  # aceita "org/repo" mas ignora org
+            # aceita "repo" ou "org/repo"
+            target = one_repo if "/" in one_repo else f"{ORG}/{one_repo}"
             if target not in names:
-              print(f"::error::repo '{one_repo}' not found in registry for org '{ORG}'", file=sys.stderr)
+              print(f"::error::repo '{one_repo}' not found in central registry for org '{ORG}'", file=sys.stderr)
               sys.exit(2)
             if not repo_exists(target):
-              selected.append({"repo": target})
+              selected.append({"repo": target.split("/")[-1]})  # initializer espera só nome
           else:
-            for name in names:
-              if not repo_exists(name):
-                selected.append({"repo": name})
+            for full in names:
+              if full.startswith(f"{ORG}/") and (not repo_exists(full)):
+                selected.append({"repo": full.split("/")[-1]})
 
           matrix = {"include": selected}
           out = json.dumps(matrix)
+
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
             f.write(f"matrix={out}\n")
             f.write(f"count={len(selected)}\n")
