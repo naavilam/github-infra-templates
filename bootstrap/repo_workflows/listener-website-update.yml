@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   run:
-    uses: naavilam/github-infra-templates/.github/workflows/repository-website-update.yml@main
+    uses: naavilam/github-infra-templates/.github/workflows/repositories-website-update.yml@main
     with:
       repo: ${{ github.repository }}
     secrets:
