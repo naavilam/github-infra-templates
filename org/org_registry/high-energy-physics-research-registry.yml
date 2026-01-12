@@ -10,24 +10,22 @@ repos:
     id: AR2026
     title: Academic Research Journal
     academic_level: graduate
-    academic_area: Heavy Ion Collision
+    academic_area: High Energy
     academic_school: University of São Paulo
     site_hero_image: journaling.jpg
-    site_subtitle: Heavy Ion Collision
+    course_url: ""
     site_description: Research journaling.
-    readme_tagline: Concepts * Theory * Simulation tools
-    readme_cta_text: "Open full course website."
-    readme_theme: minimal
+    status: on_going
+    readme_cta_text: "Open research website."
 
   - name: Gaussian-Process-Regression-Research
-    id: Gaussian Processes Regression
-    title: Research
+    id: GP2026
+    title: Gaussian Process
     academic_level: graduate
-    academic_area: Heavy Ion Collision
+    academic_area: High Energy
     academic_school: University of São Paulo
     site_hero_image: gaussian-process.png
-    site_subtitle: Heavy Ion Collision
-    site_description: Gaussian Process.
-    readme_tagline: Studies
+    course_url: ""
+    site_description: Gaussian Process Research.
+    status: on_going
     readme_cta_text: "Open research website."
-    readme_theme: minimal
