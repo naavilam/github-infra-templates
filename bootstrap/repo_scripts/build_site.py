@@ -323,6 +323,27 @@ def collect_tree(src: Path, out: Path, execute: bool):
             max-width: 1200px;
             margin: 24px auto;
         }
+
+        /* Faz o output ocupar toda a largura */
+        div.output_area {
+            display: block !important;
+        }
+
+        /* Remove o limite interno */
+        div.output_html.rendered_html {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        /* Centraliza qualquer card interno */
+        .fullwidth-center {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
         </style>
         """.strip()
 
