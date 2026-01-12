@@ -14,7 +14,7 @@ repos:
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-755-introduction-to-lie-groups-fall-2004/"
     site_hero_image: introduction-to-lie-groups.png
-    site_description: "This course is devoted to the theory of Lie Groups with emphasis on its connections with Differential Geometry. The text for this class is Differential Geometry, Lie Groups and Symmetric Spaces by Sigurdur Helgason (American Mathematical Society, 2001)."
+    site_description: "This course is devoted to the theory of Lie Groups with emphasis on its connections with Differential Geometry. The text for this class is Differential Geometry, Lie Groups and Symmetric Spaces by Sigurdur Helgason (American Mathematical Society, 2001). - Prof. Roman Bezrukavnikov"
     status: completed
     completed_on: 2004-06-30
     readme_cta_text: "Acess full course notes"
@@ -27,7 +27,7 @@ repos:
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-034-honors-differential-equations-spring-2004/"
     site_hero_image: honors-differential-equations.png
-    site_description: "Covers the same material as 18.03 with greater emphasis on theory, including first-order equations, initial value problems, systems, linear equations, and qualitative analysis of planar systems."
+    site_description: "Covers the same material as 18.03 with greater emphasis on theory, including first-order equations, initial value problems, systems, linear equations, and qualitative analysis of planar systems. - Prof. Haynes R. Miller, Prof. David Jerison"
     status: completed
     completed_on: 2004-11-30
     readme_cta_text: "Access full course notes"
@@ -40,7 +40,7 @@ repos:
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2004/"
     site_hero_image: introduction-to-numerical-analysis.png
-    site_description: "Introduces fundamental numerical methods for scientific computing, including root finding, interpolation, approximation, numerical integration, differential equations, and linear algebra techniques."
+    site_description: "Introduces fundamental numerical methods for scientific computing, including root finding, interpolation, approximation, numerical integration, differential equations, and linear algebra techniques. - Prof. Gilbert Strang"
     status: completed
     completed_on: 2004-11-30
     readme_cta_text: "Access full course notes"
@@ -53,7 +53,7 @@ repos:
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-101-analysis-ii-fall-2005/"
     site_hero_image: analysis-ii.png
-    site_description: "A continuation of rigorous analysis, covering multivariable calculus and an introduction to differential forms on Euclidean spaces and manifolds."
+    site_description: "A continuation of rigorous analysis, covering multivariable calculus and an introduction to differential forms on Euclidean spaces and manifolds. - Prof. Denis Auroux"
     status: completed
     completed_on: 2005-06-30
     readme_cta_text: "Access full course notes"
@@ -66,7 +66,7 @@ repos:
     academic_school: MIT OpenCourseWare
     course_url: "https://ocw.mit.edu/courses/18-152-introduction-to-partial-differential-equations-fall-2005/"
     site_hero_image: introduction-to-partial-differential-equations2005.png
-    site_description: "Provides a rigorous introduction to partial differential equations, focusing on linear second-order equations of elliptic and parabolic type."
+    site_description: "Provides a rigorous introduction to partial differential equations, focusing on linear second-order equations of elliptic and parabolic type. - Prof. Jeremy Orloff, Prof. Alan Edelman"
     status: completed
     completed_on: 2005-06-30
     readme_cta_text: "Access full course notes"

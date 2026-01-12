@@ -288,6 +288,46 @@ def main() -> None:
             if isinstance(e, dict) and not (e.get("org") or "").strip():
                 e["org"] = top_org
 
+
+    # ------------------------------------------------------------
+    # Optional filter: run only ONE_REPO (env)
+    # Accepts:
+    #   - "repo"
+    #   - "org/repo"
+    #   - exact "name" from registry
+    # ------------------------------------------------------------
+    one_repo = (os.environ.get("ONE_REPO") or "").strip()
+
+    def norm(s: str) -> str:
+        return re.sub(r"\s+", "", (s or "").strip().lower())
+
+    if one_repo:
+        one_repo_norm = norm(one_repo)
+        filtered = []
+
+        for entry in repos:
+            org = (entry.get("org") or "").strip()
+            raw_name = (entry.get("name") or "").strip()
+            repo = normalize_repo_name(raw_name)
+
+            full_norm = norm(f"{org}/{repo}")
+            name_norm = norm(raw_name)
+            repo_norm = norm(repo)
+
+            if "/" in one_repo_norm:
+                if full_norm == one_repo_norm:
+                    filtered.append(entry)
+            else:
+                if one_repo_norm in (repo_norm, name_norm):
+                    filtered.append(entry)
+
+        if not filtered:
+            print(f"[WARN] ONE_REPO set but no match found: {one_repo}", flush=True)
+        else:
+            repos = filtered
+
+
+
     for entry in repos:
         full = f"{(entry.get('org') or '').strip()}/{(entry.get('name') or '').strip()}"
         try:
