@@ -260,7 +260,31 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
         div.prompt.input_prompt,
         div.prompt.output_prompt {
-        display: none !important;
+            display: none !important;
+        }
+
+        div.prompt {
+            display: none !important;
+        }
+
+        div.output_area {
+            width: 100% !important;
+            margin-left: 0 !important;
+        }
+
+        div.output_area .output_subarea {
+            display: flex !important;
+            justify-content: center !important;
+        }
+
+        div.output_area .output_subarea > * {
+            max-width: 100%;
+        }
+
+        div.output_area img,
+        div.output_area svg {
+            display: block;
+            margin: 0 auto;
         }
 
         /* Indent só no conteúdo renderizado do Markdown (não mexe em código/output) */
