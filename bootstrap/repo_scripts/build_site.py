@@ -344,6 +344,11 @@ def collect_tree(src: Path, out: Path, execute: bool):
             justify-content: center;
         }
 
+        /* remove a faixa do output HTML */
+        div.output_html.rendered_html.output_subarea {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
         </style>
         """.strip()
 
