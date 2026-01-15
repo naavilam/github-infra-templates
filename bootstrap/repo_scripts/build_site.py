@@ -408,6 +408,19 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
     tree, nb_count = collect_tree(src, out, execute)
 
     out.mkdir(parents=True, exist_ok=True)
+
+    # 1) Copia template primeiro (evita sobrescrever reports.json depois)
+    copy_tree(template_dir / "css", out / "css")
+    copy_tree(template_dir / "assets", out / "assets")
+    copy_tree(template_dir / "js", out / "js")
+
+    # 2) Copia PDFs para o root do site
+    copy_reports_to_site_recursive(src_repo=src, out_site=out, pdf_name="report.pdf", debug=True)
+
+    # 3) Gera reports.json (depois do copy_tree)
+    build_reports_json_recursive(src_repo=src, out_site=out, pdf_name="report.pdf", debug=True)
+
+    # 4) Geram as páginas
     pages = [
         ("index.html", False),     # Home
         ("studies.html", True),   # Studies (com árvore)
@@ -421,10 +434,6 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
         src_html = page_path.read_text(encoding="utf-8")
         html_doc = render_tokens(src_html, title, nb_count, tree if needs_tree else None, cfg)
         (out / fname).write_text(html_doc, encoding="utf-8")
-
-    copy_tree(template_dir / "css", out / "css")
-    copy_tree(template_dir / "assets", out / "assets")
-    copy_tree(template_dir / "js", out / "js")
 
     return nb_count
 
@@ -500,7 +509,113 @@ def render_references_html(refs: list[dict]) -> str:
         items.append("<li class='ref-item'>" + "\n".join(parts) + "</li>")
 
     return "<ul class='ref-list'>\n" + "\n".join(items) + "\n</ul>"
-    
+
+DATE_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+import re, shutil
+from pathlib import Path
+
+def copy_reports_to_site_recursive(src_repo: Path, out_site: Path, pdf_name: str = "report.pdf", debug: bool = True):
+    """
+    Procura recursivamente por pastas YYYY-MM-DD que contenham report.pdf
+    e copia para:
+        out_site/YYYY-MM-DD/report.pdf
+    """
+    copied = 0
+    if debug:
+        print(f"[reports] src_repo={src_repo}")
+        print(f"[reports] out_site={out_site}")
+        print(f"[reports] pdf_name={pdf_name}")
+
+    for p in sorted(src_repo.rglob("*")):
+        if not p.is_dir():
+            continue
+        if not DATE_DIR_RE.match(p.name):
+            continue
+
+        pdf_path = p / pdf_name
+        if not pdf_path.exists():
+            continue
+
+        dst_dir = out_site / p.name
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(pdf_path, dst_dir / pdf_name)
+        copied += 1
+
+        if debug:
+            rel_found = str(p.relative_to(src_repo)).replace(os.sep, "/")
+            print(f"[reports] found: {rel_found}/{pdf_name}")
+            print(f"[reports]  -> copy: {p.name}/{pdf_name}")
+
+    if debug:
+        print(f"[reports] copied={copied}")
+    return copied
+
+
+def build_reports_json_recursive(src_repo: Path, out_site: Path, pdf_name: str = "report.pdf", debug: bool = True):
+    """
+    Gera um nó "Reports" com paths relativos ao root do site:
+      { type:"pdf", title:"2026-01-23 — report", path:"2026-01-23/report.pdf" }
+
+    Escreve em:
+      out_site/assets/tree/reports.json
+    """
+    reports = {"type": "folder", "title": "Reports", "children": []}
+    by_year = {}
+
+    found = 0
+    for p in sorted(src_repo.rglob("*")):
+        if not p.is_dir():
+            continue
+        if not DATE_DIR_RE.match(p.name):
+            continue
+
+        pdf_path = p / pdf_name
+        if not pdf_path.exists():
+            continue
+
+        date = p.name
+        year = date[:4]
+        month = date[:7]  # YYYY-MM
+        rel_path = f"{date}/{pdf_name}"
+
+        by_year.setdefault(year, {}).setdefault(month, []).append({
+            "type": "pdf",
+            "title": f"{date} — report",
+            "path": rel_path
+        })
+        found += 1
+
+    for year in sorted(by_year.keys()):
+        months = []
+        for month in sorted(by_year[year].keys()):
+            items = sorted(by_year[year][month], key=lambda x: x["title"])
+            months.append({"type": "folder", "title": month, "children": items})
+        reports["children"].append({"type": "folder", "title": year, "children": months})
+
+    out_json = out_site / "assets" / "tree" / "reports.json"
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    out_json.write_text(json.dumps(reports, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    if debug:
+        print(f"[reports] reports.json -> {out_json}")
+        print(f"[reports] entries={found}")
+        # mostra 3 exemplos
+        sample = []
+        for y in reports["children"]:
+            for m in y.get("children", []):
+                for it in m.get("children", []):
+                    sample.append(it.get("path"))
+                    if len(sample) >= 3:
+                        break
+                if len(sample) >= 3:
+                    break
+            if len(sample) >= 3:
+                break
+        print(f"[reports] sample_paths={sample}")
+
+    return out_json
+
 def main():
     ap = argparse.ArgumentParser(
         description="Gera um site estático a partir de notebooks .ipynb usando nbconvert e um template externo."
