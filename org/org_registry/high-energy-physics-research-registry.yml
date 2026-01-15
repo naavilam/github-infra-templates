@@ -6,11 +6,11 @@ org: high-energy-physics-research
 
 repos:
 
-  - name: Academic-Research-Journal
+  - name: Academic-Research-Journaling
     id: AR2026
-    title: Academic Research Journal
+    title: Academic Research Journaling
     academic_level: graduate
-    academic_area: High Energy
+    academic_area: High Energy Physics
     academic_school: University of São Paulo
     site_hero_image: journaling.jpg
     course_url: ""
