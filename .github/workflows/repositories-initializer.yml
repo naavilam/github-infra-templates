@@ -51,7 +51,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.PROVISIONER_APP_ID }}
+          app-id: ${{ secrets.PROVISIONER_APP_ID }}
           private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ env.ORG }}
 
