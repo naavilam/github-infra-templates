@@ -410,7 +410,7 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
     out.mkdir(parents=True, exist_ok=True)
     pages = [
         ("index.html", False),     # Home
-        ("studies.html", True),   # Software (com árvore)
+        ("studies.html", True),   # Studies (com árvore)
         ("publications.html", False),
         ("references.html", False),
     ]

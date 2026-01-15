@@ -46,7 +46,7 @@ body {
 }
 
 
-/* Estilo base para páginas com <main> (Home, Publications, Research, etc.) */
+/* Estilo base para páginas com <main> (Home, Publications, References, etc.) */
 main.page-container {
     max-width: 960px;
     /* largura consistente */
