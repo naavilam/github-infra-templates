@@ -410,9 +410,9 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
     out.mkdir(parents=True, exist_ok=True)
     pages = [
         ("index.html", False),     # Home
-        ("software.html", True),   # Software (com árvore)
+        ("studies.html", True),   # Software (com árvore)
         ("publications.html", False),
-        ("research.html", False),
+        ("references.html", False),
     ]
     for fname, needs_tree in pages:
         page_path = template_dir / fname

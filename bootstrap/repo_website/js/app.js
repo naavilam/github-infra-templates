@@ -86,7 +86,7 @@
           const a = document.createElement('a');
           const base = node.name.replace(/\.ipynb$/i, '');
           a.textContent = base;
-          // gera link compartilhável: software.html?nb=...
+          // gera link compartilhável: studies.html?nb=...
           const u = new URL(window.location.href);
           u.searchParams.set('nb', a.dataset.path);
           a.href = u.toString();
