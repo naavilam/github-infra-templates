@@ -18,7 +18,7 @@ repos:
     status: on_going
     readme_cta_text: "Open research website."
 
-  - name: Gaussian-Process-Regression-Research
+  - name: Gaussian-Process-Research
     id: GP2026
     title: Gaussian Process
     academic_level: graduate
@@ -27,5 +27,17 @@ repos:
     site_hero_image: gaussian-process.png
     course_url: ""
     site_description: Gaussian Process Research.
+    status: on_going
+    readme_cta_text: "Open research website."
+
+  - name: Bayesian-Inference-Research
+    id: BI2026
+    title: Bayesian Inference
+    academic_level: graduate
+    academic_area: High Energy
+    academic_school: University of São Paulo
+    site_hero_image: bayesian-inference.png
+    course_url: ""
+    site_description: Bayesian Inference Research.
     status: on_going
     readme_cta_text: "Open research website."
