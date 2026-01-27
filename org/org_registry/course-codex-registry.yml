@@ -6,3 +6,14 @@
 org: course-codex
 
 repos:
+  - name: cern-root-learning-course
+    id: ROOT
+    title: "Cern Root Learning Course"
+    academic_level: graduate
+    academic_area: Entrepreneurship
+    academic_school: CERN
+    status: completed
+    course_url: "https://videos.cern.ch/record/2301866"
+    site_description: CERN Root data analysis module learning.
+    status: on_going
+    readme_cta_text: "Open research website."
