@@ -12,6 +12,7 @@ repos:
     academic_level: graduate
     academic_area: Entrepreneurship
     academic_school: CERN
+    site_hero_image: cern-root.jpg
     status: completed
     course_url: "https://videos.cern.ch/record/2301866"
     site_description: CERN Root data analysis module learning.

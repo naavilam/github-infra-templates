@@ -152,3 +152,20 @@ orgs:
         app_id: 2632140
         app_name: Economics-Topics-Provisioner-App
         app_instalation: 103588461
+
+  - name: course-codex
+    title: "Course Codex"
+    ga_analytics: G-EYHJ8C0GLC
+    apps:
+      dispatcher:
+        app_id: 2632131
+        app_name: Economics-Topics-Dispatcher-App
+        app_instalation: 103588107
+      auditor:
+        app_id: 2632138
+        app_name: Economics-Topics-Auditor-App
+        app_instalation: 103588310
+      provisioner:
+        app_id: 2632140
+        app_name: Economics-Topics-Provisioner-App
+        app_instalation: 103588461
