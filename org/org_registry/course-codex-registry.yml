@@ -6,9 +6,9 @@
 org: course-codex
 
 repos:
-  - name: cern-root-learning-course
+  - name: cern-root-student-course
     id: ROOT
-    title: "Cern Root Learning Course"
+    title: "Cern Root Student Course"
     academic_level: graduate
     academic_area: Entrepreneurship
     academic_school: CERN
