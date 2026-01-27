@@ -160,30 +160,36 @@ jobs:
         run: |
           set -euo pipefail
 
-          ROOT="$PWD"
-          OUT="$ROOT/out"
+          WS="$GITHUB_WORKSPACE"
+          ROOT="$WS/templates"          # <-- porque você fez checkout em path: templates
+          OUT="$WS/out"                 # <-- out no workspace, não dentro de templates
+
           rm -rf "$OUT"
 
-          # 1) Copia o site primeiro (rsync --delete pode remover .github)
+          # 1) Copia o site base
           mkdir -p "$OUT/_posts"
 
           rsync -a --delete \
-            "$ROOT/templates/manager/manager_website/" \
+            "$ROOT/manager/manager_website/" \
             "$OUT/"
 
-          # 2) Assets (depende da org)
-          ASSETS_DIR="$ROOT/templates/manager/manager_assets/${ORG}"
+          # 2) Assets (depende da org) — normaliza para slug lowercase
+          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
+
           if [[ ! -d "$ASSETS_DIR" ]]; then
             echo "Missing assets dir: $ASSETS_DIR" >&2
-            ls -la "$ROOT/templates/manager/manager_assets" >&2 || true
+            echo "Available assets:" >&2
+            ls -la "$ROOT/manager/manager_assets" >&2 || true
             exit 1
           fi
+
           rsync -a "$ASSETS_DIR/" "$OUT/"
 
-          # 3) Workflows (garante destino DEPOIS do rsync do site)
+          # 3) Workflows
           mkdir -p "$OUT/.github/workflows"
           rsync -a --delete \
-            "$ROOT/templates/manager/manager_workflows/" \
+            "$ROOT/manager/manager_workflows/" \
             "$OUT/.github/workflows/"
 
           echo "Payload assembled at: $OUT"
@@ -199,7 +205,8 @@ jobs:
           ORG: ${{ inputs.org || github.event.inputs.org }}
         run: |
           set -euo pipefail
-          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG}-registry.yml"
+          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
           OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
           SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
 
