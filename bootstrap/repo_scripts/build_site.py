@@ -349,6 +349,15 @@ def collect_tree(src: Path, out: Path, execute: bool):
             padding-top: 0 !important;
             padding-bottom: 0 !important;
         }
+
+        /* Esconde qualquer saída em stderr no notebook exportado */
+        .output_subarea.output_stream.output_stderr {
+            display: none !important;
+        }
+
+        .output_subarea.output_stream.output_stderr.output_text {
+            display: none !important;
+        }
         </style>
         """.strip()
 
