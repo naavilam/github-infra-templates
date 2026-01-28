@@ -406,7 +406,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
 
 def build_static_site(src: Path, out: Path, template_dir: Path, title: str, execute: bool, cfg: dict | None):
-    tree, nb_count = collect_tree(src, out, execute)
+    # tree, nb_count = collect_tree(src, out, execute)
 
     # === NOVO: carregar refs do repo e colocar no cfg para render_tokens ===
     refs = load_references(src)  # assumes references.yml no root do repo (src)
@@ -427,7 +427,20 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
     copy_reports_to_site_recursive(src_repo=src, out_site=out, pdf_name="report.pdf", debug=True)
 
     # 3) Gera reports.json (depois do copy_tree)
-    build_reports_json_recursive(src_repo=src, out_site=out, pdf_name="report.pdf", debug=True)
+    reports_json = build_reports_json_recursive(src_repo=src, out_site=out, pdf_name="report.pdf", debug=True)
+
+    if reports_json is not None:
+        try:
+            rep_node = json.loads(reports_json.read_text(encoding="utf-8"))
+            if rep_node.get("children"):  # só adiciona se não estiver vazio
+                tree.setdefault("children", []).append(rep_node)
+        except Exception as e:
+            print(f"[reports] warn: failed to load {reports_json}: {e}")
+    else:
+        # remove reports.json antigo se sobrou de build anterior
+        stale = out / "assets" / "tree" / "reports.json"
+        if stale.exists():
+            stale.unlink()
 
     # 4) Geram as páginas
     pages = [
@@ -599,7 +612,7 @@ def build_reports_json_recursive(src_repo: Path, out_site: Path, pdf_name: str =
         if debug:
             print("[reports] no reports found; skipping reports.json")
         return None
-        
+
     for year in sorted(by_year.keys()):
         months = []
         for month in sorted(by_year[year].keys()):
