@@ -595,6 +595,11 @@ def build_reports_json_recursive(src_repo: Path, out_site: Path, pdf_name: str =
         })
         found += 1
 
+    if found == 0:
+        if debug:
+            print("[reports] no reports found; skipping reports.json")
+        return None
+        
     for year in sorted(by_year.keys()):
         months = []
         for month in sorted(by_year[year].keys()):
