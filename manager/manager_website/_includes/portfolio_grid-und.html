@@ -31,7 +31,7 @@
         <div class="card-title text-center">{{ post.title }}</div>
 
         {% if post.link %}
-        <a href="{{ post.link | relative_url }}" class="portfolio-link" rel="noopener">
+        <a href="{{ post.link | relative_url }}?utm_source=course-portfolio" class=" portfolio-link" rel="noopener">
           {% else %}
           <a href="#portfolioModal-{{ post.modal-id }}" class="portfolio-link" data-toggle="modal">
             {% endif %}
