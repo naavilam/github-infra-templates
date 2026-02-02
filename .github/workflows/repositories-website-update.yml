@@ -63,6 +63,7 @@ jobs:
           path: central
           sparse-checkout: |
             org/org_registry
+            orgs.yml
           sparse-checkout-cone-mode: false
           fetch-depth: 1
 
@@ -79,10 +80,10 @@ jobs:
           set -euo pipefail
 
           org_lc="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-          # >>> ESTE É O CAMINHO QUE O TEU DEBUG MOSTROU QUE EXISTE <<<
           reg_path_local="central/org/org_registry/${org_lc}-registry.yml"
           # fallback via API (caso não exista localmente por algum motivo)
           reg_path_api="org/org_registry/${org_lc}-registry.yml"
+          orgs_path_local = "central/orgs.yml"
 
           echo "PWD=$(pwd)"
           echo "ORG='${ORG}' (org_lc='${org_lc}')"
@@ -106,10 +107,43 @@ jobs:
           import os, sys, json, base64, re
           import yaml
 
+          # recupera chave google analytics
+          def load_org_ga_id(org_name: str) -> str:
+            path = orgs_path_local
+            try:
+              data = yaml.safe_load(open(path, "r", encoding="utf-8")) or {}
+            except FileNotFoundError:
+              print(f"::warning::orgs.yml not found at {path}")
+              return ""
+            except Exception as e:
+              print(f"::warning::failed to read orgs.yml at {path}: {e}")
+              return ""
+
+            # suporta orgs.yml como lista ou dict
+            if isinstance(data, list):
+              items = data
+            elif isinstance(data, dict):
+              items = data.get("orgs") or data.get("organizations") or data.get("items") or []
+              if not isinstance(items, list):
+                items = []
+            else:
+              items = []
+
+            org_lc = (org_name or "").strip().lower()
+            for it in items:
+              if not isinstance(it, dict):
+                continue
+              name = str(it.get("name", "")).strip().lower()
+              if name == org_lc:
+                return (it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
+            return ""
+
           org = (os.environ.get("ORG") or "").strip()
           if not org:
             raise SystemExit("::error::ORG env is required")
 
+          ga_id = load_org_ga_id(org)
+          print(f"[debug] ga_id_for_org={org} -> {ga_id or '(missing)'}")
           repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
           central_repo = (os.environ.get("CENTRAL_REPO") or "").strip()
           template_ref = (os.environ.get("TEMPLATE_REF") or "main").strip()
@@ -209,7 +243,8 @@ jobs:
               "ABOUT": about,
               "SUBTITLE_1": area,
               "SUBTITLE_2": level,
-              "COURSE_URL": course_url
+              "COURSE_URL": course_url,
+              "GA_ID": ga_id
             }
             cfg = {k: v for k, v in cfg.items() if v}
 
