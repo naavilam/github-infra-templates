@@ -323,7 +323,7 @@ repos:
     id: IF4302112
     title: "Física Matemática I"
     academic_level: undergraduate
-    academic_area: Physics
+    academic_area: Mathematics
     academic_school: IF/USP
     status: completed
     completed_on: 
@@ -393,7 +393,7 @@ repos:
     id: IF4302307
     title: "Física Matemática II"
     academic_level: undergraduate
-    academic_area: Physics
+    academic_area: Mathematics
     academic_school: IF/USP
     status: completed
     completed_on: 
