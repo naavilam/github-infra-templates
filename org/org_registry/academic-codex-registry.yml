@@ -8,12 +8,13 @@ org: academic-codex
 repos:
   - name: DPG5011-Formacao-do-Cientista-Empreendedor
     id: DPG5011
-    title: "Formação do Cientista Empreendedor"
+    title: "Training the Entrepreneur Scientist"
+    title_pt: "Formação do Cientista Empreendedor"
     academic_level: graduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: cientista-empreendedor-i.png
     site_description:
     readme_tagline:
@@ -22,12 +23,13 @@ repos:
 
   - name: EAP5054-Formacao-do-Cientista-Empreendedor-II
     id: EAP5054
-    title: "Formação do Cientista Empreendedor II"
+    title: "Training the Entrepreneur Scientist II"
+    title_pt: "Formação do Cientista Empreendedor II"
     academic_level: graduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: cientista-empreendedor-ii.png
     site_description:
     readme_tagline:
@@ -36,12 +38,13 @@ repos:
 
   - name: MAC5722-Complexidade-Computacional
     id: MAC5722
-    title: "Complexidade Computacional"
+    title: "Computational Complexity"
+    title_pt: "Complexidade Computacional"
     academic_level: graduate
     academic_area: Computer Science
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: complexidade-computacional.png
     site_description:
     readme_tagline:
@@ -51,11 +54,12 @@ repos:
   - name: MAC5921-Deep-Learning
     id: MAC5921
     title: "Deep Learning"
+    title_pt: "Deep Learning"
     academic_level: graduate
     academic_area: Artificial Intelligence
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: deep-learning.png
     site_description:
     readme_tagline:
@@ -64,12 +68,13 @@ repos:
 
   - name: MAE5911-Fundamentos-de-Estatistica-e-Machine-Learning
     id: MAE5911
-    title: "Fundamentos de Estatística e Machine Learning"
+    title: "Foundations of Statistics and Machine Learning"
+    title_pt: "Fundamentos de Estatística e Machine Learning"
     academic_level: graduate
     academic_area: Artificial Intelligence
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: estatistica.png
     site_description:
     readme_tagline:
@@ -78,12 +83,13 @@ repos:
 
   - name: MAT5730-Algebra-Linear
     id: MAT5730
-    title: "Álgebra Linear"
+    title: "Linear Algebra"
+    title_pt: "Álgebra Linear"
     academic_level: graduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: algebra-linear.png
     site_description:
     readme_tagline:
@@ -92,12 +98,13 @@ repos:
 
   - name: MCKZ-Metodos-Quantitativos
     id: MCKZ
-    title: "Métodos Quantitativos"
+    title: "Quantitative Methods"
+    title_pt: "Métodos Quantitativos"
     academic_level: graduate
     academic_area: Statistics
     academic_school: Mackenzie
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: metodos-quantitativos.png
     site_description:
     readme_tagline:
@@ -106,12 +113,13 @@ repos:
 
   - name: PGF5001-Mecanica-Quantica-I
     id: PGF5001
-    title: "Mecânica Quântica I"
+    title: "Quantum Mechanics I"
+    title_pt: "Mecânica Quântica I"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-quantica-i.png
     site_description:
     readme_tagline:
@@ -120,12 +128,13 @@ repos:
 
   - name: PGF5002-Mecanica-Quantica-II
     id: PGF5002
-    title: "Mecânica Quântica II"
+    title: "Quantum Mechanics II"
+    title_pt: "Mecânica Quântica II"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: planned
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-quantica-ii.png
     site_description:
     readme_tagline:
@@ -134,12 +143,13 @@ repos:
 
   - name: PGF5003-Eletrodinamica
     id: PGF5003
-    title: "Eletrodinâmica"
+    title: "Electrodynamics"
+    title_pt: "Eletrodinâmica"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: eletrodinamica.png
     site_description:
     readme_tagline:
@@ -148,12 +158,13 @@ repos:
 
   - name: PGF5005-Mecanica-Classica
     id: PGF5005
-    title: "Mecânica Clássica"
+    title: "Classical Mechanics"
+    title_pt: "Mecânica Clássica"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-classica.png
     site_description:
     readme_tagline:
@@ -162,12 +173,13 @@ repos:
 
   - name: PGF5006-Mecanica-Estatistica
     id: PGF5006
-    title: "Mecânica Estatística"
+    title: "Statistical Mechanics"
+    title_pt: "Mecânica Estatística"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-estatistica.png
     site_description:
     readme_tagline:
@@ -176,12 +188,13 @@ repos:
 
   - name: PGF5107-Introducao-a-Teoria-Quantica-de-Campos-I
     id: PGF5107
-    title: "Introdução à Teoria Quântica de Campos I"
+    title: "Introduction to Quantum Field Theory I"
+    title_pt: "Introdução à Teoria Quântica de Campos I"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: planned
-    completed_on: 
+    completed_on:
     site_hero_image: teoria-quantica-campos-i.png
     site_description:
     readme_tagline:
@@ -190,12 +203,13 @@ repos:
 
   - name: PGF5261-Teoria-de-Grupos-Aplicada-a-Solidos-e-Moleculas
     id: PGF5261
-    title: "Teoria de Grupos Aplicada a Sólidos e Moléculas"
+    title: "Group Theory Applied to Solids and Molecules"
+    title_pt: "Teoria de Grupos Aplicada a Sólidos e Moléculas"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: teoria-grupos.png
     site_description:
     readme_tagline:
@@ -204,12 +218,13 @@ repos:
 
   - name: PGF5295-Teoria-de-Muitos-Corpos-e-Materia-Condensada
     id: PGF5295
-    title: "Teoria de Muitos Corpos e Matéria Condensada"
+    title: "Many-Body Theory and Condensed Matter"
+    title_pt: "Teoria de Muitos Corpos e Matéria Condensada"
     academic_level: graduate
     academic_area: Physics
     academic_school: EESC/USP
     status: planned
-    completed_on: 
+    completed_on:
     site_hero_image: muitos-corpos-e-materia-condensada.png
     site_description:
     readme_tagline:
@@ -223,12 +238,13 @@ repos:
 
   - name: FCM0101-Fisica-I
     id: FCM0101
-    title: "Física I"
+    title: "Physics I"
+    title_pt: "Física I"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IFSC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-i.png
     site_description:
     readme_tagline:
@@ -237,12 +253,13 @@ repos:
 
   - name: FCM0102-Fisica-II
     id: FCM0102
-    title: "Física II"
+    title: "Physics II"
+    title_pt: "Física II"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IFSC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-ii.png
     site_description:
     readme_tagline:
@@ -251,12 +268,13 @@ repos:
 
   - name: FFI0180-Laboratorio-de-Fisica-Geral-I
     id: FFI0180
-    title: "Laboratório de Física Geral I"
+    title: "General Physics Laboratory I"
+    title_pt: "Laboratório de Física Geral I"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IFSC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: laboratorio-fisica.png
     site_description:
     readme_tagline:
@@ -265,12 +283,13 @@ repos:
 
   - name: FFI0181-Laboratorio-de-Fisica-Geral-II
     id: FFI0181
-    title: "Laboratório de Física Geral II"
+    title: "General Physics Laboratory II"
+    title_pt: "Laboratório de Física Geral II"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IFSC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: laboratorio-fisica.png
     site_description:
     readme_tagline:
@@ -279,12 +298,13 @@ repos:
 
   - name: IF4300214-Fisica-Experimental-IV
     id: IF4300214
-    title: "Física Experimental IV"
+    title: "Experimental Physics IV"
+    title_pt: "Física Experimental IV"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-experimental-iv.png
     site_description:
     readme_tagline:
@@ -293,12 +313,13 @@ repos:
 
   - name: IF4302111-Fisica-I
     id: IF4302111
-    title: "Física I"
+    title: "Physics I"
+    title_pt: "Física I"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-i.png
     site_description:
     readme_tagline:
@@ -307,12 +328,13 @@ repos:
 
   - name: IF4302112-Fisica-II
     id: IF4302112
-    title: "Física II"
+    title: "Physics II"
+    title_pt: "Física II"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-ii.png
     site_description:
     readme_tagline:
@@ -321,12 +343,13 @@ repos:
 
   - name: IF4302112-Fisica-Matematica-I
     id: IF4302112
-    title: "Física Matemática I"
+    title: "Mathematical Physics I"
+    title_pt: "Física Matemática I"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-matematica-i.png
     site_description:
     readme_tagline:
@@ -335,12 +358,13 @@ repos:
 
   - name: IF4302211-Fisica-III
     id: IF4302211
-    title: "Física III"
+    title: "Physics III"
+    title_pt: "Física III"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-iii.png
     site_description:
     readme_tagline:
@@ -349,12 +373,13 @@ repos:
 
   - name: IF4302212-Fisica-IV
     id: IF4302212
-    title: "Física IV"
+    title: "Physics IV"
+    title_pt: "Física IV"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-iv.png
     site_description:
     readme_tagline:
@@ -363,12 +388,13 @@ repos:
 
   - name: IF4302305-Mecanica-Classica-I
     id: IF4302305
-    title: "Mecânica Clássica I"
+    title: "Classical Mechanics I"
+    title_pt: "Mecânica Clássica I"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-classica-i.png
     site_description:
     readme_tagline:
@@ -377,12 +403,13 @@ repos:
 
   - name: IF4302306-Mecanica-Classica-II
     id: IF4302306
-    title: "Mecânica Clássica II"
+    title: "Classical Mechanics II"
+    title_pt: "Mecânica Clássica II"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-classica-ii.png
     site_description:
     readme_tagline:
@@ -391,12 +418,13 @@ repos:
 
   - name: IF4302307-Fisica-Matematica-II
     id: IF4302307
-    title: "Física Matemática II"
+    title: "Mathematical Physics II"
+    title_pt: "Física Matemática II"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fisica-matematica-ii.png
     site_description:
     readme_tagline:
@@ -405,12 +433,13 @@ repos:
 
   - name: IF4302403-Mecanica-Quantica-I
     id: IF4302403
-    title: "Mecânica Quântica I"
+    title: "Quantum Mechanics I"
+    title_pt: "Mecânica Quântica I"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-quantica-i.png
     site_description:
     readme_tagline:
@@ -419,12 +448,13 @@ repos:
 
   - name: IF4302404-Mecanica-Quantica-II
     id: IF4302404
-    title: "Mecânica Quântica II"
+    title: "Quantum Mechanics II"
+    title_pt: "Mecânica Quântica II"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: IF/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-quantica-ii.png
     site_description:
     readme_tagline:
@@ -433,12 +463,13 @@ repos:
 
   - name: SAP0679-Humanidades-e-Ciencias-Sociais
     id: SAP0679
-    title: "Humanidades e Ciências Sociais"
+    title: "Humanities and Social Sciences"
+    title_pt: "Humanidades e Ciências Sociais"
     academic_level: undergraduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: ciencias-sociais.png
     site_description:
     readme_tagline:
@@ -447,12 +478,13 @@ repos:
 
   - name: SCC0635-Visao-Computacional-em-Robotica
     id: SCC0635
-    title: "Visão Computacional em Robótica"
+    title: "Computer Vision in Robotics"
+    title_pt: "Visão Computacional em Robótica"
     academic_level: undergraduate
     academic_area: Artificial Intelligence
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: visao-computacional.png
     site_description:
     readme_tagline:
@@ -461,12 +493,13 @@ repos:
 
   - name: SCC0650-Computacao-Grafica
     id: SCC0650
-    title: "Computação Gráfica"
+    title: "Computer Graphics"
+    title_pt: "Computação Gráfica"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: computacao-grafica.png
     site_description:
     readme_tagline:
@@ -475,12 +508,13 @@ repos:
 
   - name: SCC0661-Hipermidia-e-Multimidia
     id: SCC0661
-    title: "Hipermídia e Multimídia"
+    title: "Hypermedia and Multimedia"
+    title_pt: "Hipermídia e Multimídia"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: multimidia-hipermidia.png
     site_description:
     readme_tagline:
@@ -489,12 +523,13 @@ repos:
 
   - name: SCE0245-Algoritmos-Avancados
     id: SCE0245
-    title: "Algoritmos Avançados"
+    title: "Advanced Algorithms"
+    title_pt: "Algoritmos Avançados"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: algoritmos-avancados.png
     site_description:
     readme_tagline:
@@ -503,12 +538,13 @@ repos:
 
   - name: SCE0294-Laboratorio-de-Algoritmos-Avancados
     id: SCE0294
-    title: "Laboratório de Algoritmos Avançados"
+    title: "Advanced Algorithms Laboratory"
+    title_pt: "Laboratório de Algoritmos Avançados"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: algoritmos-avancados.png
     site_description:
     readme_tagline:
@@ -517,12 +553,13 @@ repos:
 
   - name: SCE0601-Introducao-a-Ciencia-da-Computacao-I
     id: SCE0601
-    title: "Introdução à Ciência da Computação I"
+    title: "Introduction to Computer Science I"
+    title_pt: "Introdução à Ciência da Computação I"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: ciencia-computacao-i.png
     site_description:
     readme_tagline:
@@ -531,12 +568,13 @@ repos:
 
   - name: SCE0601-Laboratorio-de-Introducao-a-Ciencia-da-Computacao-I
     id: SCE0601
-    title: "Laboratório de Introdução à Ciência da Computação I"
+    title: "Introduction to Computer Science Laboratory I"
+    title_pt: "Laboratório de Introdução à Ciência da Computação I"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: ciencia-computacao-i.png
     site_description:
     readme_tagline:
@@ -545,12 +583,13 @@ repos:
 
   - name: SCE0602-Introducao-Ciencia-Da-Computacao-II
     id: SCE0602
-    title: "Introdução à Ciência da Computação II"
+    title: "Introduction to Computer Science II"
+    title_pt: "Introdução à Ciência da Computação II"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: ciencia-computacao-ii.png
     site_description:
     readme_tagline:
@@ -559,12 +598,13 @@ repos:
 
   - name: SCE0603-Algoritmos-e-Estrutura-de-Dados-I
     id: SCE0603
-    title: "Algoritmos e Estrutura de Dados I"
+    title: "Algorithms and Data Structures I"
+    title_pt: "Algoritmos e Estrutura de Dados I"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: estrutura-dados-i.png
     site_description:
     readme_tagline:
@@ -573,12 +613,13 @@ repos:
 
   - name: SCE0605-Teoria-da-Computacao-e-Compiladores
     id: SCE0605
-    title: "Teoria da Computação e Compiladores"
+    title: "Theory of Computation and Compilers"
+    title_pt: "Teoria da Computação e Compiladores"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: compiladores.png
     site_description:
     readme_tagline:
@@ -587,12 +628,13 @@ repos:
 
   - name: SCE0606-Algoritmos-e-Estrutura-de-Dados-II
     id: SCE0606
-    title: "Algoritmos e Estrutura de Dados II"
+    title: "Algorithms and Data Structures II"
+    title_pt: "Algoritmos e Estrutura de Dados II"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: estrutura-dados-ii.png
     site_description:
     readme_tagline:
@@ -601,12 +643,13 @@ repos:
 
   - name: SCE0609-Sistemas-Operacionais-I
     id: SCE0609
-    title: "Sistemas Operacionais I"
+    title: "Operating Systems I"
+    title_pt: "Sistemas Operacionais I"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: sistemas-operacionais.png
     site_description:
     readme_tagline:
@@ -615,12 +658,13 @@ repos:
 
   - name: SCE0610-Programacao-Orientada-a-Objetos
     id: SCE0610
-    title: "Programação Orientada a Objetos"
+    title: "Object-Oriented Programming"
+    title_pt: "Programação Orientada a Objetos"
     academic_level: undergraduate
     academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: programacao-orientada-objetos.png
     site_description:
     readme_tagline:
@@ -629,12 +673,13 @@ repos:
 
   - name: SCE0611-Engenharia-de-Software
     id: SCE0611
-    title: "Engenharia de Software"
+    title: "Software Engineering"
+    title_pt: "Engenharia de Software"
     academic_level: undergraduate
     academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: engenharia-de-software.png
     site_description:
     readme_tagline:
@@ -643,12 +688,13 @@ repos:
 
   - name: SCE0613-Arquitetura-de-Computadores
     id: SCE0613
-    title: "Arquitetura de Computadores"
+    title: "Computer Architecture"
+    title_pt: "Arquitetura de Computadores"
     academic_level: undergraduate
     academic_area: Computer Science
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: arquitetura-de-computadores.png
     site_description:
     readme_tagline:
@@ -657,12 +703,13 @@ repos:
 
   - name: SCE0614-Inteligencia-Artificial
     id: SCE0614
-    title: "Inteligência Artificial"
+    title: "Artificial Intelligence"
+    title_pt: "Inteligência Artificial"
     academic_level: undergraduate
     academic_area: Artificial Intelligence
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: inteligencia-artificial.png
     site_description:
     readme_tagline:
@@ -671,12 +718,13 @@ repos:
 
   - name: SCE0615-Banco-de-Dados
     id: SCE0615
-    title: "Banco de Dados"
+    title: "Databases"
+    title_pt: "Banco de Dados"
     academic_level: undergraduate
     academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: banco-de-dados.png
     site_description:
     readme_tagline:
@@ -685,12 +733,13 @@ repos:
 
   - name: SCE0616-Sistemas-Computacionais-Distribuidos
     id: SCE0616
-    title: "Sistemas Computacionais Distribuídos"
+    title: "Distributed Computer Systems"
+    title_pt: "Sistemas Computacionais Distribuídos"
     academic_level: undergraduate
     academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: sistemas-distribuidos.png
     site_description:
     readme_tagline:
@@ -699,12 +748,13 @@ repos:
 
   - name: SCE0617-Redes-de-Computadores
     id: SCE0617
-    title: "Redes de Computadores"
+    title: "Computer Networks"
+    title_pt: "Redes de Computadores"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: redes-de-computadores.png
     site_description:
     readme_tagline:
@@ -713,12 +763,13 @@ repos:
 
   - name: SCE0620-Analise-e-Projeto-Orientado-a-Objeto
     id: SCE0620
-    title: "Análise e Projeto Orientado a Objetos"
+    title: "Object-Oriented Analysis and Design"
+    title_pt: "Análise e Projeto Orientado a Objetos"
     academic_level: undergraduate
     academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: analise-projetos-orientado-objeto.png
     site_description:
     readme_tagline:
@@ -727,12 +778,13 @@ repos:
 
   - name: SEL0344-Antenas
     id: SEL0344
-    title: "Antenas"
+    title: "Antennas"
+    title_pt: "Antenas"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: antenas.png
     site_description:
     readme_tagline:
@@ -741,12 +793,13 @@ repos:
 
   - name: SEL0366-Comunicacoes-Opticas
     id: SEL0366
-    title: "Comunicações Ópticas"
+    title: "Optical Communications"
+    title_pt: "Comunicações Ópticas"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: comunicacoes-opticas.png
     site_description:
     readme_tagline:
@@ -755,12 +808,13 @@ repos:
 
   - name: SEL0601-Materiais-Eletricos
     id: SEL0601
-    title: "Materiais Elétricos"
+    title: "Electrical Materials"
+    title_pt: "Materiais Elétricos"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: materiais-eletricos.png
     site_description:
     readme_tagline:
@@ -769,12 +823,13 @@ repos:
 
   - name: SEL0602-Circuitos-Eletricos
     id: SEL0602
-    title: "Circuitos Elétricos"
+    title: "Electric Circuits"
+    title_pt: "Circuitos Elétricos"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: circuitos-eletricos.png
     site_description:
     readme_tagline:
@@ -783,12 +838,13 @@ repos:
 
   - name: SEL0604-Sinais-e-Sistemas
     id: SEL0604
-    title: "Sinais e Sistemas"
+    title: "Signals and Systems"
+    title_pt: "Sinais e Sistemas"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: sinais-e-sistemas.png
     site_description:
     readme_tagline:
@@ -797,12 +853,13 @@ repos:
 
   - name: SEL0606-Laboratorio-de-Sistemas-Digitais
     id: SEL0606
-    title: "Laboratório de Sistemas Digitais"
+    title: "Digital Systems Laboratory"
+    title_pt: "Laboratório de Sistemas Digitais"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: sistemas-digitais.png
     site_description:
     readme_tagline:
@@ -811,12 +868,13 @@ repos:
 
   - name: SEL0607-Fundamentos-de-Semicondutores
     id: SEL0607
-    title: "Fundamentos de Semicondutores"
+    title: "Semiconductor Fundamentals"
+    title_pt: "Fundamentos de Semicondutores"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fundamentos-de-semicondutores.png
     site_description:
     readme_tagline:
@@ -825,14 +883,15 @@ repos:
 
   - name: SCE0607-Organizacao-de-Computadores-Digitais-I
     id: SCE0607
-    title: "Organização de Computadores Digitais I"
+    title: "Digital Computer Organization I"
+    title_pt: "Organização de Computadores Digitais I"
     status: completed
-    completed_on: 
+    completed_on:
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: organizacao-de-computadores.png
     site_description:
     readme_tagline:
@@ -841,12 +900,13 @@ repos:
 
   - name: SEL0608-Eletromagnetismo
     id: SEL0608
-    title: "Eletromagnetismo"
+    title: "Electromagnetism"
+    title_pt: "Eletromagnetismo"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: eletrodinamica.png
     site_description:
     readme_tagline:
@@ -855,12 +915,13 @@ repos:
 
   - name: SEL0609-Circuitos-Eletronicos-I
     id: SEL0609
-    title: "Circuitos Eletrônicos I"
+    title: "Electronic Circuits I"
+    title_pt: "Circuitos Eletrônicos I"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: circuitos-eletronicos-i.png
     site_description:
     readme_tagline:
@@ -869,12 +930,13 @@ repos:
 
   - name: SEL0610-Laboratorio-de-Circuitos-Eletronicos
     id: SEL0610
-    title: "Laboratório de Circuitos Eletrônicos"
+    title: "Electronic Circuits Laboratory"
+    title_pt: "Laboratório de Circuitos Eletrônicos"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: laboratorio-circuitos.png
     site_description:
     readme_tagline:
@@ -883,12 +945,13 @@ repos:
 
   - name: SEL0611-Fundamentos-de-Controle
     id: SEL0611
-    title: "Fundamentos de Controle"
+    title: "Control Fundamentals"
+    title_pt: "Fundamentos de Controle"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fundamentos-controle.png
     site_description:
     readme_tagline:
@@ -897,12 +960,13 @@ repos:
 
   - name: SEL0612-Ondas-Eletromagneticas
     id: SEL0612
-    title: "Ondas Eletromagnéticas"
+    title: "Electromagnetic Waves"
+    title_pt: "Ondas Eletromagnéticas"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: ondas-eletromagneticas.png
     site_description:
     readme_tagline:
@@ -911,12 +975,13 @@ repos:
 
   - name: SEL0614-Microprocessadores-e-Aplicacoes
     id: SEL0614
-    title: "Microprocessadores e Aplicações"
+    title: "Microprocessors and Applications"
+    title_pt: "Microprocessadores e Aplicações"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: microprocessadores.png
     site_description:
     readme_tagline:
@@ -925,12 +990,13 @@ repos:
 
   - name: SEL0615-Circuitos-Eletronicos-II
     id: SEL0615
-    title: "Circuitos Eletrônicos II"
+    title: "Electronic Circuits II"
+    title_pt: "Circuitos Eletrônicos II"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: circuitos-eletronicos-ii.png
     site_description:
     readme_tagline:
@@ -939,12 +1005,13 @@ repos:
 
   - name: SEL0615-Processamento-Digital-de-Sinais
     id: SEL0615
-    title: "Processamento Digital de Sinais"
+    title: "Digital Signal Processing"
+    title_pt: "Processamento Digital de Sinais"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: processamento-digital-sinais.png
     site_description:
     readme_tagline:
@@ -953,12 +1020,13 @@ repos:
 
   - name: SEL0616-Principios-de-Comunicacao
     id: SEL0616
-    title: "Princípios de Comunicação"
+    title: "Principles of Communication"
+    title_pt: "Princípios de Comunicação"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: principios-de-comunicacao.png
     site_description:
     readme_tagline:
@@ -967,12 +1035,13 @@ repos:
 
   - name: SEL0617-Fundamentos-de-Microeletronica
     id: SEL0617
-    title: "Fundamentos de Microeletrônica"
+    title: "Microelectronics Fundamentals"
+    title_pt: "Fundamentos de Microeletrônica"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fundamentos-microeletronica.png
     site_description:
     readme_tagline:
@@ -981,12 +1050,13 @@ repos:
 
   - name: SEL0618-Projeto-de-Circuitos-Integrados-Analogicos
     id: SEL0618
-    title: "Projeto de Circuitos Integrados Analógicos"
+    title: "Analog Integrated Circuit Design"
+    title_pt: "Projeto de Circuitos Integrados Analógicos"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: projeto-circuito-integrado-i.png
     site_description:
     readme_tagline:
@@ -995,12 +1065,13 @@ repos:
 
   - name: SEL0618-Projeto-de-Circuitos-Integrados-Digitais-I
     id: SEL0618
-    title: "Projeto de Circuitos Integrados Digitais I"
+    title: "Digital Integrated Circuit Design I"
+    title_pt: "Projeto de Circuitos Integrados Digitais I"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: projeto-circuito-integrado-ii.png
     site_description:
     readme_tagline:
@@ -1009,12 +1080,13 @@ repos:
 
   - name: SEL0619-Comunicacao-Digital
     id: SEL0619
-    title: "Comunicação Digital"
+    title: "Digital Communication"
+    title_pt: "Comunicação Digital"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: comunicacao-digital.png
     site_description:
     readme_tagline:
@@ -1023,12 +1095,13 @@ repos:
 
   - name: SEL0620-Controle-Digital
     id: SEL0620
-    title: "Controle Digital"
+    title: "Digital Control"
+    title_pt: "Controle Digital"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: controle-digital.png
     site_description:
     readme_tagline:
@@ -1037,12 +1110,13 @@ repos:
 
   - name: SEL0622-Projeto-de-Circuitos-Integrados-Digitais-II
     id: SEL0622
-    title: "Projeto de Circuitos Integrados Digitais II"
+    title: "Digital Integrated Circuit Design II"
+    title_pt: "Projeto de Circuitos Integrados Digitais II"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: projeto-circuito-integrado-ii.png
     site_description:
     readme_tagline:
@@ -1051,12 +1125,13 @@ repos:
 
   - name: SEP0527-Gestao-e-Organizacao
     id: SEP0527
-    title: "Gestão e Organização"
+    title: "Management and Organization"
+    title_pt: "Gestão e Organização"
     academic_level: undergraduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: gestao-e-organizacao.png
     site_description:
     readme_tagline:
@@ -1065,12 +1140,13 @@ repos:
 
   - name: SEP0587-Principios-de-Economia
     id: SEP0587
-    title: "Princípios de Economia"
+    title: "Principles of Economics"
+    title_pt: "Princípios de Economia"
     academic_level: undergraduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: principios-de-economia.png
     site_description:
     readme_tagline:
@@ -1079,12 +1155,13 @@ repos:
 
   - name: SET0623-Mecanica-dos-Solidos
     id: SET0623
-    title: "Mecânica dos Sólidos"
+    title: "Solid Mechanics"
+    title_pt: "Mecânica dos Sólidos"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: mecanica-dos-solidos.png
     site_description:
     readme_tagline:
@@ -1093,12 +1170,13 @@ repos:
 
   - name: SHS0416-Sistema-de-Gestao-Ambiental
     id: SHS0416
-    title: "Sistema de Gestão Ambiental"
+    title: "Environmental Management System"
+    title_pt: "Sistema de Gestão Ambiental"
     academic_level: undergraduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: gestao-ambiental.png
     site_description:
     readme_tagline:
@@ -1107,12 +1185,13 @@ repos:
 
   - name: SHS0619-Fenomenos-de-Transporte
     id: SHS0619
-    title: "Fenômenos de Transporte"
+    title: "Transport Phenomena"
+    title_pt: "Fenômenos de Transporte"
     academic_level: undergraduate
     academic_area: Physics
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: fenomenos-de-transporte.png
     site_description:
     readme_tagline:
@@ -1121,12 +1200,13 @@ repos:
 
   - name: SMA0111-Funcoes-de-Variaveis-Complexas
     id: SMA0111
-    title: "Funções de Variáveis Complexas"
+    title: "Functions of a Complex Variable"
+    title_pt: "Funções de Variáveis Complexas"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: variaveis-complexas.png
     site_description:
     readme_tagline:
@@ -1135,12 +1215,13 @@ repos:
 
   - name: SMA0182-Algebra-Linear-e-Equacoes-Diferenciais
     id: SMA0182
-    title: "Álgebra Linear e Equações Diferenciais"
+    title: "Linear Algebra and Differential Equations"
+    title_pt: "Álgebra Linear e Equações Diferenciais"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: algebra-linear.png
     site_description:
     readme_tagline:
@@ -1149,12 +1230,13 @@ repos:
 
   - name: SMA0300-Geometria-Analitica
     id: SMA0300
-    title: "Geometria Analítica"
+    title: "Analytic Geometry"
+    title_pt: "Geometria Analítica"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: geometria-analitica.png
     site_description:
     readme_tagline:
@@ -1163,12 +1245,13 @@ repos:
 
   - name: SMA0301-Calculo-I
     id: SMA0301
-    title: "Cálculo I"
+    title: "Calculus I"
+    title_pt: "Cálculo I"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: calculo-i.png
     site_description:
     readme_tagline:
@@ -1177,12 +1260,13 @@ repos:
 
   - name: SMA0332-Calculo-II
     id: SMA0332
-    title: "Cálculo II"
+    title: "Calculus II"
+    title_pt: "Cálculo II"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: calculo-ii.png
     site_description:
     readme_tagline:
@@ -1191,12 +1275,13 @@ repos:
 
   - name: SMA0333-Calculo-III
     id: SMA0333
-    title: "Cálculo III"
+    title: "Calculus III"
+    title_pt: "Cálculo III"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: calculo-iii.png
     site_description:
     readme_tagline:
@@ -1205,12 +1290,13 @@ repos:
 
   - name: SME0320-Estatistica-I
     id: SME0320
-    title: "Estatística I"
+    title: "Statistics I"
+    title_pt: "Estatística I"
     academic_level: undergraduate
     academic_area: Statistics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: estatistica.png
     site_description:
     readme_tagline:
@@ -1219,12 +1305,13 @@ repos:
 
   - name: SME0600-Calculo-Numerico-I
     id: SME0600
-    title: "Cálculo Numérico I"
+    title: "Numerical Methods I"
+    title_pt: "Cálculo Numérico I"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: calculo-numerico-i.png
     site_description:
     readme_tagline:
@@ -1233,12 +1320,13 @@ repos:
 
   - name: SME0601-Calculo-Numerico-II
     id: SME0601
-    title: "Cálculo Numérico II"
+    title: "Numerical Methods II"
+    title_pt: "Cálculo Numérico II"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: calculo-numerico-ii.png
     site_description:
     readme_tagline:
@@ -1247,12 +1335,13 @@ repos:
 
   - name: SME0610-Programacao-Matematica
     id: SME0610
-    title: "Programação Matemática"
+    title: "Mathematical Programming"
+    title_pt: "Programação Matemática"
     academic_level: undergraduate
     academic_area: Mathematics
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: programacao-matematica.png
     site_description:
     readme_tagline:
@@ -1261,12 +1350,13 @@ repos:
 
   - name: SQM0405-Quimica-Geral-Experimental
     id: SQM0405
-    title: "Química Geral Experimental"
+    title: "General Chemistry Laboratory"
+    title_pt: "Química Geral Experimental"
     academic_level: undergraduate
     academic_area: Chemistry
     academic_school: IQ/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: laboratorio-quimica.png
     site_description:
     readme_tagline:
@@ -1275,12 +1365,13 @@ repos:
 
   - name: SSC0144-Redes-de-Alto-Desempenho
     id: SSC0144
-    title: "Redes de Alto Desempenho"
+    title: "High-Performance Networks"
+    title_pt: "Redes de Alto Desempenho"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: redes-de-alto-desempenho.png
     site_description:
     readme_tagline:
@@ -1289,12 +1380,13 @@ repos:
 
   - name: SSC0570-Empreendedores-Em-Informatica
     id: SSC0570
-    title: "Empreendedores em Informática"
+    title: "Entrepreneurs in Informatics"
+    title_pt: "Empreendedores em Informática"
     academic_level: undergraduate
     academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: empreendedores-em-informatica.png
     site_description:
     readme_tagline:
@@ -1303,12 +1395,13 @@ repos:
 
   - name: SSC0643-Avaliacao-de-Desempenho
     id: SSC0643
-    title: "Avaliação de Desempenho"
+    title: "Performance Evaluation"
+    title_pt: "Avaliação de Desempenho"
     academic_level: undergraduate
     academic_area: Software Engineering
     academic_school: EESC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: avaliacao-de-desempenho.png
     site_description:
     readme_tagline:
@@ -1317,12 +1410,13 @@ repos:
 
   - name: SSC0748-Redes-Moveis
     id: SSC0748
-    title: "Redes Móveis"
+    title: "Mobile Networks"
+    title_pt: "Redes Móveis"
     academic_level: undergraduate
     academic_area: Communications
     academic_school: ICMC/USP
     status: completed
-    completed_on: 
+    completed_on:
     site_hero_image: redes-moveis.png
     site_description:
     readme_tagline:
