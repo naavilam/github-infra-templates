@@ -53,28 +53,29 @@
     <!-- ABOUT -->
     <section id="about" class="section">
       <h2>About</h2>
-      <blockquote class="about-quote">
-        {{ ABOUT }}
-      </blockquote>
 
+      <div class="card">
+        <blockquote class="about-quote">
+          {{ ABOUT }}
+        </blockquote>
 
-      <p class="about-link">
-        <a href="{{ COURSE_URL }}" target="_blank" rel="noopener">
-          → Lecture Notes
-        </a>
-      </p>
+        <p class="about-link">
+          <a href="{{ COURSE_URL }}" target="_blank" rel="noopener">
+            → Lecture Notes
+          </a>
+        </p>
 
-      <p class="muted">
-        Last Updated at {{TIMESTAMP}} • Number of notebooks in this course:
-        <span id="nbcount">{{NBCOUNT}}</span>
-      </p>
+        <p class="muted">
+          Last Updated at {{TIMESTAMP}} • Number of notebooks in this course:
+          <span id="nbcount">{{NBCOUNT}}</span>
+        </p>
 
-      <p class="about-contact">
-        <strong>Contact:</strong><br>
-        nara.moraes@usp.br ·
-        <a href="{{ GITHUB_LINK }}#readme">GitHub</a>
-      </p>
-
+        <p class="about-contact">
+          <strong>Contact:</strong><br>
+          nara.moraes@usp.br ·
+          <a href="{{ GITHUB_LINK }}#readme">GitHub</a>
+        </p>
+      </div>
     </section>
 
     <!-- BIO -->
