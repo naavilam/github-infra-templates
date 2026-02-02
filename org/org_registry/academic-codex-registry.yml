@@ -1063,10 +1063,25 @@ repos:
     readme_cta_text: "Open full course website."
     readme_theme: minimal
 
-  - name: SEL0618-Projeto-de-Circuitos-Integrados-Digitais-I
-    id: SEL0618
+  - name: SEL0621-Projeto-de-Circuitos-Integrados-Digitais-I
+    id: SEL0621
     title: "Digital Integrated Circuit Design I"
     title_pt: "Projeto de Circuitos Integrados Digitais I"
+    academic_level: undergraduate
+    academic_area: Eletronics
+    academic_school: EESC/USP
+    status: completed
+    completed_on:
+    site_hero_image: projeto-circuito-integrado-i.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
+  - name: SEL0622-Projeto-de-Circuitos-Integrados-Digitais-II
+    id: SEL0622
+    title: "Digital Integrated Circuit Design II"
+    title_pt: "Projeto de Circuitos Integrados Digitais II"
     academic_level: undergraduate
     academic_area: Eletronics
     academic_school: EESC/USP
@@ -1103,21 +1118,6 @@ repos:
     status: completed
     completed_on:
     site_hero_image: controle-digital.png
-    site_description:
-    readme_tagline:
-    readme_cta_text: "Open full course website."
-    readme_theme: minimal
-
-  - name: SEL0622-Projeto-de-Circuitos-Integrados-Digitais-II
-    id: SEL0622
-    title: "Digital Integrated Circuit Design II"
-    title_pt: "Projeto de Circuitos Integrados Digitais II"
-    academic_level: undergraduate
-    academic_area: Eletronics
-    academic_school: EESC/USP
-    status: completed
-    completed_on:
-    site_hero_image: projeto-circuito-integrado-ii.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
