@@ -83,7 +83,9 @@ jobs:
           reg_path_local="central/org/org_registry/${org_lc}-registry.yml"
           # fallback via API (caso não exista localmente por algum motivo)
           reg_path_api="org/org_registry/${org_lc}-registry.yml"
-          orgs_path_local = "central/orgs.yml"
+
+          orgs_path_local="central/orgs.yml"
+          export ORGS_PATH_LOCAL="${orgs_path_local}"
 
           echo "PWD=$(pwd)"
           echo "ORG='${ORG}' (org_lc='${org_lc}')"
@@ -92,6 +94,7 @@ jobs:
           echo "TEMPLATE_REF='${TEMPLATE_REF}'"
           echo "REGISTRY_LOCAL='${reg_path_local}'"
           echo "REGISTRY_API='${reg_path_api}'"
+          echo "ORGS_YML_LOCAL='${orgs_path_local}'"
 
           echo "---- find registry candidates ----"
           find . -maxdepth 6 -type f \( -name "*registry*.yml" -o -name "*registry*.yaml" -o -name "*repos*.yml" -o -name "*repos*.yaml" \) -print || true
@@ -103,82 +106,79 @@ jobs:
             echo "local registry file not found at ${reg_path_local}"
           fi
 
+          echo "---- show orgs.yml (first 120 lines if exists) ----"
+          if [ -f "${orgs_path_local}" ]; then
+            sed -n '1,120p' "${orgs_path_local}"
+          else
+            echo "orgs.yml not found at ${orgs_path_local}"
+          fi
+
           python - <<'PY'
-          import os, sys, json, base64, re
+          import os, sys, json, base64
           import yaml
 
           # recupera chave google analytics
           def load_org_ga_id(org_name: str) -> str:
-            path = orgs_path_local
-            try:
-              data = yaml.safe_load(open(path, "r", encoding="utf-8")) or {}
-            except FileNotFoundError:
-              print(f"::warning::orgs.yml not found at {path}")
-              return ""
-            except Exception as e:
-              print(f"::warning::failed to read orgs.yml at {path}: {e}")
-              return ""
+              path = os.environ.get("ORGS_PATH_LOCAL", "central/orgs.yml")
+              try:
+                  data = yaml.safe_load(open(path, "r", encoding="utf-8")) or {}
+              except FileNotFoundError:
+                  print(f"::warning::orgs.yml not found at {path}")
+                  return ""
+              except Exception as e:
+                  print(f"::warning::failed to read orgs.yml at {path}: {e}")
+                  return ""
 
-            # suporta orgs.yml como lista ou dict
-            if isinstance(data, list):
-              items = data
-            elif isinstance(data, dict):
-              items = data.get("orgs") or data.get("organizations") or data.get("items") or []
-              if not isinstance(items, list):
-                items = []
-            else:
-              items = []
+              # suporta orgs.yml como lista ou dict
+              if isinstance(data, list):
+                  items = data
+              elif isinstance(data, dict):
+                  items = data.get("orgs") or data.get("organizations") or data.get("items") or []
+                  if not isinstance(items, list):
+                      items = []
+              else:
+                  items = []
 
-            org_lc = (org_name or "").strip().lower()
-            for it in items:
-              if not isinstance(it, dict):
-                continue
-              name = str(it.get("name", "")).strip().lower()
-              if name == org_lc:
-                return (it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
-            return ""
+              org_lc = (org_name or "").strip().lower()
+              for it in items:
+                  if not isinstance(it, dict):
+                      continue
+                  name = str(it.get("name", "")).strip().lower()
+                  if name == org_lc:
+                      return (it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
+              return ""
 
           org = (os.environ.get("ORG") or "").strip()
           if not org:
-            raise SystemExit("::error::ORG env is required")
+              raise SystemExit("::error::ORG env is required")
 
           ga_id = load_org_ga_id(org)
           print(f"[debug] ga_id_for_org={org} -> {ga_id or '(missing)'}")
+
           repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
-          central_repo = (os.environ.get("CENTRAL_REPO") or "").strip()
-          template_ref = (os.environ.get("TEMPLATE_REF") or "main").strip()
-          gh_token = (os.environ.get("GH_TOKEN") or "").strip()
 
           org_lc = org.lower()
           reg_path_local = f"central/org/org_registry/{org_lc}-registry.yml"
-          reg_path_api   = f"org/org_registry/{org_lc}-registry.yml"
 
           def norm(s: str) -> str:
-            return (s or "").strip().lower()
+              return (s or "").strip().lower()
 
           def slug_repo(name: str) -> str:
-            s = (name or "").strip()
-            s = s.replace("(", "-").replace(")", "-")
-            return s
+              s = (name or "").strip()
+              s = s.replace("(", "-").replace(")", "-")
+              return s
 
-          # -------------------------
           # 1) LÊ LOCAL (CANÔNICO)
-          # -------------------------
-          raw = None
-          source = None
-
           with open(reg_path_local, "r", encoding="utf-8") as f:
-            raw = f.read()
+              raw = f.read()
           source = f"local:{reg_path_local}"
- 
-          # -------------------------
+
           # PARSE YAML + SANITY
-          # -------------------------
           data = yaml.safe_load(raw) or {}
           items = data.get("repos", [])
           if not isinstance(items, list):
-            print(f"::warning::'repos' is not a list (type={type(items).__name__}). Forcing empty list.", file=sys.stderr)
-            items = []
+              print(f"::warning::'repos' is not a list (type={type(items).__name__}). Forcing empty list.", file=sys.stderr)
+              items = []
 
           print(f"[debug] registry_source={source}")
           print(f"[debug] top_keys={list(data.keys())}")
@@ -186,89 +186,85 @@ jobs:
 
           include = []
           for it in items:
-            if not isinstance(it, dict):
-              continue
-
-            raw_name = str(it.get("name", "")).strip()
-            if not raw_name:
-              continue
-
-            name = slug_repo(raw_name)
-            full = f"{org_lc}/{name}"
-
-            # filtro: aceita "repo" OU "org/repo"
-            if repo_filter:
-              rf = repo_filter.strip()
-              if "/" in rf:
-                if norm(full) != norm(rf):
-                  continue
-              else:
-                if norm(name) != norm(rf) and norm(raw_name) != norm(rf) and norm(slug_repo(rf)) != norm(name):
+              if not isinstance(it, dict):
                   continue
 
-            course_id = (it.get("id") or "").strip() or name
-            title = (it.get("title") or "").strip()
-            area  = (it.get("academic_area") or "").strip()
-            about = (it.get("site_description") or "").strip()
-            course_url = (it.get("course_url") or "").strip()
+              raw_name = str(it.get("name", "")).strip()
+              if not raw_name:
+                  continue
 
-            LEVEL_MAP = {
-                "undergraduate": "Undergraduate Course",
-                "graduate": "Graduate Course",
-            }
+              name = slug_repo(raw_name)
+              full = f"{org_lc}/{name}"
 
-            raw_level = (it.get("academic_level") or "").strip().lower()
-            level = LEVEL_MAP.get(raw_level, raw_level)
+              # filtro: aceita "repo" OU "org/repo"
+              if repo_filter:
+                  rf = repo_filter.strip()
+                  if "/" in rf:
+                      if norm(full) != norm(rf):
+                          continue
+                  else:
+                      if norm(name) != norm(rf) and norm(raw_name) != norm(rf) and norm(slug_repo(rf)) != norm(name):
+                          continue
 
+              course_id = (it.get("id") or "").strip() or name
+              title = (it.get("title") or "").strip()
+              area  = (it.get("academic_area") or "").strip()
+              about = (it.get("site_description") or "").strip()
+              course_url = (it.get("course_url") or "").strip()
 
-            tagline = (it.get("readme_tagline") or "").strip()
-            if not tagline:
-              parts = [p for p in [area, level] if p]
-              tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
+              LEVEL_MAP = {
+                  "undergraduate": "Undergraduate Course",
+                  "graduate": "Graduate Course",
+              }
+              raw_level = (it.get("academic_level") or "").strip().lower()
+              level = LEVEL_MAP.get(raw_level, raw_level)
 
-            site_url = (it.get("site_url") or "").strip()
-            if not site_url:
-              site_url = f"https://{org_lc}.github.io/{name}"
+              tagline = (it.get("readme_tagline") or "").strip()
+              if not tagline:
+                  parts = [p for p in [area, level] if p]
+                  tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
 
-            cfg = {
-              "TITLE_1": course_id,
-              "TITLE_2": title or name.replace("-", " "),
-              "REPO_TAGLINE": tagline,
-              "CTA_TEXT": (it.get("readme_cta_text") or "Access the full course website").strip(),
-              "THEME": (it.get("readme_theme") or "coding").strip(),
-              "SITE_URL": site_url,
-              "HERO_FILE": (it.get("site_hero_image") or "").strip(),
-              "GITHUB_LINK": f"https://github.com/{full}",
-              "CENTRAL_REPO": f"https://{org_lc}.github.io",
-              "ABOUT": about,
-              "SUBTITLE_1": area,
-              "SUBTITLE_2": level,
-              "COURSE_URL": course_url,
-              "GA_ID": ga_id
-            }
-            cfg = {k: v for k, v in cfg.items() if v}
+              site_url = (it.get("site_url") or "").strip()
+              if not site_url:
+                  site_url = f"https://{org_lc}.github.io/{name}"
 
-            payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-            cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
+              cfg = {
+                  "TITLE_1": course_id,
+                  "TITLE_2": title or name.replace("-", " "),
+                  "REPO_TAGLINE": tagline,
+                  "CTA_TEXT": (it.get("readme_cta_text") or "Access the full course website").strip(),
+                  "THEME": (it.get("readme_theme") or "coding").strip(),
+                  "SITE_URL": site_url,
+                  "HERO_FILE": (it.get("site_hero_image") or "").strip(),
+                  "GITHUB_LINK": f"https://github.com/{full}",
+                  "CENTRAL_REPO": f"https://{org_lc}.github.io",
+                  "ABOUT": about,
+                  "SUBTITLE_1": area,
+                  "SUBTITLE_2": level,
+                  "COURSE_URL": course_url,
+                  "GA_ID": ga_id,
+              }
+              cfg = {k: v for k, v in cfg.items() if v}
 
-            include.append({"repo": full, "cfg_b64": cfg_b64})
+              payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+              cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
+              include.append({"repo": full, "cfg_b64": cfg_b64})
 
           matrix = {"include": include}
           out_path = os.environ["GITHUB_OUTPUT"]
           with open(out_path, "a", encoding="utf-8") as f:
-            f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
-            f.write(f"count={len(include)}\n")
+              f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
+              f.write(f"count={len(include)}\n")
 
           print(f"[ok] selected={len(include)} from {source}")
           if len(include) == 0:
-            # ajuda a diagnosticar *rapidamente* sem adivinhar
-            names = []
-            for it in items[:20]:
-              if isinstance(it, dict) and it.get("name"):
-                names.append(str(it.get("name")))
-            print(f"[debug] first_repo_names={names}")
+              names = []
+              for it in items[:20]:
+                  if isinstance(it, dict) and it.get("name"):
+                      names.append(str(it.get("name")))
+              print(f"[debug] first_repo_names={names}")
           PY
-
+          
       - name: Debug plan outputs
         shell: bash
         run: |

@@ -170,8 +170,8 @@ orgs:
         app_name: Economics-Topics-Provisioner-App
         app_instalation: 103588461
 
-  - name: rigorous-math-proof-collection
-    title: "Rigorous Mathematics Proof Collection"
+  - name: rigorous-proof-series-mathematics
+    title: "Rigorous Proof Series: Mathematics"
     ga_analytics: 
     apps:
       dispatcher:
@@ -185,4 +185,38 @@ orgs:
       provisioner:
         app_id: 
         app_name: Rigorous-Math-Provisioner-App
+        app_instalation: 
+
+  - name: rigorous-proof-series-physics
+    title: "Rigorous Proof Series: Physics"
+    ga_analytics: 
+    apps:
+      dispatcher:
+        app_id: 
+        app_name: Rigorous-Physics-Dispatcher-App
+        app_instalation: 
+      auditor:
+        app_id: 
+        app_name: Rigorous-Physics-Auditor-App
+        app_instalation: 
+      provisioner:
+        app_id: 
+        app_name: Rigorous-Physics-Provisioner-App
+        app_instalation: 
+
+  - name: rigorous-proof-series-computer-science
+    title: "Rigorous Proof Series: Computer Science"
+    ga_analytics: 
+    apps:
+      dispatcher:
+        app_id: 
+        app_name: Rigorous-CScience-Dispatcher-App
+        app_instalation: 
+      auditor:
+        app_id: 
+        app_name: Rigorous-CScience-Auditor-App
+        app_instalation: 
+      provisioner:
+        app_id: 
+        app_name: Rigorous-CScience-Provisioner-App
         app_instalation: 

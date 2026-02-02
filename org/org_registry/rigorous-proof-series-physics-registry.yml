@@ -1,0 +1,68 @@
+# ============================================================
+# Rigorous Proof Series Physics – Repository Registry
+# Source of truth
+# ============================================================
+
+org: rigorous-proof-series-physics
+
+repos:
+
+  - name: "001-Eletrodynamics"
+    id: 001
+    title: "Eletrodynamics"
+    title_pt: "Eletrodinâmica"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status: 
+    completed_on:
+    site_hero_image: eletrodinamica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+  
+  - name: "002-Statistical-Physics"
+    id: 002
+    title: "Statistical-Physics"
+    title_pt: "Física Estatística"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status: 
+    completed_on:
+    site_hero_image: fisica-estatistica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+
+  - name: "003-Classical-Mechanics"
+    id: 003
+    title: "Classical Mechanics"
+    title_pt: "Mecânica Clássica"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status: 
+    completed_on:
+    site_hero_image: mecanica-classica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+
+  - name: "004-Quantum-Mechanics"
+    id: 004
+    title: "Quantum Mechanics"
+    title_pt: "Mecânica"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status: 
+    completed_on:
+    site_hero_image: mecanica-quantica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
