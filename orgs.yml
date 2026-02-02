@@ -169,3 +169,20 @@ orgs:
         app_id: 2632140
         app_name: Economics-Topics-Provisioner-App
         app_instalation: 103588461
+
+  - name: rigorous-math-proof-collection
+    title: "Rigorous Mathematics Proof Collection"
+    ga_analytics: 
+    apps:
+      dispatcher:
+        app_id: 
+        app_name: Rigorous-Math-Dispatcher-App
+        app_instalation: 
+      auditor:
+        app_id: 
+        app_name: Rigorous-Math-Auditor-App
+        app_instalation: 
+      provisioner:
+        app_id: 
+        app_name: Rigorous-Math-Provisioner-App
+        app_instalation: 
