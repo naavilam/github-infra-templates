@@ -66,7 +66,7 @@ repos:
     id: MAE5911
     title: "Fundamentos de Estatística e Machine Learning"
     academic_level: graduate
-    academic_area: Statistics
+    academic_area: Artificial Intelligence
     academic_school: EESC/USP
     status: completed
     completed_on: 
@@ -435,7 +435,7 @@ repos:
     id: SAP0679
     title: "Humanidades e Ciências Sociais"
     academic_level: undergraduate
-    academic_area: Communications
+    academic_area: Entrepreneurship
     academic_school: EESC/USP
     status: completed
     completed_on: 
@@ -673,7 +673,7 @@ repos:
     id: SCE0615
     title: "Banco de Dados"
     academic_level: undergraduate
-    academic_area: Computer Science
+    academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
     completed_on: 
@@ -687,7 +687,7 @@ repos:
     id: SCE0616
     title: "Sistemas Computacionais Distribuídos"
     academic_level: undergraduate
-    academic_area: Computer Science
+    academic_area: Software Engineering
     academic_school: ICMC/USP
     status: completed
     completed_on: 
@@ -701,7 +701,7 @@ repos:
     id: SCE0617
     title: "Redes de Computadores"
     academic_level: undergraduate
-    academic_area: Computer Science
+    academic_area: Communications
     academic_school: ICMC/USP
     status: completed
     completed_on: 
@@ -729,7 +729,7 @@ repos:
     id: SEL0344
     title: "Antenas"
     academic_level: undergraduate
-    academic_area: Eletronics
+    academic_area: Communications
     academic_school: EESC/USP
     status: completed
     completed_on: 
@@ -1277,7 +1277,7 @@ repos:
     id: SSC0144
     title: "Redes de Alto Desempenho"
     academic_level: undergraduate
-    academic_area: Computer Science
+    academic_area: Communications
     academic_school: EESC/USP
     status: completed
     completed_on: 
