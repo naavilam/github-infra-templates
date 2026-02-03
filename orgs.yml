@@ -73,21 +73,21 @@ orgs:
         app_instalation: 103056460
 
   - name: topics-series-mathematics
-    slug: mathematics-topics
+    slug: math-topics
     title: "Mathematics Topics Series"
     ga_analytics: G-X9ELZLHCW6
     apps:
       dispatcher:
         app_id: 2632062
-        app_name: Topics-Mathematics-Dispatcher-App
+        app_name: Math-Topics-Dispatcher-App
         app_instalation: 103586528
       auditor:
         app_id: 2632076
-        app_name: Topics-Mathematics-Auditor-App
+        app_name: Math-Topics-Auditor-App
         app_instalation: 103586722
       provisioner:
         app_id: 2632081
-        app_name: Topics-Mathematics-Provisioner-App
+        app_name: Math-Topics-Provisioner-App
         app_instalation: 103586902
 
   - name: topics-series-physics
@@ -97,15 +97,15 @@ orgs:
     apps:
       dispatcher:
         app_id: 2631271
-        app_name: Topics-Physics-Dispatcher-App
+        app_name: Physics-Topics-Dispatcher-App
         app_instalation: 103564496
       auditor:
-        app_id: Topics-Physics-Auditor-App
+        app_id: Physics-Topics-Auditor-App
         app_name: 2631297
         app_instalation: 103564843
       provisioner:
         app_id: 2631317
-        app_name: Topics-Physics-Provisioner-App
+        app_name: Physics-Topics-Provisioner-App
         app_instalation: 103565036
 
   - name: topics-series-business
@@ -181,7 +181,7 @@ orgs:
         app_instalation: 103588461
 
   - name: rigorous-proof-series-mathematics
-    slug: rigorous-mathematics
+    slug: rigorous-math
     title: "Rigorous Proof Series: Mathematics"
     ga_analytics: 
     apps:
