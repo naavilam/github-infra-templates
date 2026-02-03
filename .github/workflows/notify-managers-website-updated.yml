@@ -9,6 +9,14 @@ on:
         type: string
         default: ""
 
+  push:
+    branches: [ main ]
+    paths:
+      - "manager/manager_website/**"
+      - "manager/manager_assets/**"
+      - "manager/manager_scripts/**"
+      - "manager/manager_workflows/**"
+
 permissions:
   contents: read
   id-token: write

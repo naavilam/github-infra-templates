@@ -22,17 +22,6 @@ on:
         type: string
         default: ""
 
-  # rebuild automático quando algo do site mudar (rebuild ALL orgs listadas em orgs.yml)
-  push:
-    branches: [ main ]
-    paths:
-      - "manager/manager_website/**"
-      - "manager/manager_assets/**"
-      - "manager/manager_scripts/**"
-      - "manager/manager_workflows/**"
-      - "org/org_registry/**"
-      - "orgs.yml"
-
 permissions:
   contents: read
 

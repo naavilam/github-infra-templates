@@ -8,6 +8,10 @@ on:
         required: false
         type: string
         default: ""
+  push:
+    branches: [ main ]
+    paths:
+      - 'orgs.yml'
 
 permissions:
   contents: read

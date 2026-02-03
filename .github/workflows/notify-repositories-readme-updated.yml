@@ -3,11 +3,12 @@ name: Notify orgs readme's template updated
 env:
   GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
 
-# on:
-  # push:
-    # branches: [ main ]
-    # paths:
-    #   - 'bootstrap/repo_readme/**' 
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'bootstrap/repo_readme/**' 
+      - 'bootstrap/repo_scripts/build_readme.py'
 
 jobs:
   notify:
