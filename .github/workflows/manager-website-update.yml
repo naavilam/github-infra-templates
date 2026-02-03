@@ -85,7 +85,7 @@ jobs:
           set -euo pipefail
 
           python - <<'PY'
-          import os, json, yaml, sys
+          import os, json, yaml
           from pathlib import Path
 
           org_input = (os.environ.get("ORG_INPUT") or "").strip()
@@ -95,7 +95,6 @@ jobs:
               raise SystemExit(f"::error::orgs.yml not found at {orgs_yml} (checkout central failed?)")
 
           data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
-
           if isinstance(data, list):
               items = data
           elif isinstance(data, dict):
@@ -105,25 +104,31 @@ jobs:
           else:
               items = []
 
-          orgs = []
+          selected = []
           for it in items:
-              if isinstance(it, dict):
-                  name = str(it.get("name","")).strip()
-                  if name:
-                      orgs.append(name)
+              if not isinstance(it, dict):
+                  continue
+              org = str(it.get("name","")).strip()
+              slug = str(it.get("slug","")).strip()
+              if not org:
+                  continue
+              if not slug:
+                  # fallback seguro: mantém compatibilidade (slug = org)
+                  slug = org.lower()
+              selected.append({"org": org, "slug": slug.lower()})
 
           if org_input:
-              orgs = [o for o in orgs if o.lower() == org_input.lower()]
-              if not orgs:
+              selected = [x for x in selected if x["org"].lower() == org_input.lower()]
+              if not selected:
                   raise SystemExit(f"::error::org '{org_input}' not found in orgs.yml")
 
-          matrix = {"include": [{"org": o} for o in orgs]}
+          matrix = {"include": selected}
           out = os.environ["GITHUB_OUTPUT"]
           with open(out, "a", encoding="utf-8") as f:
               f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
-              f.write(f"count={len(orgs)}\n")
+              f.write(f"count={len(selected)}\n")
 
-          print(f"[ok] orgs_selected={len(orgs)}")
+          print(f"[ok] orgs_selected={len(selected)}")
           PY
 
   rebuild:
@@ -138,11 +143,14 @@ jobs:
     # mantém o mesmo padrão: environment por org
     environment: ${{ matrix.org }}
 
+    env:
+      ORG:  ${{ matrix.org }}
+      SLUG: ${{ matrix.slug }}
+
     steps:
       - name: Ensure gh is available
         run: gh --version
 
-      # ✅ Token do App (agora usando secrets do workflow_call / workflow_dispatch)
       - name: Create Provisioner installation token
         id: app_token
         uses: actions/create-github-app-token@v1
@@ -308,7 +316,8 @@ jobs:
       - name: Push content to {org}.github.io (site-only)
         shell: bash
         env:
-          ORG: ${{ matrix.org }}
+          ORG:  ${{ matrix.org }}
+          SLUG: ${{ matrix.slug }}
         run: |
           set -euo pipefail
 
@@ -318,8 +327,8 @@ jobs:
 
           gh api "repos/${FULL}" -q '.full_name' >/dev/null
 
-          # ✅ identidade correta do App daquela org
-          BOT="${ORG_LC}-provisioner-app[bot]"
+          SLUG_LC="$(echo "${SLUG}" | tr '[:upper:]' '[:lower:]')"
+          BOT="${SLUG_LC}-provisioner-app[bot]"
           git config --global user.name  "${BOT}"
           git config --global user.email "${BOT}@users.noreply.github.com"
 
