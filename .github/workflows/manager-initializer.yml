@@ -294,30 +294,32 @@ jobs:
 
           rm -rf target
           git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" target
-          cd target
 
-          # garante branch main (se repo recém-criado vier vazio/sem main, isso cria)
-          git checkout -B main
+          # garante que é repo mesmo
+          test -d target/.git
 
-          # aplica o payload (delete no destino para ficar idempotente)
-          rsync -a --delete "$GITHUB_WORKSPACE/out/" .
+          # garante branch main (sem depender de cd)
+          git -C target checkout -B main
 
-          # se nada mudou, sai sem commit (idempotente de verdade)
-          if git diff --quiet; then
+          # aplica payload (idempotente)
+          rsync -a --delete "$GITHUB_WORKSPACE/out/" "target/"
+
+          # se nada mudou, sai sem commit
+          if git -C target diff --quiet; then
             echo "No changes for ${FULL}"
             exit 0
           fi
 
-          git add -A
+          git -C target add -A
 
-          # duplo-check: nada staged?
-          if git diff --cached --quiet; then
+          # se nada staged, sai
+          if git -C target diff --cached --quiet; then
             echo "No staged changes for ${FULL}"
             exit 0
           fi
 
-          git commit -m "Update files"
-          git push origin main
+          git -C target commit -m "Update files"
+          git -C target push origin main
 
       - name: Set org secrets (dispatcher + provisioner)
         env:
