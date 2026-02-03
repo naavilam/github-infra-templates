@@ -391,6 +391,9 @@ jobs:
 
       - name: Build + commit + push
         shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ matrix.repo }}          # ex: academic-codex/XYZ
         run: |
           set -euo pipefail
 
@@ -398,7 +401,7 @@ jobs:
             --repo target \
             --central central/bootstrap/repo_readme \
             --repo-cfg _cfg/readme.yml
-          
+
           cd target
 
           # identidade do bot (org do manager atual)
@@ -406,6 +409,13 @@ jobs:
           BOT="${ORG_LC}-provisioner-app[bot]"
           git config user.name "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
+
+          # 🔒 garante push autenticado + sem redirect/rename surprises
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+
+          # opcional: evita prompts mesmo se algo tentar pedir credencial
+          git config --global credential.helper ""
+          git config --global core.askPass "true"
 
           git add README.md .github/readme || true
 
@@ -415,4 +425,7 @@ jobs:
           fi
 
           git commit -m "Update files"
-          git push
+
+          # empurra explicitamente pro branch atual
+          BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+          git push origin "${BRANCH}"
