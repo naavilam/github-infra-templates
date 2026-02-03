@@ -285,6 +285,11 @@ jobs:
       - name: Push content to {org}.github.io
         run: |
           set -euo pipefail
+          
+          echo "WORKFLOW=$GITHUB_WORKFLOW  JOB=$GITHUB_JOB  REF=$GITHUB_REF  SHA=$GITHUB_SHA"
+          ls -la .github/workflows || true
+
+          echo ">>> USING UPDATED PUSH STEP v2 (C-target)"
 
           REPO="${ORG}.github.io"
           FULL="${ORG}/${REPO}"
