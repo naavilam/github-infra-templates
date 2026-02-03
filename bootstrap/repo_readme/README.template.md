@@ -3,7 +3,7 @@
 </p> -->
 
 <p align="center">
-  <a href="{{SITE_URL}}">
+  <a href="{{SITE_URL}}?utm_source={{REPO}}&utm_medium=readme">
     <img src="{{ASSETS_DIR}}/hero.svg?v={{TIMESTAMP}}" width="100%" alt="Access the course website" />
   </a>
 </p>

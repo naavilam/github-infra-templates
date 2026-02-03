@@ -190,6 +190,7 @@ jobs:
                   "ASSETS_DIR": (it.get("readme_assets_dir") or ".github/readme").strip(),
                   "HERO_FILE": (it.get("site_hero_image") or "").strip(),
                   "GA_ID": ga_id,
+                  "REPO": name
               }
               cfg = {k: v for k, v in cfg.items() if v}
 
