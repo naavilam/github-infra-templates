@@ -285,25 +285,39 @@ provision:
     - name: Push content to {org}.github.io
       run: |
         set -euo pipefail
+
         REPO="${ORG}.github.io"
+        FULL="${ORG}/${REPO}"
 
         git config --global user.name  "templates-provisioner-app[bot]"
         git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
 
         rm -rf target
-        mkdir -p target
+        git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" target
         cd target
 
-        git init
-        git branch -M main
+        # garante branch main (se repo recém-criado vier vazio/sem main, isso cria)
+        git checkout -B main
 
-        rsync -a "$GITHUB_WORKSPACE/out/" .
+        # aplica o payload (delete no destino para ficar idempotente)
+        rsync -a --delete "$GITHUB_WORKSPACE/out/" .
+
+        # se nada mudou, sai sem commit (idempotente de verdade)
+        if git diff --quiet; then
+          echo "No changes for ${FULL}"
+          exit 0
+        fi
 
         git add -A
-        git commit -m "Update files" || echo "Nothing to commit."
 
-        git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
-        git push -u origin main --force
+        # duplo-check: nada staged?
+        if git diff --cached --quiet; then
+          echo "No staged changes for ${FULL}"
+          exit 0
+        fi
+
+        git commit -m "Update files"
+        git push origin main
 
     - name: Set org secrets (dispatcher + provisioner)
       env:
