@@ -198,8 +198,8 @@ jobs:
           path: templates
           fetch-depth: 1
 
-      # 1) Create repo {org}.github.io (it does not exist by plan)
-      - name: Create {org}.github.io repo
+      # 1) Create repo {org}.github.io repo (skip if already exists)
+      - name: Ensure {org}.github.io repo exists (create if missing)
         run: |
           set -euo pipefail
           : "${ORG:?ORG is required}"
@@ -207,13 +207,18 @@ jobs:
           REPO="${ORG}.github.io"
           FULL="${ORG}/${REPO}"
 
-          echo "Creating repo: ${FULL}"
-          gh api "orgs/${ORG}/repos" -X POST \
-            -f name="$REPO" \
-            -f private=false \
-            -f description="Org website for ${ORG}" >/dev/null
+          echo "Target repo: ${FULL}"
 
-          # Wait for repo provisioning
+          if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
+            echo "Repo already exists: ${FULL} (skip create)"
+          else
+            echo "Creating repo: ${FULL}"
+            gh api "orgs/${ORG}/repos" -X POST \
+              -f name="$REPO" \
+              -f private=false \
+              -f description="Org website for ${ORG}" >/dev/null
+          fi
+
           echo "Waiting for repo to be reachable: ${FULL}"
           for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
             if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
@@ -224,7 +229,6 @@ jobs:
             sleep $((i * 2))
           done
 
-          # Ensure PUBLIC
           echo "Ensuring repo is PUBLIC: ${FULL}"
           for i in 1 2 3 4 5 6; do
             if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
