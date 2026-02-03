@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       org:
-        description: "Target organization"
-        required: true
+        description: "Target organization (leave empty to run ALL from orgs.yml)"
+        required: false
         type: string
+        default: ""
 
 permissions:
   contents: read
@@ -22,366 +23,317 @@ env:
   MAX_PARALLEL: "10"
 
 jobs:
-  provision:
+  plan:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.org }}
-
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      count:  ${{ steps.set.outputs.count }}
     steps:
-      - name: Ensure gh is available
-        run: gh --version
-
-      # 0) Mint token (no mesmo job) + exporta para GH_TOKEN
-      - name: Create Provisioner installation token
-        id: app_token
-        uses: actions/create-github-app-token@v1
+      - uses: actions/checkout@v4
         with:
-          # ROOT creds (repo-level)
-          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
-          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
-          owner: ${{ inputs.org }}
+          fetch-depth: 1
 
-      - name: Debug runner + workspace
-        run: |
-          set -euo pipefail
-          echo "PWD=$PWD"
-          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-          ls -la
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
 
-      - name: Export GH_TOKEN for rest of job (no leak)
-        shell: bash
-        run: |
-          set -euo pipefail
-          tok='${{ steps.app_token.outputs.token }}'
-          echo "mint: token length = ${#tok}"
-          [[ "${#tok}" -ge 20 ]]
-          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
-
-      - name: Sanity check auth
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh auth status
-
-      # 1) Checkout templates repo (public -> GITHUB_TOKEN ok)
-      - name: Checkout templates
+      - name: Checkout templates (orgs.yml only)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CENTRAL_REPO }}
           ref: ${{ env.TEMPLATE_REF }}
           path: templates
+          sparse-checkout: |
+            orgs.yml
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
 
-
-      - name: Debug templates HEAD (prove what you are using)
-        run: |
-          set -euo pipefail
-          echo "templates_repo=${{ env.CENTRAL_REPO }}"
-          echo "templates_ref=${{ env.TEMPLATE_REF }}"
-          cd templates
-          echo "HEAD:"
-          git rev-parse HEAD
-          git log -1 --oneline
-          echo "Recent changes (last commit files):"
-          git show --name-only --pretty="" HEAD | sed '/^$/d' || true
-
-      - name: Debug orgs.yml + registry chosen
+      - id: set
+        name: Build org matrix (1 org or ALL)
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG_INPUT: ${{ inputs.org }}
         run: |
-          set -euo pipefail
-          echo "Looking for org in templates/orgs.yml"
-          ls -la templates/orgs.yml
-          echo "grep ORG name:"
-          grep -n "name: ${ORG}" -n templates/orgs.yml || true
-          echo
-          echo "Registry file:"
-          ls -la "templates/org/org_registry/${ORG}-registry.yml" || true
-
-      # 2) Create repo {org}.github.io if missing
-      - name: Create {org}.github.io repo (if missing)
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-        run: |
-          set -euo pipefail
-
-          : "${ORG:?ORG is required}"
-
-          REPO="${ORG}.github.io"
-          FULL="${ORG}/${REPO}"
-
-          echo "Target repo: ${FULL}"
-
-          # 1) Create repo if missing
-          if gh api "repos/${FULL}" >/dev/null 2>&1; then
-            echo "Repo already exists: ${FULL}"
-          else
-            echo "Creating repo: ${FULL}"
-            gh api "orgs/${ORG}/repos" -X POST \
-              -f name="$REPO" \
-              -f private=false \
-              -f description="Org website for ${ORG}" >/dev/null
-          fi
-
-          # 2) Wait until GitHub finishes repo provisioning
-          echo "Waiting for repo to be fully provisioned: ${FULL}"
-          for i in 1 2 3 4 5 6 7 8 9 10; do
-            if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
-              echo " Repo reachable (attempt $i/10)"
-              break
-            fi
-            echo "…repo not reachable yet (attempt $i/10). Waiting..."
-            sleep $((i * 2))
-          done
-
-          # 3) Enforce PUBLIC (handles repos created as private by org defaults/policies)
-          echo "Ensuring repo is PUBLIC: ${FULL}"
-          for i in 1 2 3 4 5 6; do
-            if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
-              echo " Repo visibility set to public"
-              break
-            fi
-
-            echo "…cannot update visibility yet (attempt $i/6). Likely previous repo operation still in progress. Waiting..."
-            sleep $((i * 3))
-          done
-
-          # 4) Verify
-          is_private="$(gh api "repos/${FULL}" -q '.private')"
-          echo "Repo private? ${is_private}"
-          if [[ "$is_private" == "true" ]]; then
-            echo " Repo still private after retries: ${FULL}" >&2
-            exit 1
-          fi
-
-      # 3) Build payload
-      - name: Assemble website payload
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-        run: |
-          set -euo pipefail
-
-          WS="$GITHUB_WORKSPACE"
-          ROOT="$WS/templates"          # <-- porque você fez checkout em path: templates
-          OUT="$WS/out"                 # <-- out no workspace, não dentro de templates
-
-          rm -rf "$OUT"
-
-          # 1) Copia o site base
-          mkdir -p "$OUT/_posts"
-
-          rsync -a --delete \
-            "$ROOT/manager/manager_website/" \
-            "$OUT/"
-
-          # 2) Assets (depende da org) — normaliza para slug lowercase
-          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-          ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
-
-          if [[ ! -d "$ASSETS_DIR" ]]; then
-            echo "Missing assets dir: $ASSETS_DIR" >&2
-            echo "Available assets:" >&2
-            ls -la "$ROOT/manager/manager_assets" >&2 || true
-            exit 1
-          fi
-
-          rsync -a "$ASSETS_DIR/" "$OUT/"
-
-          # 3) Workflows
-          mkdir -p "$OUT/.github/workflows"
-          rsync -a --delete \
-            "$ROOT/manager/manager_workflows/" \
-            "$OUT/.github/workflows/"
-
-          echo "Payload assembled at: $OUT"
-
-
-      - name: Install python deps for assembly
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
-
-      - name: Generate _posts from registry (assembly_posts.py)
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-        run: |
-          set -euo pipefail
-          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
-          OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
-          SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
-
-          [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
-
-          python "$SCRIPT" \
-            --registry "$REG" \
-            --out-posts "$OUTPOSTS"
-    
-      - name: Write site URL to README.md
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-        run: |
-          set -euo pipefail
-          echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
-          
-      - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org || github.repository_owner }}
-        run: |
-          set -euo pipefail
-
-          python -m pip install --upgrade pip
-          pip install pyyaml
-
           python - <<'PY'
-          import os, yaml
+          import os, json, yaml
+          from pathlib import Path
 
-          org = (os.environ.get("ORG") or "").strip()
-          if not org:
-              raise SystemExit("ORG env is required")
-
-          ws  = os.environ["GITHUB_WORKSPACE"]
-
-          orgs_yml   = os.path.join(ws, "templates", "orgs.yml")
-          config_yml = os.path.join(ws, "out", "_config.yml")
-
-          # --- Load orgs.yml (supports list or dict) ---
-          with open(orgs_yml, "r", encoding="utf-8") as f:
-              data = yaml.safe_load(f) or {}
+          org_input = (os.environ.get("ORG_INPUT") or "").strip()
+          orgs_yml = Path("templates/orgs.yml")
+          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
 
           if isinstance(data, list):
               items = data
-          elif isinstance(data, dict):
+          else:
               items = data.get("orgs") or data.get("organizations") or data.get("items") or []
-              if not isinstance(items, list):
-                  items = []
-          else:
-              items = []
 
-          org_lc = org.lower()
-          entry = next(
-              (x for x in items
-              if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
-              None
-          )
+          selected = []
+          for it in items:
+              if not isinstance(it, dict):
+                  continue
+              org = str(it.get("name","")).strip()
+              slug = str(it.get("slug","")).strip() or org.lower()
+              if org:
+                  selected.append({"org": org, "slug": slug.lower()})
 
-          if not entry:
-              raise SystemExit(f"ORG not found in orgs.yml: {org}")
+          if org_input:
+              selected = [x for x in selected if x["org"].lower() == org_input.lower()]
+              if not selected:
+                  raise SystemExit(f"::error::org '{org_input}' not found in orgs.yml")
 
-          # --- Values to inject ---
-          ga_id = (entry.get("ga_analytics") or entry.get("GA_ID") or entry.get("ga_id") or "").strip()
-          title = (entry.get("title") or "").strip()
-          url   = f"https://{org_lc}.github.io"
-          github_url = f"https://github.com/{org_lc}/{org_lc}.github.io"
-
-          # --- Load existing _config.yml ---
-          with open(config_yml, "r", encoding="utf-8") as f:
-              cfg = yaml.safe_load(f) or {}
-
-          # --- Inject org + utm_source (so templates can build UTMs) ---
-          cfg["org"] = org_lc
-          cfg["utm_source"] = org_lc
-
-          # --- GA tracking id ---
-          if ga_id:
-              cfg["ga_tracking_id"] = ga_id
-              print(f"Injected ga_tracking_id = {ga_id}")
-          else:
-              cfg.pop("ga_tracking_id", None)
-              print("No GA tracking id found; ga_tracking_id removed")
-
-          # --- Title ---
-          if title:
-              cfg["title"] = title
-              print(f"Injected title = {title}")
-          else:
-              print("No title found in orgs.yml; keeping existing title")
-
-          # --- URL (always set, site public URL) ---
-          cfg["url"] = url
-          print(f"Injected url = {url}")
-
-          # --- GitHub URL (useful for templates/footer/header links) ---
-          cfg["github_url"] = github_url
-          print(f"Injected github_url = {github_url}")
-
-          # --- Write back ---
-          with open(config_yml, "w", encoding="utf-8") as f:
-              yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
-
-          print("_config.yml updated successfully")
+          matrix = {"include": selected}
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a", encoding="utf-8") as f:
+              f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
+              f.write(f"count={len(selected)}\n")
+          print(f"[ok] selected={len(selected)}")
           PY
 
-      # 4) Push payload into {org}.github.io
-      - name: Push content to {org}.github.io
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-        run: |
-          set -euo pipefail
-          REPO="${ORG}.github.io"
+provision:
+  needs: plan
+  if: ${{ needs.plan.outputs.count != '0' }}
+  runs-on: ubuntu-latest
+  strategy:
+    fail-fast: false
+    max-parallel: 10
+    matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
-          git config --global user.name  "templates-provisioner-app[bot]"
-          git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
+  environment: ${{ matrix.org }}
 
-          rm -rf target
-          mkdir -p target
-          cd target
+  env:
+    ORG:  ${{ matrix.org }}
+    SLUG: ${{ matrix.slug }}
 
-          git init
-          git branch -M main
+  steps:
+    - name: Ensure gh is available
+      run: gh --version
 
-          rsync -a "$GITHUB_WORKSPACE/out/" .
+    - name: Create Provisioner installation token
+      id: app_token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+        private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+        owner: ${{ matrix.org }}
 
-          git add -A
-          git commit -m "Update files" || echo "Nothing to commit."
+    - name: Debug runner + workspace
+      run: |
+        set -euo pipefail
+        echo "PWD=$PWD"
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+        echo "ORG=$ORG"
+        echo "SLUG=$SLUG"
+        ls -la
 
-          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
-          git push -u origin main --force
+    - name: Export GH_TOKEN for rest of job (no leak)
+      shell: bash
+      run: |
+        set -euo pipefail
+        tok='${{ steps.app_token.outputs.token }}'
+        echo "mint: token length = ${#tok}"
+        [[ "${#tok}" -ge 20 ]]
+        echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
 
-      # 5) Set org secrets
-      - name: Set org secrets (dispatcher + provisioner)
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-          DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
-          DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
-          PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
-          PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
-        run: |
-          set -euo pipefail
+    - name: Sanity check auth
+      shell: bash
+      run: |
+        set -euo pipefail
+        gh auth status
 
-          # --- ORG VARIABLES (non-sensitive) ---
-          echo "$ORG"  | gh variable set ORG  --org "$ORG" --visibility all
-          
-          echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
-          echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
+    - name: Checkout templates
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.CENTRAL_REPO }}
+        ref: ${{ env.TEMPLATE_REF }}
+        path: templates
 
-          # --- ORG SECRETS (sensitive) ---
-          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility all
-          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility all
+    - name: Debug templates HEAD (prove what you are using)
+      run: |
+        set -euo pipefail
+        echo "templates_repo=${{ env.CENTRAL_REPO }}"
+        echo "templates_ref=${{ env.TEMPLATE_REF }}"
+        cd templates
+        git rev-parse HEAD
+        git log -1 --oneline
+        git show --name-only --pretty="" HEAD | sed '/^$/d' || true
 
-      # 6) Set repo secrets (auditor only)
-      - name: Set auditor secrets on {org}.github.io
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-          AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
-          AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
-        run: |
-          set -euo pipefail
-          TARGET="${ORG}/${ORG}.github.io"
+    - name: Debug orgs.yml + registry chosen
+      run: |
+        set -euo pipefail
+        echo "Looking for org in templates/orgs.yml"
+        ls -la templates/orgs.yml
+        echo "grep ORG name:"
+        grep -n "name: ${ORG}" -n templates/orgs.yml || true
+        echo
+        echo "Registry file:"
+        ls -la "templates/org/org_registry/${ORG}-registry.yml" || true
 
-          # --- REPO VARIABLES (non-sensitive) ---
-          echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
+    - name: Create {org}.github.io repo (if missing)
+      run: |
+        set -euo pipefail
+        : "${ORG:?ORG is required}"
 
-          # --- REPO SECRETS (sensitive) ---
-          echo "$AUDITOR_PRIVATE_KEY_PEM" | gh secret set AUDITOR_PRIVATE_KEY_PEM --repo "$TARGET"
+        REPO="${ORG}.github.io"
+        FULL="${ORG}/${REPO}"
 
-      # 7) Enable Pages (optional)
-      - name: Enable GitHub Pages (optional)
-        env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
-        run: |
-          set -euo pipefail
-          REPO="${ORG}.github.io"
-          gh api "repos/${ORG}/${REPO}/pages" -X POST \
-            -f source[branch]=main \
-            -f source[path]="/" >/dev/null 2>&1 || true
+        echo "Target repo: ${FULL}"
+
+        if gh api "repos/${FULL}" >/dev/null 2>&1; then
+          echo "Repo already exists: ${FULL}"
+        else
+          echo "Creating repo: ${FULL}"
+          gh api "orgs/${ORG}/repos" -X POST \
+            -f name="$REPO" \
+            -f private=false \
+            -f description="Org website for ${ORG}" >/dev/null
+        fi
+
+        echo "Waiting for repo to be fully provisioned: ${FULL}"
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+          if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
+            echo " Repo reachable (attempt $i/10)"
+            break
+          fi
+          echo "…repo not reachable yet (attempt $i/10). Waiting..."
+          sleep $((i * 2))
+        done
+
+        echo "Ensuring repo is PUBLIC: ${FULL}"
+        for i in 1 2 3 4 5 6; do
+          if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
+            echo " Repo visibility set to public"
+            break
+          fi
+          echo "…cannot update visibility yet (attempt $i/6). Waiting..."
+          sleep $((i * 3))
+        done
+
+        is_private="$(gh api "repos/${FULL}" -q '.private')"
+        echo "Repo private? ${is_private}"
+        if [[ "$is_private" == "true" ]]; then
+          echo " Repo still private after retries: ${FULL}" >&2
+          exit 1
+        fi
+
+    - name: Assemble website payload
+      run: |
+        set -euo pipefail
+
+        WS="$GITHUB_WORKSPACE"
+        ROOT="$WS/templates"
+        OUT="$WS/out"
+
+        rm -rf "$OUT"
+        mkdir -p "$OUT/_posts"
+
+        rsync -a --delete \
+          "$ROOT/manager/manager_website/" \
+          "$OUT/"
+
+        ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+        ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
+
+        if [[ ! -d "$ASSETS_DIR" ]]; then
+          echo "Missing assets dir: $ASSETS_DIR" >&2
+          ls -la "$ROOT/manager/manager_assets" >&2 || true
+          exit 1
+        fi
+
+        rsync -a "$ASSETS_DIR/" "$OUT/"
+
+        mkdir -p "$OUT/.github/workflows"
+        rsync -a --delete \
+          "$ROOT/manager/manager_workflows/" \
+          "$OUT/.github/workflows/"
+
+        echo "Payload assembled at: $OUT"
+
+    - name: Install python deps for assembly
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+
+    - name: Generate _posts from registry (assembly_posts.py)
+      run: |
+        set -euo pipefail
+        ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+        REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
+        OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
+        SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
+
+        [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
+
+        python "$SCRIPT" \
+          --registry "$REG" \
+          --out-posts "$OUTPOSTS"
+
+    - name: Write site URL to README.md
+      run: |
+        set -euo pipefail
+        echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
+
+    - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+        pip install pyyaml
+        # (teu python aqui permanece igual)
+
+    - name: Push content to {org}.github.io
+      run: |
+        set -euo pipefail
+        REPO="${ORG}.github.io"
+
+        git config --global user.name  "templates-provisioner-app[bot]"
+        git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
+
+        rm -rf target
+        mkdir -p target
+        cd target
+
+        git init
+        git branch -M main
+
+        rsync -a "$GITHUB_WORKSPACE/out/" .
+
+        git add -A
+        git commit -m "Update files" || echo "Nothing to commit."
+
+        git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
+        git push -u origin main --force
+
+    - name: Set org secrets (dispatcher + provisioner)
+      env:
+        DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
+        DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
+        PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
+        PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+      run: |
+        set -euo pipefail
+        echo "$ORG" | gh variable set ORG --org "$ORG" --visibility all
+        echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
+        echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
+        echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility all
+        echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility all
+
+    - name: Set auditor secrets on {org}.github.io
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      env:
+        AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
+        AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
+      run: |
+        set -euo pipefail
+        TARGET="${ORG}/${ORG}.github.io"
+        echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
+        echo "$AUDITOR_PRIVATE_KEY_PEM" | gh secret set AUDITOR_PRIVATE_KEY_PEM --repo "$TARGET"
+
+    - name: Enable GitHub Pages (optional)
+      run: |
+        set -euo pipefail
+        REPO="${ORG}.github.io"
+        gh api "repos/${ORG}/${REPO}/pages" -X POST \
+          -f source[branch]=main \
+          -f source[path]="/" >/dev/null 2>&1 || true

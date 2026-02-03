@@ -2,8 +2,6 @@ name: Listener Manager Update Readme
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 permissions:
   contents: read
