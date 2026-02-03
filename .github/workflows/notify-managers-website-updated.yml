@@ -54,48 +54,48 @@ jobs:
           ORG_INPUT: ${{ inputs.org }}
         run: |
           python - <<'PY'
-          import os, json, yaml, subprocess
+          import os
+          import json
+          import yaml
+          import subprocess
           from pathlib import Path
 
-          org_input = (os.environ.get("ORG_INPUT") or "").strip().lower()
-          orgs_yml = Path("templates/orgs.yml")
-          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
+          ORG_FILE = Path("orgs.yml")
 
-          if isinstance(data, list):
-              items = data
-          else:
-              items = data.get("orgs") or data.get("organizations") or []
+          data = yaml.safe_load(ORG_FILE.read_text(encoding="utf-8")) or {}
+          orgs = data.get("orgs", [])
 
-          selected = []
+          found = []
 
-          for it in items:
+          for it in orgs:
               if not isinstance(it, dict):
                   continue
-              org = str(it.get("name","")).strip()
+
+              org = it.get("name")
               if not org:
                   continue
-              if org_input and org.lower() != org_input:
-                  continue
 
-              repo = f"{org}/{org}.github.io"
+              repo = f"{org}.github.io"
 
-              # usa gh api para testar existência
-              r = subprocess.run(
-                  ["gh", "api", f"repos/{repo}"],
-                  stdout=subprocess.DEVNULL,
-                  stderr=subprocess.DEVNULL
-              )
+              # verifica se o repo existe
+              try:
+                  subprocess.run(
+                      ["gh", "api", f"repos/{org}/{repo}"],
+                      check=True,
+                      stdout=subprocess.DEVNULL,
+                      stderr=subprocess.DEVNULL,
+                  )
+                  found.append({"org": org})
+              except subprocess.CalledProcessError:
+                  pass  # repo não existe → ignora
 
-              if r.returncode == 0:
-                  selected.append({"org": org})
+          matrix = {"include": found}
 
-          matrix = {"include": selected}
-          out = os.environ["GITHUB_OUTPUT"]
-          with open(out, "a", encoding="utf-8") as f:
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
               f.write(f"matrix={json.dumps(matrix)}\n")
-              f.write(f"count={len(selected)}\n")
+              f.write(f"count={len(found)}\n")
 
-          print(f"[ok] manager sites found = {len(selected)}")
+          print(f"[ok] manager sites found = {len(found)}")
           PY
 
   notify:
