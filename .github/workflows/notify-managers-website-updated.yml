@@ -25,11 +25,11 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set.outputs.matrix }}
-      count:  ${{ steps.set.outputs.count }}
+      matrix: ${{ steps.build.outputs.matrix }}
+      count:  ${{ steps.build.outputs.count }}
 
     steps:
-      - name: Checkout central (orgs.yml only)
+      - name: Checkout orgs.yml
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CENTRAL_REPO }}
@@ -38,90 +38,50 @@ jobs:
           sparse-checkout: |
             orgs.yml
           sparse-checkout-cone-mode: false
-          fetch-depth: 1
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
+      - run: pip install pyyaml requests
 
-      - id: set
-        name: Build matrix of EXISTING manager repos (with debug)
+      - id: build
+        name: Build matrix of EXISTING manager repos
         env:
           ORG_INPUT: ${{ inputs.org }}
         run: |
           python - <<'PY'
-          import os, json, yaml, subprocess, shlex
+          import json, os, yaml, requests
           from pathlib import Path
 
-          def run(cmd):
-              p = subprocess.run(
-                  cmd,
-                  shell=True,
-                  text=True,
-                  stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE,
-              )
-              return p.returncode, p.stdout.strip(), p.stderr.strip()
+          org_input = (os.environ.get("ORG_INPUT") or "").strip().lower()
 
-          org_input = (os.environ.get("ORG_INPUT") or "").strip()
-
-          orgs_yml = Path("templates/orgs.yml")
-          if not orgs_yml.exists():
-              raise SystemExit("::error::orgs.yml not found in workspace")
-
-          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
-          items = data.get("orgs", [])
-
+          data = yaml.safe_load(Path("templates/orgs.yml").read_text())
           found = []
-          tested = []
 
-          for it in items:
-              org = str(it.get("name", "")).strip()
+          for it in data.get("orgs", []):
+              org = it.get("name", "").strip()
               if not org:
                   continue
 
-              if org_input and org.lower() != org_input.lower():
+              if org_input and org.lower() != org_input:
                   continue
 
-              repo = f"{org}.github.io"
-              full = f"{org}/{repo}"
+              url = f"https://api.github.com/repos/{org}/{org}.github.io"
+              r = requests.get(url, timeout=10)
 
-              print("=" * 80)
-              print(f"🔍 Checking repo: {full}")
+              print(f"🔍 {org}: {r.status_code}")
 
-              code, out, err = run(f"gh api repos/{full}")
-
-              print(f"→ exit code: {code}")
-              if out:
-                  print(f"→ stdout:\n{out}")
-              if err:
-                  print(f"→ stderr:\n{err}")
-
-              tested.append(full)
-
-              if code == 0:
-                  print("✅ FOUND")
+              if r.status_code == 200:
                   found.append({"org": org})
-              else:
-                  print("❌ NOT FOUND or NO ACCESS")
 
           matrix = {"include": found}
 
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"matrix={json.dumps(matrix)}\n")
               f.write(f"count={len(found)}\n")
 
-          print("\n" + "=" * 80)
-          print(f"[summary] tested repos = {len(tested)}")
-          print(f"[summary] manager sites found = {len(found)}")
-          if tested:
-              print("[summary] tested list:")
-              for r in tested:
-                  print(" -", r)
+          print(f"[ok] manager sites found = {len(found)}")
           PY
 
   notify:
@@ -138,27 +98,23 @@ jobs:
       ORG: ${{ matrix.org }}
 
     steps:
-      - name: Create Provisioner installation token
+      - name: Mint templates-provisioner-app token
         id: app_token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          app-id:      ${{ vars.ROOT_PROVISIONER_APP_ID }}
           private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
-          owner: ${{ matrix.org }}
+          owner:       ${{ matrix.org }}
 
       - name: Export GH_TOKEN
         run: |
-          tok='${{ steps.app_token.outputs.token }}'
-          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+          echo "GH_TOKEN=${{ steps.app_token.outputs.token }}" >> "$GITHUB_ENV"
 
-      - name: Dispatch manager-website-update in org repo
+      - name: Dispatch manager-website-update
         run: |
           set -euo pipefail
-          REPO="${ORG}.github.io"
-
-          echo "Dispatching update for $ORG"
-
-          gh api "repos/${ORG}/${REPO}/actions/workflows/manager-website-update.yml/dispatches" \
+          gh api \
+            "repos/${ORG}/${ORG}.github.io/actions/workflows/manager-website-update.yml/dispatches" \
             -X POST \
             -f ref=main \
             -f inputs[org]="$ORG"
