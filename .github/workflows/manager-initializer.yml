@@ -53,7 +53,7 @@ jobs:
           fetch-depth: 1
 
       - id: set
-        name: Build org matrix (ONLY orgs without {org}.github.io)
+        name: Build org matrix (ONLY orgs missing repo OR missing main)
         env:
           ORG_INPUT: ${{ inputs.org }}
         run: |
@@ -79,15 +79,13 @@ jobs:
               if org:
                   all_orgs.append({"org": org, "slug": slug.lower()})
 
-          # se o user pediu 1 org, filtra antes
+          # filtro opcional por 1 org
           if org_input:
               all_orgs = [x for x in all_orgs if x["org"].lower() == org_input.lower()]
               if not all_orgs:
                   raise SystemExit(f"::error::org '{org_input}' not found in orgs.yml")
 
-          def repo_exists(org: str) -> bool:
-              # repo público: checa via API pública
-              url = f"https://api.github.com/repos/{org}/{org}.github.io"
+          def gh_get(url: str) -> int:
               req = urllib.request.Request(
                   url,
                   headers={
@@ -97,28 +95,50 @@ jobs:
                   method="GET",
               )
               try:
-                  with urllib.request.urlopen(req, timeout=15) as r:
-                      return r.status == 200
+                  with urllib.request.urlopen(req, timeout=20) as r:
+                      return r.status
               except urllib.error.HTTPError as e:
-                  if e.code == 404:
-                      return False
-                  # outros erros -> falha explícita, melhor do que matriz errada
-                  raise SystemExit(f"::error::GitHub API error checking {url}: HTTP {e.code}")
+                  return e.code
               except Exception as e:
-                  raise SystemExit(f"::error::Error checking repo existence for {org}: {e}")
+                  raise SystemExit(f"::error::Error calling {url}: {e}")
+
+          def repo_status(org: str):
+              repo = f"{org}.github.io"
+              base = f"https://api.github.com/repos/{org}/{repo}"
+
+              s_repo = gh_get(base)
+              if s_repo == 200:
+                  s_main = gh_get(base + "/branches/main")
+                  if s_main == 200:
+                      return "ok"            # repo existe e main existe
+                  elif s_main == 404:
+                      return "no_main"        # repo existe mas main não
+                  else:
+                      raise SystemExit(f"::error::GitHub API unexpected status checking main for {org}: HTTP {s_main}")
+              elif s_repo == 404:
+                  return "no_repo"            # repo não existe
+              else:
+                  raise SystemExit(f"::error::GitHub API unexpected status checking repo for {org}: HTTP {s_repo}")
 
           selected = []
-          skipped = []
+          skipped = {"ok": [], "no_repo": [], "no_main": []}
+
           for x in all_orgs:
               org = x["org"]
-              if repo_exists(org):
-                  skipped.append(org)
-              else:
-                  selected.append(x)
+              st = repo_status(org)
 
-          print(f"[plan] selected={len(selected)} (missing repos), skipped={len(skipped)} (already exist)")
-          if skipped:
-              print("[plan] skipped orgs (repo already exists): " + ", ".join(skipped[:50]) + (" ..." if len(skipped) > 50 else ""))
+              if st in ("no_repo", "no_main"):
+                  selected.append(x)
+                  skipped[st].append(org)
+                  print(f"[plan] SELECT {org}: {st}")
+              else:
+                  skipped["ok"].append(org)
+                  print(f"[plan] SKIP   {org}: ok")
+
+          print(f"\n[plan] selected={len(selected)} (no_repo or no_main)")
+          print(f"[plan] skipped_ok={len(skipped['ok'])}")
+          print(f"[plan] need_create_repo(no_repo)={len(skipped['no_repo'])}")
+          print(f"[plan] need_bootstrap_main(no_main)={len(skipped['no_main'])}")
 
           matrix = {"include": selected}
           out = os.environ["GITHUB_OUTPUT"]
