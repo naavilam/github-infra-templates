@@ -150,7 +150,7 @@ orgs:
     ga_analytics: G-EYHJ8C0GLC
     apps:
       dispatcher:
-        app_id: 2632131
+        app_id: 
         app_name: Economics-Topics-Dispatcher-App
         app_instalation: 103588107
       auditor:
@@ -165,20 +165,20 @@ orgs:
   - name: course-codex
     slug: course-codex
     title: "Course Codex"
-    ga_analytics: G-EYHJ8C0GLC
+    ga_analytics: 
     apps:
       dispatcher:
-        app_id: 2632131
-        app_name: Economics-Topics-Dispatcher-App
-        app_instalation: 103588107
+        app_id: 
+        app_name: Course-Codex-Dispatcher-App
+        app_instalation: 
       auditor:
-        app_id: 2632138
-        app_name: Economics-Topics-Auditor-App
-        app_instalation: 103588310
+        app_id: 
+        app_name: Course-Codex-Auditor-App
+        app_instalation: 
       provisioner:
-        app_id: 2632140
-        app_name: Economics-Topics-Provisioner-App
-        app_instalation: 103588461
+        app_id: 
+        app_name: Course-Codex-Provisioner-App
+        app_instalation: 
 
   - name: rigorous-proof-series-mathematics
     slug: rigorous-math
