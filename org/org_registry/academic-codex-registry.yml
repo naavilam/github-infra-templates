@@ -275,7 +275,7 @@ repos:
     academic_school: IFSC/USP
     status: completed
     completed_on:
-    site_hero_image: laboratorio-fisica.png
+    site_hero_image: laboratorio-fisica-i.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
@@ -290,7 +290,7 @@ repos:
     academic_school: IFSC/USP
     status: completed
     completed_on:
-    site_hero_image: laboratorio-fisica.png
+    site_hero_image: laboratorio-fisica-ii.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
@@ -1057,7 +1057,7 @@ repos:
     academic_school: EESC/USP
     status: completed
     completed_on:
-    site_hero_image: projeto-circuito-integrado-i.png
+    site_hero_image: projeto-circuito-integrado-analogico.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
@@ -1297,7 +1297,7 @@ repos:
     academic_school: ICMC/USP
     status: completed
     completed_on:
-    site_hero_image: estatistica.png
+    site_hero_image: statistics.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
