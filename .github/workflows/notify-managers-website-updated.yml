@@ -60,7 +60,7 @@ jobs:
           import subprocess
           from pathlib import Path
 
-          ORG_FILE = Path("orgs.yml")
+          ORG_FILE = Path("templates/orgs.yml")
 
           data = yaml.safe_load(ORG_FILE.read_text(encoding="utf-8")) or {}
           orgs = data.get("orgs", [])
