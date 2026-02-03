@@ -246,8 +246,8 @@ jobs:
           FULL="${ORG}/${REPO}"
           TGT="$GITHUB_WORKSPACE/target"
 
-          WF_SRC="$GITHUB_WORKSPACE/templates/manager/manager_workflows/manager-website-update.yml"
-          WF_DST_REL=".github/workflows/manager-website-update.yml"
+          WF_SRC="$GITHUB_WORKSPACE/templates/manager/manager_workflows/listener-manager-website-update.yml"
+          WF_DST_REL=".github/workflows/listener-manager-website-update.yml"
 
           [[ -f "$WF_SRC" ]] || (echo "Missing workflow in templates: $WF_SRC" >&2; exit 1)
 
