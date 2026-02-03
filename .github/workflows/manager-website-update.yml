@@ -331,7 +331,7 @@ jobs:
           rsync -a "$GITHUB_WORKSPACE/out/" .
 
           git add -A
-          git commit -m "Rebuild manager website" || echo "Nothing to commit."
+          git commit -m "Update files" || echo "Nothing to commit."
 
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git"
           git push -u origin main --force
