@@ -65,6 +65,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      - name: Checkout central (orgs.yml only)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: templates
+          sparse-checkout: |
+            orgs.yml
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
       - id: set
         name: Build org matrix
         shell: bash
@@ -74,12 +85,17 @@ jobs:
           set -euo pipefail
 
           python - <<'PY'
-          import os, json, yaml
+          import os, json, yaml, sys
+          from pathlib import Path
 
           org_input = (os.environ.get("ORG_INPUT") or "").strip()
-          orgs_yml = "orgs.yml"
+          orgs_yml = Path("templates/orgs.yml")
 
-          data = yaml.safe_load(open(orgs_yml, "r", encoding="utf-8")) or {}
+          if not orgs_yml.exists():
+              raise SystemExit(f"::error::orgs.yml not found at {orgs_yml} (checkout central failed?)")
+
+          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
+
           if isinstance(data, list):
               items = data
           elif isinstance(data, dict):
@@ -91,15 +107,12 @@ jobs:
 
           orgs = []
           for it in items:
-              if not isinstance(it, dict):
-                  continue
-              name = str(it.get("name","")).strip()
-              if not name:
-                  continue
-              orgs.append(name)
+              if isinstance(it, dict):
+                  name = str(it.get("name","")).strip()
+                  if name:
+                      orgs.append(name)
 
           if org_input:
-              # se usuário passou org, filtra
               orgs = [o for o in orgs if o.lower() == org_input.lower()]
               if not orgs:
                   raise SystemExit(f"::error::org '{org_input}' not found in orgs.yml")
@@ -110,7 +123,7 @@ jobs:
               f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
               f.write(f"count={len(orgs)}\n")
 
-          print(f"[ok] orgs_selected={len(orgs)} -> {orgs[:8]}{'...' if len(orgs)>8 else ''}")
+          print(f"[ok] orgs_selected={len(orgs)}")
           PY
 
   rebuild:
