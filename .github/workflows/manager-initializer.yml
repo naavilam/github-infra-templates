@@ -288,38 +288,46 @@ jobs:
 
           REPO="${ORG}.github.io"
           FULL="${ORG}/${REPO}"
+          TGT="$GITHUB_WORKSPACE/target"
 
           git config --global user.name  "templates-provisioner-app[bot]"
           git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
 
-          rm -rf target
-          git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" target
+          rm -rf "$TGT"
 
-          # garante que é repo mesmo
-          test -d target/.git
+          echo "Cloning $FULL into $TGT"
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" "$TGT"
 
-          # garante branch main (sem depender de cd)
-          git -C target checkout -B main
+          echo "Sanity: list target"
+          ls -la "$TGT"
+          echo "Sanity: .git exists?"
+          test -d "$TGT/.git" || (echo "FATAL: $TGT/.git missing" >&2; exit 1)
 
-          # aplica payload (idempotente)
-          rsync -a --delete "$GITHUB_WORKSPACE/out/" "target/"
+          echo "Checkout main"
+          git -C "$TGT" checkout -B main
 
-          # se nada mudou, sai sem commit
-          if git -C target diff --quiet; then
-            echo "No changes for ${FULL}"
+          echo "Sync payload -> target"
+          rsync -a --delete "$GITHUB_WORKSPACE/out/" "$TGT/"
+
+          echo "Diff (must run inside target repo)"
+          git -C "$TGT" status --porcelain=v1
+
+          # Se nada mudou, sai.
+          if git -C "$TGT" diff --quiet; then
+            echo "No changes for $FULL"
             exit 0
           fi
 
-          git -C target add -A
+          git -C "$TGT" add -A
 
-          # se nada staged, sai
-          if git -C target diff --cached --quiet; then
-            echo "No staged changes for ${FULL}"
+          # Se por algum motivo não tiver staged, sai.
+          if git -C "$TGT" diff --cached --quiet; then
+            echo "No staged changes for $FULL"
             exit 0
           fi
 
-          git -C target commit -m "Update files"
-          git -C target push origin main
+          git -C "$TGT" commit -m "Update files"
+          git -C "$TGT" push origin main
 
       - name: Set org secrets (dispatcher + provisioner)
         env:
