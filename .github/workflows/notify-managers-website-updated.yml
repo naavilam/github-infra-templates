@@ -114,7 +114,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api \
-            "repos/${ORG}/${ORG}.github.io/actions/workflows/manager-website-update.yml/dispatches" \
+            "repos/${ORG}/${ORG}.github.io/actions/workflows/listener-manager-website-update.yml/dispatches" \
             -X POST \
             -f ref=main \
             -f inputs[org]="$ORG"
