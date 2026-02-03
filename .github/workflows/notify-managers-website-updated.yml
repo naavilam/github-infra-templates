@@ -38,6 +38,7 @@ jobs:
           sparse-checkout: |
             orgs.yml
           sparse-checkout-cone-mode: false
+          fetch-depth: 1
 
       - uses: actions/setup-python@v5
         with:
@@ -56,19 +57,24 @@ jobs:
 
           org_input = (os.environ.get("ORG_INPUT") or "").strip().lower()
 
-          data = yaml.safe_load(Path("templates/orgs.yml").read_text())
+          data = yaml.safe_load(Path("templates/orgs.yml").read_text(encoding="utf-8")) or {}
+          items = data.get("orgs", []) if isinstance(data, dict) else (data or [])
+
           found = []
 
-          for it in data.get("orgs", []):
-              org = it.get("name", "").strip()
+          for it in items:
+              if not isinstance(it, dict):
+                  continue
+              org = str(it.get("name", "")).strip()
               if not org:
                   continue
 
               if org_input and org.lower() != org_input:
                   continue
 
+              # Public existence check (no auth): repo {org}/{org}.github.io
               url = f"https://api.github.com/repos/{org}/{org}.github.io"
-              r = requests.get(url, timeout=10)
+              r = requests.get(url, timeout=15)
 
               print(f"🔍 {org}: {r.status_code}")
 
@@ -77,7 +83,8 @@ jobs:
 
           matrix = {"include": found}
 
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a", encoding="utf-8") as f:
               f.write(f"matrix={json.dumps(matrix)}\n")
               f.write(f"count={len(found)}\n")
 
@@ -98,6 +105,9 @@ jobs:
       ORG: ${{ matrix.org }}
 
     steps:
+      - name: Ensure gh is available
+        run: gh --version
+
       - name: Mint templates-provisioner-app token
         id: app_token
         uses: actions/create-github-app-token@v1
@@ -107,14 +117,40 @@ jobs:
           owner:       ${{ matrix.org }}
 
       - name: Export GH_TOKEN
-        run: |
-          echo "GH_TOKEN=${{ steps.app_token.outputs.token }}" >> "$GITHUB_ENV"
-
-      - name: Dispatch manager-website-update
+        shell: bash
         run: |
           set -euo pipefail
-          gh api \
-            "repos/${ORG}/${ORG}.github.io/actions/workflows/listener-manager-website-update.yml/dispatches" \
+          tok='${{ steps.app_token.outputs.token }}'
+          [[ "${#tok}" -ge 20 ]]
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+
+      # Debug + robust dispatch:
+      # 1) discover default branch
+      # 2) find workflow_id by workflow path
+      # 3) dispatch by workflow_id (NOT by "name")
+      - name: Dispatch listener-manager-website-update (robust)
+        shell: bash
+        run: |
+          set -euo pipefail
+          FULL="${ORG}/${ORG}.github.io"
+
+          echo "Repo: $FULL"
+
+          DEFAULT_BRANCH="$(gh api "repos/$FULL" -q '.default_branch')"
+          echo "default_branch=$DEFAULT_BRANCH"
+
+          echo "Workflows in repo (name + path):"
+          gh api "repos/$FULL/actions/workflows" -q '.workflows[] | [.name,.path] | @tsv'
+
+          WF_PATH=".github/workflows/listener-manager-website-update.yml"
+          WF_ID="$(gh api "repos/$FULL/actions/workflows" -q ".workflows[] | select(.path==\"$WF_PATH\") | .id" | head -n 1)"
+
+          if [[ -z "${WF_ID:-}" ]]; then
+            echo "FATAL: workflow not found at path: $WF_PATH" >&2
+            exit 1
+          fi
+
+          echo "Dispatching workflow_id=$WF_ID on ref=$DEFAULT_BRANCH"
+          gh api "repos/$FULL/actions/workflows/$WF_ID/dispatches" \
             -X POST \
-            -f ref=main \
-            -f inputs[org]="$ORG"
+            -f ref="$DEFAULT_BRANCH"
