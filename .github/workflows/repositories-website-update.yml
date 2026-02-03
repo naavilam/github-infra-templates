@@ -243,6 +243,12 @@ jobs:
               about = (it.get("site_description") or "").strip()
               course_url = (it.get("course_url") or "").strip()
 
+              course_link_block = ""
+              if course_url:
+                  course_link_block = f'''<p class="about-link">
+                <a href="{course_url}" target="_blank" rel="noopener">→ Lecture Notes</a>
+              </p>'''
+
               LEVEL_MAP = {
                   "undergraduate": "Undergraduate Course",
                   "graduate": "Graduate Course",
@@ -272,10 +278,9 @@ jobs:
                   "ABOUT": about,
                   "SUBTITLE_1": area,
                   "SUBTITLE_2": level,
-                  "COURSE_URL": course_url,
+                  "COURSE_LINK_BLOCK": course_link_block,
                   "GA_ID": ga_id,
               }
-              cfg = {k: v for k, v in cfg.items() if v}
 
               payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
               cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
