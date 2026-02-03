@@ -1,5 +1,6 @@
 orgs:
   - name: high-energy-physics-research
+    slug: high-energy
     title: "High Energy Physics Research"
     ga_analytics: G-JLHP21NXVY
     github_environment: 
@@ -18,6 +19,7 @@ orgs:
         app_instalation: 103056770
 
   - name: academic-codex
+    slug: academic-codex
     title: "Academic Codex"
     ga_analytics: G-EM7FEY66C3
     apps:
@@ -35,6 +37,7 @@ orgs:
         app_instalation: 103092835
 
   - name: quantum-computing-research
+    slug: quantum-computing
     title: Quantum Computing Research
     ga_analytics: G-43GLSN1HZQ
     apps:
@@ -52,6 +55,7 @@ orgs:
         app_instalation: 103054041
 
   - name: quantum-materials-simulation-research
+    slug: quantum-materials
     title: Quantum Materials Simulation Research
     ga_analytics: G-BS975FKGYZ
     apps:
@@ -69,6 +73,7 @@ orgs:
         app_instalation: 103056460
 
   - name: topics-series-mathematics
+    slug: mathematics-topics
     title: "Mathematics Topics Series"
     ga_analytics: G-X9ELZLHCW6
     apps:
@@ -86,6 +91,7 @@ orgs:
         app_instalation: 103586902
 
   - name: topics-series-physics
+    slug: physics-topics
     title: "Physics Topics Series"
     ga_analytics: G-RSX3P7BLCS
     apps:
@@ -103,6 +109,7 @@ orgs:
         app_instalation: 103565036
 
   - name: topics-series-business
+    slug: business-topics
     title: "Business Topics Series"
     ga_analytics: G-6R2G5C398V
     apps:
@@ -119,7 +126,8 @@ orgs:
         app_name: Business-Topics-Provisioner-App
         app_instalation: 103587547
 
-  - name: topics-series-investiments
+  - name: topics-series-investments
+    slug: investments-topics
     title: "Investments Topics Séries"
     ga_analytics: G-MWES6S69W6
     apps:
@@ -137,6 +145,7 @@ orgs:
         app_instalation: 103590021
 
   - name: topics-series-economics
+    slug: economics-topics
     title: "Economics Topics Series"
     ga_analytics: G-EYHJ8C0GLC
     apps:
@@ -154,6 +163,7 @@ orgs:
         app_instalation: 103588461
 
   - name: course-codex
+    slug: course-codex
     title: "Course Codex"
     ga_analytics: G-EYHJ8C0GLC
     apps:
@@ -171,23 +181,25 @@ orgs:
         app_instalation: 103588461
 
   - name: rigorous-proof-series-mathematics
+    slug: rigorous-mathematics
     title: "Rigorous Proof Series: Mathematics"
     ga_analytics: 
     apps:
       dispatcher:
         app_id: 
-        app_name: Rigorous-Math-Dispatcher-App
+        app_name: Rigorous-Mathematics-Dispatcher-App
         app_instalation: 
       auditor:
         app_id: 
-        app_name: Rigorous-Math-Auditor-App
+        app_name: Rigorous-Mathematics-Auditor-App
         app_instalation: 
       provisioner:
         app_id: 
-        app_name: Rigorous-Math-Provisioner-App
+        app_name: Rigorous-Mathematics-Provisioner-App
         app_instalation: 
 
   - name: rigorous-proof-series-physics
+    slug: rigorous-physics
     title: "Rigorous Proof Series: Physics"
     ga_analytics: 
     apps:
@@ -205,6 +217,7 @@ orgs:
         app_instalation: 
 
   - name: rigorous-proof-series-computer-science
+    slug: rigorous-cscience
     title: "Rigorous Proof Series: Computer Science"
     ga_analytics: 
     apps:

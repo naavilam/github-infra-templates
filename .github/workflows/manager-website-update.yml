@@ -318,8 +318,10 @@ jobs:
 
           gh api "repos/${FULL}" -q '.full_name' >/dev/null
 
-          git config --global user.name  "templates-site-builder[bot]"
-          git config --global user.email "templates-site-builder[bot]@users.noreply.github.com"
+          # ✅ identidade correta do App daquela org
+          BOT="${ORG_LC}-provisioner-app[bot]"
+          git config --global user.name  "${BOT}"
+          git config --global user.email "${BOT}@users.noreply.github.com"
 
           rm -rf target
           mkdir -p target
