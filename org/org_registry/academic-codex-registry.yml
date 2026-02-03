@@ -545,7 +545,7 @@ repos:
     academic_school: ICMC/USP
     status: completed
     completed_on:
-    site_hero_image: algoritmos-avancados.png
+    site_hero_image: laboratorio-algoritmos-avancados.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
@@ -575,7 +575,7 @@ repos:
     academic_school: ICMC/USP
     status: completed
     completed_on:
-    site_hero_image: ciencia-computacao-i.png
+    site_hero_image: laboratorio-ciencia-computacao-i.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
