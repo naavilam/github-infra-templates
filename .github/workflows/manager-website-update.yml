@@ -1,14 +1,28 @@
 name: Manager Update Website
 
 on:
+  workflow_call:
+    inputs:
+      org:
+        description: "Target organization"
+        required: true
+        type: string
+        default: ""
+    secrets:
+      PROVISIONER_APP_ID:
+        required: true
+      PROVISIONER_PRIVATE_KEY_PEM:
+        required: true
+
   workflow_dispatch:
     inputs:
       org:
-        description: "Target organization (e.g. academic-codex)"
-        required: true
+        description: "Target organization (leave empty to rebuild ALL from orgs.yml)"
+        required: false
         type: string
+        default: ""
 
-  # opcional: rebuild automático quando algo do site mudar
+  # rebuild automático quando algo do site mudar (rebuild ALL orgs listadas em orgs.yml)
   push:
     branches: [ main ]
     paths:
@@ -21,7 +35,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: manager-site
@@ -30,25 +43,100 @@ concurrency:
 env:
   CENTRAL_REPO: naavilam/github-infra-templates
   TEMPLATE_REF: main
+  MAX_PARALLEL: "6"
 
 jobs:
-  rebuild:
+  plan:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      count:  ${{ steps.set.outputs.count }}
+    steps:
+      - name: Checkout templates (this repo)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - id: set
+        name: Build org matrix
+        shell: bash
+        env:
+          ORG_INPUT: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          import os, json, yaml
+
+          org_input = (os.environ.get("ORG_INPUT") or "").strip()
+          orgs_yml = "orgs.yml"
+
+          data = yaml.safe_load(open(orgs_yml, "r", encoding="utf-8")) or {}
+          if isinstance(data, list):
+              items = data
+          elif isinstance(data, dict):
+              items = data.get("orgs") or data.get("organizations") or data.get("items") or []
+              if not isinstance(items, list):
+                  items = []
+          else:
+              items = []
+
+          orgs = []
+          for it in items:
+              if not isinstance(it, dict):
+                  continue
+              name = str(it.get("name","")).strip()
+              if not name:
+                  continue
+              orgs.append(name)
+
+          if org_input:
+              # se usuário passou org, filtra
+              orgs = [o for o in orgs if o.lower() == org_input.lower()]
+              if not orgs:
+                  raise SystemExit(f"::error::org '{org_input}' not found in orgs.yml")
+
+          matrix = {"include": [{"org": o} for o in orgs]}
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a", encoding="utf-8") as f:
+              f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
+              f.write(f"count={len(orgs)}\n")
+
+          print(f"[ok] orgs_selected={len(orgs)} -> {orgs[:8]}{'...' if len(orgs)>8 else ''}")
+          PY
+
+  rebuild:
+    needs: plan
+    runs-on: ubuntu-latest
+    if: ${{ needs.plan.outputs.count != '0' }}
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(env.MAX_PARALLEL) }}
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+
     # mantém o mesmo padrão: environment por org
-    environment: ${{ inputs.org || github.event.inputs.org }}
+    environment: ${{ matrix.org }}
 
     steps:
       - name: Ensure gh is available
         run: gh --version
 
-      # Token do App (igual ao provisioner)
+      # ✅ Token do App (agora usando secrets do workflow_call / workflow_dispatch)
       - name: Create Provisioner installation token
         id: app_token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
-          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
-          owner: ${{ inputs.org || github.event.inputs.org }}
+          app-id: ${{ secrets.PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ matrix.org }}
 
       - name: Export GH_TOKEN for rest of job (no leak)
         shell: bash
@@ -64,8 +152,7 @@ jobs:
           set -euo pipefail
           gh auth status
 
-      # checkout do repo de templates (este mesmo)
-      - name: Checkout templates
+      - name: Checkout templates repo (central)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CENTRAL_REPO }}
@@ -73,13 +160,12 @@ jobs:
           path: templates
           fetch-depth: 1
 
-      # monta OUT igual ao provisioner
       - name: Assemble website payload
+        shell: bash
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ matrix.org }}
         run: |
           set -euo pipefail
-
           : "${ORG:?ORG is required}"
 
           WS="$GITHUB_WORKSPACE"
@@ -118,8 +204,9 @@ jobs:
           pip install pyyaml
 
       - name: Generate _posts from registry
+        shell: bash
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ matrix.org }}
         run: |
           set -euo pipefail
           ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
@@ -135,16 +222,18 @@ jobs:
             --out-posts "$OUTPOSTS"
 
       - name: Write site URL to README.md
+        shell: bash
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ matrix.org }}
         run: |
           set -euo pipefail
           ORG_LC="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
           echo "https://${ORG_LC}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
 
       - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
+        shell: bash
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ matrix.org }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -165,12 +254,14 @@ jobs:
               items = data
           elif isinstance(data, dict):
               items = data.get("orgs") or data.get("organizations") or data.get("items") or []
-              if not isinstance(items, list): items = []
+              if not isinstance(items, list):
+                  items = []
           else:
               items = []
 
           entry = next(
-              (x for x in items if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
+              (x for x in items
+              if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
               None
           )
           if not entry:
@@ -196,14 +287,15 @@ jobs:
           if title:
               cfg["title"] = title
 
-          yaml.safe_dump(cfg, open(config_yml, "w", encoding="utf-8"), sort_keys=False, allow_unicode=True)
+          yaml.safe_dump(cfg, open(config_yml, "w", encoding="utf-8"),
+                        sort_keys=False, allow_unicode=True)
           print("[ok] _config.yml updated")
           PY
 
-      # deploy: só push no repo {org}.github.io (sem criar, sem secrets)
       - name: Push content to {org}.github.io (site-only)
+        shell: bash
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ matrix.org }}
         run: |
           set -euo pipefail
 
@@ -211,7 +303,6 @@ jobs:
           REPO="${ORG_LC}.github.io"
           FULL="${ORG_LC}/${REPO}"
 
-          # sanity: o repo precisa existir (provisioner cria)
           gh api "repos/${FULL}" -q '.full_name' >/dev/null
 
           git config --global user.name  "templates-site-builder[bot]"
@@ -232,10 +323,10 @@ jobs:
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git"
           git push -u origin main --force
 
-      # opcional: tentar garantir Pages (não mexe em secrets)
       - name: Ensure GitHub Pages enabled (best-effort)
+        shell: bash
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ matrix.org }}
         run: |
           set -euo pipefail
           ORG_LC="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
