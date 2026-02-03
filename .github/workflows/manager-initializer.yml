@@ -53,12 +53,12 @@ jobs:
           fetch-depth: 1
 
       - id: set
-        name: Build org matrix (1 org or ALL)
+        name: Build org matrix (ONLY orgs without {org}.github.io)
         env:
           ORG_INPUT: ${{ inputs.org }}
         run: |
           python - <<'PY'
-          import os, json, yaml
+          import os, json, yaml, urllib.request, urllib.error
           from pathlib import Path
 
           org_input = (os.environ.get("ORG_INPUT") or "").strip()
@@ -70,26 +70,61 @@ jobs:
           else:
               items = data.get("orgs") or data.get("organizations") or data.get("items") or []
 
-          selected = []
+          all_orgs = []
           for it in items:
               if not isinstance(it, dict):
                   continue
               org = str(it.get("name","")).strip()
               slug = str(it.get("slug","")).strip() or org.lower()
               if org:
-                  selected.append({"org": org, "slug": slug.lower()})
+                  all_orgs.append({"org": org, "slug": slug.lower()})
 
+          # se o user pediu 1 org, filtra antes
           if org_input:
-              selected = [x for x in selected if x["org"].lower() == org_input.lower()]
-              if not selected:
+              all_orgs = [x for x in all_orgs if x["org"].lower() == org_input.lower()]
+              if not all_orgs:
                   raise SystemExit(f"::error::org '{org_input}' not found in orgs.yml")
+
+          def repo_exists(org: str) -> bool:
+              # repo público: checa via API pública
+              url = f"https://api.github.com/repos/{org}/{org}.github.io"
+              req = urllib.request.Request(
+                  url,
+                  headers={
+                      "User-Agent": "manager-provision-plan",
+                      "Accept": "application/vnd.github+json",
+                  },
+                  method="GET",
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      return r.status == 200
+              except urllib.error.HTTPError as e:
+                  if e.code == 404:
+                      return False
+                  # outros erros -> falha explícita, melhor do que matriz errada
+                  raise SystemExit(f"::error::GitHub API error checking {url}: HTTP {e.code}")
+              except Exception as e:
+                  raise SystemExit(f"::error::Error checking repo existence for {org}: {e}")
+
+          selected = []
+          skipped = []
+          for x in all_orgs:
+              org = x["org"]
+              if repo_exists(org):
+                  skipped.append(org)
+              else:
+                  selected.append(x)
+
+          print(f"[plan] selected={len(selected)} (missing repos), skipped={len(skipped)} (already exist)")
+          if skipped:
+              print("[plan] skipped orgs (repo already exists): " + ", ".join(skipped[:50]) + (" ..." if len(skipped) > 50 else ""))
 
           matrix = {"include": selected}
           out = os.environ["GITHUB_OUTPUT"]
           with open(out, "a", encoding="utf-8") as f:
               f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
               f.write(f"count={len(selected)}\n")
-          print(f"[ok] selected={len(selected)}")
           PY
 
   provision:
@@ -111,22 +146,14 @@ jobs:
       - name: Ensure gh is available
         run: gh --version
 
-      - name: Create Provisioner installation token
+      # token do ROOT provisioner para operar na org alvo
+      - name: Create Provisioner installation token (ROOT)
         id: app_token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
           private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
           owner: ${{ matrix.org }}
-
-      - name: Debug runner + workspace
-        run: |
-          set -euo pipefail
-          echo "PWD=$PWD"
-          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-          echo "ORG=$ORG"
-          echo "SLUG=$SLUG"
-          ls -la
 
       - name: Export GH_TOKEN for rest of job (no leak)
         shell: bash
@@ -143,35 +170,16 @@ jobs:
           set -euo pipefail
           gh auth status
 
-      - name: Checkout templates
+      - name: Checkout templates (need the workflow file)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CENTRAL_REPO }}
           ref: ${{ env.TEMPLATE_REF }}
           path: templates
+          fetch-depth: 1
 
-      - name: Debug templates HEAD (prove what you are using)
-        run: |
-          set -euo pipefail
-          echo "templates_repo=${{ env.CENTRAL_REPO }}"
-          echo "templates_ref=${{ env.TEMPLATE_REF }}"
-          cd templates
-          git rev-parse HEAD
-          git log -1 --oneline
-          git show --name-only --pretty="" HEAD | sed '/^$/d' || true
-
-      - name: Debug orgs.yml + registry chosen
-        run: |
-          set -euo pipefail
-          echo "Looking for org in templates/orgs.yml"
-          ls -la templates/orgs.yml
-          echo "grep ORG name:"
-          grep -n "name: ${ORG}" -n templates/orgs.yml || true
-          echo
-          echo "Registry file:"
-          ls -la "templates/org/org_registry/${ORG}-registry.yml" || true
-
-      - name: Create {org}.github.io repo (if missing)
+      # 1) Create repo {org}.github.io (it does not exist by plan)
+      - name: Create {org}.github.io repo
         run: |
           set -euo pipefail
           : "${ORG:?ORG is required}"
@@ -179,28 +187,24 @@ jobs:
           REPO="${ORG}.github.io"
           FULL="${ORG}/${REPO}"
 
-          echo "Target repo: ${FULL}"
+          echo "Creating repo: ${FULL}"
+          gh api "orgs/${ORG}/repos" -X POST \
+            -f name="$REPO" \
+            -f private=false \
+            -f description="Org website for ${ORG}" >/dev/null
 
-          if gh api "repos/${FULL}" >/dev/null 2>&1; then
-            echo "Repo already exists: ${FULL}"
-          else
-            echo "Creating repo: ${FULL}"
-            gh api "orgs/${ORG}/repos" -X POST \
-              -f name="$REPO" \
-              -f private=false \
-              -f description="Org website for ${ORG}" >/dev/null
-          fi
-
-          echo "Waiting for repo to be fully provisioned: ${FULL}"
-          for i in 1 2 3 4 5 6 7 8 9 10; do
+          # Wait for repo provisioning
+          echo "Waiting for repo to be reachable: ${FULL}"
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
             if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
-              echo " Repo reachable (attempt $i/10)"
+              echo " Repo reachable (attempt $i/12)"
               break
             fi
-            echo "…repo not reachable yet (attempt $i/10). Waiting..."
+            echo "…repo not reachable yet (attempt $i/12). Waiting..."
             sleep $((i * 2))
           done
 
+          # Ensure PUBLIC
           echo "Ensuring repo is PUBLIC: ${FULL}"
           for i in 1 2 3 4 5 6; do
             if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
@@ -213,130 +217,9 @@ jobs:
 
           is_private="$(gh api "repos/${FULL}" -q '.private')"
           echo "Repo private? ${is_private}"
-          if [[ "$is_private" == "true" ]]; then
-            echo " Repo still private after retries: ${FULL}" >&2
-            exit 1
-          fi
+          [[ "$is_private" != "true" ]]
 
-      - name: Assemble website payload
-        run: |
-          set -euo pipefail
-
-          WS="$GITHUB_WORKSPACE"
-          ROOT="$WS/templates"
-          OUT="$WS/out"
-
-          rm -rf "$OUT"
-          mkdir -p "$OUT/_posts"
-
-          rsync -a --delete \
-            "$ROOT/manager/manager_website/" \
-            "$OUT/"
-
-          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-          ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
-
-          if [[ ! -d "$ASSETS_DIR" ]]; then
-            echo "Missing assets dir: $ASSETS_DIR" >&2
-            ls -la "$ROOT/manager/manager_assets" >&2 || true
-            exit 1
-          fi
-
-          rsync -a "$ASSETS_DIR/" "$OUT/"
-
-          mkdir -p "$OUT/.github/workflows"
-          rsync -a --delete \
-            "$ROOT/manager/manager_workflows/" \
-            "$OUT/.github/workflows/"
-
-          echo "Payload assembled at: $OUT"
-
-      - name: Install python deps for assembly
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
-
-      - name: Generate _posts from registry (assembly_posts.py)
-        run: |
-          set -euo pipefail
-          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
-          OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
-          SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
-
-          [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
-
-          python "$SCRIPT" \
-            --registry "$REG" \
-            --out-posts "$OUTPOSTS"
-
-      - name: Write site URL to README.md
-        run: |
-          set -euo pipefail
-          echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
-
-      - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install pyyaml
-          # (teu python aqui permanece igual)
-
-      - name: Push content to {org}.github.io
-        run: |
-          set -euo pipefail
-          
-          echo "WORKFLOW=$GITHUB_WORKFLOW  JOB=$GITHUB_JOB  REF=$GITHUB_REF  SHA=$GITHUB_SHA"
-          ls -la .github/workflows || true
-
-          echo ">>> USING UPDATED PUSH STEP v2 (C-target)"
-
-          REPO="${ORG}.github.io"
-          FULL="${ORG}/${REPO}"
-          TGT="$GITHUB_WORKSPACE/target"
-
-          git config --global user.name  "templates-provisioner-app[bot]"
-          git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
-
-          rm -rf "$TGT"
-
-          echo "Cloning $FULL into $TGT"
-          git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" "$TGT"
-
-          echo "Sanity: list target"
-          ls -la "$TGT"
-          echo "Sanity: .git exists?"
-          test -d "$TGT/.git" || (echo "FATAL: $TGT/.git missing" >&2; exit 1)
-
-          echo "Checkout main"
-          git -C "$TGT" checkout -B main
-
-          echo "Sync payload -> target"
-          rsync -a --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            "$GITHUB_WORKSPACE/out/" "$TGT/"
-
-          echo "Diff (must run inside target repo)"
-          git -C "$TGT" status --porcelain=v1
-
-          # Se nada mudou, sai.
-          if git -C "$TGT" diff --quiet; then
-            echo "No changes for $FULL"
-            exit 0
-          fi
-
-          git -C "$TGT" add -A
-
-          # Se por algum motivo não tiver staged, sai.
-          if git -C "$TGT" diff --cached --quiet; then
-            echo "No staged changes for $FULL"
-            exit 0
-          fi
-
-          git -C "$TGT" commit -m "Update files"
-          git -C "$TGT" push origin main
-
+      # 2) Set org secrets/vars (idempotente)
       - name: Set org secrets (dispatcher + provisioner)
         env:
           DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
@@ -345,27 +228,70 @@ jobs:
           PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
         run: |
           set -euo pipefail
+
           echo "$ORG" | gh variable set ORG --org "$ORG" --visibility all
+
           echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
           echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
+
           echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility all
           echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility all
 
-      - name: Set auditor secrets on {org}.github.io
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        env:
-          AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
-          AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
+      # 3) Bootstrap mínimo: só instala o workflow listener no repo recém criado (cria main)
+      - name: Bootstrap manager-website-update workflow in {org}.github.io
         run: |
           set -euo pipefail
-          TARGET="${ORG}/${ORG}.github.io"
-          echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
-          echo "$AUDITOR_PRIVATE_KEY_PEM" | gh secret set AUDITOR_PRIVATE_KEY_PEM --repo "$TARGET"
 
-      - name: Enable GitHub Pages (optional)
+          REPO="${ORG}.github.io"
+          FULL="${ORG}/${REPO}"
+          TGT="$GITHUB_WORKSPACE/target"
+
+          WF_SRC="$GITHUB_WORKSPACE/templates/manager/manager_workflows/manager-website-update.yml"
+          WF_DST_REL=".github/workflows/manager-website-update.yml"
+
+          [[ -f "$WF_SRC" ]] || (echo "Missing workflow in templates: $WF_SRC" >&2; exit 1)
+
+          git config --global user.name  "templates-provisioner-app[bot]"
+          git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
+
+          rm -rf "$TGT"
+          mkdir -p "$TGT"
+          cd "$TGT"
+          git init
+          git branch -M main
+
+          mkdir -p ".github/workflows"
+          cp -f "$WF_SRC" "$WF_DST_REL"
+
+          cat > ".gitignore" <<'EOF'
+          .DS_Store
+          EOF
+
+          git add -A
+          git commit -m "Bootstrap manager website update workflow"
+
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git"
+          git push -u origin main
+
+      # 4) Enable Pages (agora já existe main)
+      - name: Enable GitHub Pages (main + /)
         run: |
           set -euo pipefail
           REPO="${ORG}.github.io"
           gh api "repos/${ORG}/${REPO}/pages" -X POST \
             -f source[branch]=main \
             -f source[path]="/" >/dev/null 2>&1 || true
+
+      # 5) Dispatch do listener (o repo da org vai construir o site)
+      - name: Dispatch manager-website-update on {org}.github.io
+        run: |
+          set -euo pipefail
+          REPO="${ORG}.github.io"
+          FULL="${ORG}/${REPO}"
+
+          gh api "repos/${FULL}/actions/workflows/manager-website-update.yml/dispatches" \
+            -X POST \
+            -f ref="main" \
+            -F inputs[org]="$ORG" >/dev/null || true
+
+          echo "Dispatched manager-website-update for $FULL"
