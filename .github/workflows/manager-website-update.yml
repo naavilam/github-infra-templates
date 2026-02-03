@@ -119,7 +119,7 @@ jobs:
     if: ${{ needs.plan.outputs.count != '0' }}
     strategy:
       fail-fast: false
-      max-parallel: ${{ env.MAX_PARALLEL }}
+      max-parallel: env.MAX_PARALLEL
       matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
     # mantém o mesmo padrão: environment por org
