@@ -312,7 +312,10 @@ jobs:
           git -C "$TGT" checkout -B main
 
           echo "Sync payload -> target"
-          rsync -a --delete "$GITHUB_WORKSPACE/out/" "$TGT/"
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            "$GITHUB_WORKSPACE/out/" "$TGT/"
 
           echo "Diff (must run inside target repo)"
           git -C "$TGT" status --porcelain=v1
