@@ -58,7 +58,7 @@ repos:
     completed_on: 2005-06-30
     readme_cta_text: "Access full course notes"
 
-  - name: MIT-18.152--Introduction-to-Partial-Differential-Equations
+  - name: MIT-18.152--Introduction-to-Partial-Differential-Equations-2005
     id: MIT(18.152)
     title: "Introduction to Partial Differential Equations"
     academic_level: undergraduate
