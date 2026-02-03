@@ -91,6 +91,33 @@ jobs:
           import os, sys, json, base64
           import yaml
 
+          def load_org_slug(org_name: str) -> str:
+              path = os.environ.get("ORGS_PATH_LOCAL", "central/orgs.yml")
+              try:
+                  data = yaml.safe_load(open(path, "r", encoding="utf-8")) or {}
+              except Exception as e:
+                  print(f"::warning::failed to read orgs.yml for slug at {path}: {e}")
+                  return (org_name or "").strip().lower()
+
+              if isinstance(data, list):
+                  items = data
+              elif isinstance(data, dict):
+                  items = data.get("orgs") or data.get("organizations") or data.get("items") or []
+                  if not isinstance(items, list):
+                      items = []
+              else:
+                  items = []
+
+              org_lc = (org_name or "").strip().lower()
+              for it in items:
+                  if not isinstance(it, dict):
+                      continue
+                  if str(it.get("name", "")).strip().lower() == org_lc:
+                      slug = str(it.get("slug", "")).strip().lower()
+                      return slug or org_lc
+
+              return org_lc
+
           def load_org_ga_id(org_name: str) -> str:
               path = os.environ.get("ORGS_PATH_LOCAL", "central/orgs.yml")
               try:
@@ -135,6 +162,9 @@ jobs:
               items = []
 
           ga_id = load_org_ga_id(org)
+
+          org_slug = load_org_slug(org)
+          print(f"[debug] org_slug={org_slug}")
 
           def norm(s: str) -> str:
               return (s or "").strip().lower()
@@ -196,7 +226,7 @@ jobs:
 
               payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
               cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
-              include.append({"repo": full, "cfg_b64": cfg_b64})
+              include.append({"repo": full, "cfg_b64": cfg_b64, "slug": org_slug})
 
           matrix = {"include": include}
           out_path = os.environ["GITHUB_OUTPUT"]
@@ -405,12 +435,12 @@ jobs:
           cd target
 
           # identidade do bot (org do manager atual)
-          ORG_LC="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
-          BOT="${ORG_LC}-provisioner-app[bot]"
-          git config user.name "${BOT}"
+          SLUG="${{ matrix.slug }}"
+          BOT="${SLUG}-provisioner-app[bot]"
+          git config user.name  "${BOT}"
           git config user.email "${BOT}@users.noreply.github.com"
 
-          # 🔒 garante push autenticado + sem redirect/rename surprises
+          # garante push autenticado + sem redirect/rename surprises
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
 
           # opcional: evita prompts mesmo se algo tentar pedir credencial
