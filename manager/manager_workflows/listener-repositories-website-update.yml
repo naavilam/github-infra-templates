@@ -1,4 +1,4 @@
-name: Listener Update Repositories Websites
+name: Listener Repositories Update Websites
 
 on:
   workflow_dispatch:
