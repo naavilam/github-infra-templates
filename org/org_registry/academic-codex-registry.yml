@@ -1222,7 +1222,7 @@ repos:
     academic_school: ICMC/USP
     status: completed
     completed_on:
-    site_hero_image: algebra-linear.png
+    site_hero_image: equacoes-diferenciais.png
     site_description:
     readme_tagline:
     readme_cta_text: "Open full course website."
