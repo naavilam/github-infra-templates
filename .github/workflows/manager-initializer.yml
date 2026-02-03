@@ -1,4 +1,4 @@
-name: Provise Managers Website and Secrets
+name: Provision Managers Website and Secrets
 
 on:
   workflow_dispatch:
@@ -92,262 +92,262 @@ jobs:
           print(f"[ok] selected={len(selected)}")
           PY
 
-provision:
-  needs: plan
-  if: ${{ needs.plan.outputs.count != '0' }}
-  runs-on: ubuntu-latest
-  strategy:
-    fail-fast: false
-    max-parallel: 10
-    matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+  provision:
+    needs: plan
+    if: ${{ needs.plan.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
-  environment: ${{ matrix.org }}
+    environment: ${{ matrix.org }}
 
-  env:
-    ORG:  ${{ matrix.org }}
-    SLUG: ${{ matrix.slug }}
+    env:
+      ORG:  ${{ matrix.org }}
+      SLUG: ${{ matrix.slug }}
 
-  steps:
-    - name: Ensure gh is available
-      run: gh --version
+    steps:
+      - name: Ensure gh is available
+        run: gh --version
 
-    - name: Create Provisioner installation token
-      id: app_token
-      uses: actions/create-github-app-token@v1
-      with:
-        app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
-        private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
-        owner: ${{ matrix.org }}
+      - name: Create Provisioner installation token
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ matrix.org }}
 
-    - name: Debug runner + workspace
-      run: |
-        set -euo pipefail
-        echo "PWD=$PWD"
-        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-        echo "ORG=$ORG"
-        echo "SLUG=$SLUG"
-        ls -la
+      - name: Debug runner + workspace
+        run: |
+          set -euo pipefail
+          echo "PWD=$PWD"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "ORG=$ORG"
+          echo "SLUG=$SLUG"
+          ls -la
 
-    - name: Export GH_TOKEN for rest of job (no leak)
-      shell: bash
-      run: |
-        set -euo pipefail
-        tok='${{ steps.app_token.outputs.token }}'
-        echo "mint: token length = ${#tok}"
-        [[ "${#tok}" -ge 20 ]]
-        echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+      - name: Export GH_TOKEN for rest of job (no leak)
+        shell: bash
+        run: |
+          set -euo pipefail
+          tok='${{ steps.app_token.outputs.token }}'
+          echo "mint: token length = ${#tok}"
+          [[ "${#tok}" -ge 20 ]]
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
 
-    - name: Sanity check auth
-      shell: bash
-      run: |
-        set -euo pipefail
-        gh auth status
+      - name: Sanity check auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh auth status
 
-    - name: Checkout templates
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ env.CENTRAL_REPO }}
-        ref: ${{ env.TEMPLATE_REF }}
-        path: templates
+      - name: Checkout templates
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: templates
 
-    - name: Debug templates HEAD (prove what you are using)
-      run: |
-        set -euo pipefail
-        echo "templates_repo=${{ env.CENTRAL_REPO }}"
-        echo "templates_ref=${{ env.TEMPLATE_REF }}"
-        cd templates
-        git rev-parse HEAD
-        git log -1 --oneline
-        git show --name-only --pretty="" HEAD | sed '/^$/d' || true
+      - name: Debug templates HEAD (prove what you are using)
+        run: |
+          set -euo pipefail
+          echo "templates_repo=${{ env.CENTRAL_REPO }}"
+          echo "templates_ref=${{ env.TEMPLATE_REF }}"
+          cd templates
+          git rev-parse HEAD
+          git log -1 --oneline
+          git show --name-only --pretty="" HEAD | sed '/^$/d' || true
 
-    - name: Debug orgs.yml + registry chosen
-      run: |
-        set -euo pipefail
-        echo "Looking for org in templates/orgs.yml"
-        ls -la templates/orgs.yml
-        echo "grep ORG name:"
-        grep -n "name: ${ORG}" -n templates/orgs.yml || true
-        echo
-        echo "Registry file:"
-        ls -la "templates/org/org_registry/${ORG}-registry.yml" || true
+      - name: Debug orgs.yml + registry chosen
+        run: |
+          set -euo pipefail
+          echo "Looking for org in templates/orgs.yml"
+          ls -la templates/orgs.yml
+          echo "grep ORG name:"
+          grep -n "name: ${ORG}" -n templates/orgs.yml || true
+          echo
+          echo "Registry file:"
+          ls -la "templates/org/org_registry/${ORG}-registry.yml" || true
 
-    - name: Create {org}.github.io repo (if missing)
-      run: |
-        set -euo pipefail
-        : "${ORG:?ORG is required}"
+      - name: Create {org}.github.io repo (if missing)
+        run: |
+          set -euo pipefail
+          : "${ORG:?ORG is required}"
 
-        REPO="${ORG}.github.io"
-        FULL="${ORG}/${REPO}"
+          REPO="${ORG}.github.io"
+          FULL="${ORG}/${REPO}"
 
-        echo "Target repo: ${FULL}"
+          echo "Target repo: ${FULL}"
 
-        if gh api "repos/${FULL}" >/dev/null 2>&1; then
-          echo "Repo already exists: ${FULL}"
-        else
-          echo "Creating repo: ${FULL}"
-          gh api "orgs/${ORG}/repos" -X POST \
-            -f name="$REPO" \
-            -f private=false \
-            -f description="Org website for ${ORG}" >/dev/null
-        fi
-
-        echo "Waiting for repo to be fully provisioned: ${FULL}"
-        for i in 1 2 3 4 5 6 7 8 9 10; do
-          if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
-            echo " Repo reachable (attempt $i/10)"
-            break
+          if gh api "repos/${FULL}" >/dev/null 2>&1; then
+            echo "Repo already exists: ${FULL}"
+          else
+            echo "Creating repo: ${FULL}"
+            gh api "orgs/${ORG}/repos" -X POST \
+              -f name="$REPO" \
+              -f private=false \
+              -f description="Org website for ${ORG}" >/dev/null
           fi
-          echo "…repo not reachable yet (attempt $i/10). Waiting..."
-          sleep $((i * 2))
-        done
 
-        echo "Ensuring repo is PUBLIC: ${FULL}"
-        for i in 1 2 3 4 5 6; do
-          if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
-            echo " Repo visibility set to public"
-            break
+          echo "Waiting for repo to be fully provisioned: ${FULL}"
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if gh api "repos/${FULL}" -q '.name' >/dev/null 2>&1; then
+              echo " Repo reachable (attempt $i/10)"
+              break
+            fi
+            echo "…repo not reachable yet (attempt $i/10). Waiting..."
+            sleep $((i * 2))
+          done
+
+          echo "Ensuring repo is PUBLIC: ${FULL}"
+          for i in 1 2 3 4 5 6; do
+            if gh api "repos/${FULL}" -X PATCH -f private=false >/dev/null 2>&1; then
+              echo " Repo visibility set to public"
+              break
+            fi
+            echo "…cannot update visibility yet (attempt $i/6). Waiting..."
+            sleep $((i * 3))
+          done
+
+          is_private="$(gh api "repos/${FULL}" -q '.private')"
+          echo "Repo private? ${is_private}"
+          if [[ "$is_private" == "true" ]]; then
+            echo " Repo still private after retries: ${FULL}" >&2
+            exit 1
           fi
-          echo "…cannot update visibility yet (attempt $i/6). Waiting..."
-          sleep $((i * 3))
-        done
 
-        is_private="$(gh api "repos/${FULL}" -q '.private')"
-        echo "Repo private? ${is_private}"
-        if [[ "$is_private" == "true" ]]; then
-          echo " Repo still private after retries: ${FULL}" >&2
-          exit 1
-        fi
+      - name: Assemble website payload
+        run: |
+          set -euo pipefail
 
-    - name: Assemble website payload
-      run: |
-        set -euo pipefail
+          WS="$GITHUB_WORKSPACE"
+          ROOT="$WS/templates"
+          OUT="$WS/out"
 
-        WS="$GITHUB_WORKSPACE"
-        ROOT="$WS/templates"
-        OUT="$WS/out"
+          rm -rf "$OUT"
+          mkdir -p "$OUT/_posts"
 
-        rm -rf "$OUT"
-        mkdir -p "$OUT/_posts"
+          rsync -a --delete \
+            "$ROOT/manager/manager_website/" \
+            "$OUT/"
 
-        rsync -a --delete \
-          "$ROOT/manager/manager_website/" \
-          "$OUT/"
+          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
 
-        ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-        ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
+          if [[ ! -d "$ASSETS_DIR" ]]; then
+            echo "Missing assets dir: $ASSETS_DIR" >&2
+            ls -la "$ROOT/manager/manager_assets" >&2 || true
+            exit 1
+          fi
 
-        if [[ ! -d "$ASSETS_DIR" ]]; then
-          echo "Missing assets dir: $ASSETS_DIR" >&2
-          ls -la "$ROOT/manager/manager_assets" >&2 || true
-          exit 1
-        fi
+          rsync -a "$ASSETS_DIR/" "$OUT/"
 
-        rsync -a "$ASSETS_DIR/" "$OUT/"
+          mkdir -p "$OUT/.github/workflows"
+          rsync -a --delete \
+            "$ROOT/manager/manager_workflows/" \
+            "$OUT/.github/workflows/"
 
-        mkdir -p "$OUT/.github/workflows"
-        rsync -a --delete \
-          "$ROOT/manager/manager_workflows/" \
-          "$OUT/.github/workflows/"
+          echo "Payload assembled at: $OUT"
 
-        echo "Payload assembled at: $OUT"
+      - name: Install python deps for assembly
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
 
-    - name: Install python deps for assembly
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyyaml
+      - name: Generate _posts from registry (assembly_posts.py)
+        run: |
+          set -euo pipefail
+          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
+          OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
+          SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
 
-    - name: Generate _posts from registry (assembly_posts.py)
-      run: |
-        set -euo pipefail
-        ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
-        REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
-        OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
-        SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
+          [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
 
-        [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
+          python "$SCRIPT" \
+            --registry "$REG" \
+            --out-posts "$OUTPOSTS"
 
-        python "$SCRIPT" \
-          --registry "$REG" \
-          --out-posts "$OUTPOSTS"
+      - name: Write site URL to README.md
+        run: |
+          set -euo pipefail
+          echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
 
-    - name: Write site URL to README.md
-      run: |
-        set -euo pipefail
-        echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
+      - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install pyyaml
+          # (teu python aqui permanece igual)
 
-    - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
-      run: |
-        set -euo pipefail
-        python -m pip install --upgrade pip
-        pip install pyyaml
-        # (teu python aqui permanece igual)
+      - name: Push content to {org}.github.io
+        run: |
+          set -euo pipefail
 
-    - name: Push content to {org}.github.io
-      run: |
-        set -euo pipefail
+          REPO="${ORG}.github.io"
+          FULL="${ORG}/${REPO}"
 
-        REPO="${ORG}.github.io"
-        FULL="${ORG}/${REPO}"
+          git config --global user.name  "templates-provisioner-app[bot]"
+          git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
 
-        git config --global user.name  "templates-provisioner-app[bot]"
-        git config --global user.email "templates-provisioner-app[bot]@users.noreply.github.com"
+          rm -rf target
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" target
+          cd target
 
-        rm -rf target
-        git clone "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git" target
-        cd target
+          # garante branch main (se repo recém-criado vier vazio/sem main, isso cria)
+          git checkout -B main
 
-        # garante branch main (se repo recém-criado vier vazio/sem main, isso cria)
-        git checkout -B main
+          # aplica o payload (delete no destino para ficar idempotente)
+          rsync -a --delete "$GITHUB_WORKSPACE/out/" .
 
-        # aplica o payload (delete no destino para ficar idempotente)
-        rsync -a --delete "$GITHUB_WORKSPACE/out/" .
+          # se nada mudou, sai sem commit (idempotente de verdade)
+          if git diff --quiet; then
+            echo "No changes for ${FULL}"
+            exit 0
+          fi
 
-        # se nada mudou, sai sem commit (idempotente de verdade)
-        if git diff --quiet; then
-          echo "No changes for ${FULL}"
-          exit 0
-        fi
+          git add -A
 
-        git add -A
+          # duplo-check: nada staged?
+          if git diff --cached --quiet; then
+            echo "No staged changes for ${FULL}"
+            exit 0
+          fi
 
-        # duplo-check: nada staged?
-        if git diff --cached --quiet; then
-          echo "No staged changes for ${FULL}"
-          exit 0
-        fi
+          git commit -m "Update files"
+          git push origin main
 
-        git commit -m "Update files"
-        git push origin main
+      - name: Set org secrets (dispatcher + provisioner)
+        env:
+          DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
+          DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
+          PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
+          PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          echo "$ORG" | gh variable set ORG --org "$ORG" --visibility all
+          echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
+          echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
+          echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility all
+          echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility all
 
-    - name: Set org secrets (dispatcher + provisioner)
-      env:
-        DISPATCHER_APP_ID: ${{ vars.DISPATCHER_APP_ID }}
-        DISPATCHER_PRIVATE_KEY_PEM: ${{ secrets.DISPATCHER_PRIVATE_KEY_PEM }}
-        PROVISIONER_APP_ID: ${{ vars.PROVISIONER_APP_ID }}
-        PROVISIONER_PRIVATE_KEY_PEM: ${{ secrets.PROVISIONER_PRIVATE_KEY_PEM }}
-      run: |
-        set -euo pipefail
-        echo "$ORG" | gh variable set ORG --org "$ORG" --visibility all
-        echo "$DISPATCHER_APP_ID"  | gh variable set DISPATCHER_APP_ID  --org "$ORG" --visibility all
-        echo "$PROVISIONER_APP_ID" | gh variable set PROVISIONER_APP_ID --org "$ORG" --visibility all
-        echo "$DISPATCHER_PRIVATE_KEY_PEM"  | gh secret set DISPATCHER_PRIVATE_KEY_PEM  --org "$ORG" --visibility all
-        echo "$PROVISIONER_PRIVATE_KEY_PEM" | gh secret set PROVISIONER_PRIVATE_KEY_PEM --org "$ORG" --visibility all
+      - name: Set auditor secrets on {org}.github.io
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
+          AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          TARGET="${ORG}/${ORG}.github.io"
+          echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
+          echo "$AUDITOR_PRIVATE_KEY_PEM" | gh secret set AUDITOR_PRIVATE_KEY_PEM --repo "$TARGET"
 
-    - name: Set auditor secrets on {org}.github.io
-      if: ${{ github.event_name == 'workflow_dispatch' }}
-      env:
-        AUDITOR_APP_ID: ${{ vars.AUDITOR_APP_ID }}
-        AUDITOR_PRIVATE_KEY_PEM: ${{ secrets.AUDITOR_PRIVATE_KEY_PEM }}
-      run: |
-        set -euo pipefail
-        TARGET="${ORG}/${ORG}.github.io"
-        echo "$AUDITOR_APP_ID" | gh variable set AUDITOR_APP_ID --repo "$TARGET"
-        echo "$AUDITOR_PRIVATE_KEY_PEM" | gh secret set AUDITOR_PRIVATE_KEY_PEM --repo "$TARGET"
-
-    - name: Enable GitHub Pages (optional)
-      run: |
-        set -euo pipefail
-        REPO="${ORG}.github.io"
-        gh api "repos/${ORG}/${REPO}/pages" -X POST \
-          -f source[branch]=main \
-          -f source[path]="/" >/dev/null 2>&1 || true
+      - name: Enable GitHub Pages (optional)
+        run: |
+          set -euo pipefail
+          REPO="${ORG}.github.io"
+          gh api "repos/${ORG}/${REPO}/pages" -X POST \
+            -f source[branch]=main \
+            -f source[path]="/" >/dev/null 2>&1 || true
