@@ -49,40 +49,65 @@ jobs:
           pip install pyyaml
 
       - id: set
-        name: Build matrix of EXISTING manager repos
+        name: Build matrix of EXISTING manager repos (with debug)
         env:
           ORG_INPUT: ${{ inputs.org }}
         run: |
           python - <<'PY'
-          import os, json, yaml, subprocess
+          import os, json, yaml, subprocess, shlex
           from pathlib import Path
 
-          orgs_yml = Path("templates/orgs.yml")
-          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
-
-          items = data.get("orgs", []) if isinstance(data, dict) else data
-          found = []
-
-          def repo_exists(org, repo):
-              cmd = ["gh", "api", f"repos/{org}/{repo}"]
-              return subprocess.run(
+          def run(cmd):
+              p = subprocess.run(
                   cmd,
-                  stdout=subprocess.DEVNULL,
-                  stderr=subprocess.DEVNULL
-              ).returncode == 0
+                  shell=True,
+                  text=True,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+              )
+              return p.returncode, p.stdout.strip(), p.stderr.strip()
+
+          org_input = (os.environ.get("ORG_INPUT") or "").strip()
+
+          orgs_yml = Path("orgs.yml")
+          if not orgs_yml.exists():
+              raise SystemExit("::error::orgs.yml not found in workspace")
+
+          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
+          items = data.get("orgs", [])
+
+          found = []
+          tested = []
 
           for it in items:
-              org = it.get("name")
+              org = str(it.get("name", "")).strip()
               if not org:
                   continue
 
-              repo = f"{org}.github.io"
+              if org_input and org.lower() != org_input.lower():
+                  continue
 
-              if repo_exists(org, repo):
-                  found.append({
-                      "org": org,
-                      "repo": repo
-                  })
+              repo = f"{org}.github.io"
+              full = f"{org}/{repo}"
+
+              print("=" * 80)
+              print(f"🔍 Checking repo: {full}")
+
+              code, out, err = run(f"gh api repos/{full}")
+
+              print(f"→ exit code: {code}")
+              if out:
+                  print(f"→ stdout:\n{out}")
+              if err:
+                  print(f"→ stderr:\n{err}")
+
+              tested.append(full)
+
+              if code == 0:
+                  print("✅ FOUND")
+                  found.append({"org": org})
+              else:
+                  print("❌ NOT FOUND or NO ACCESS")
 
           matrix = {"include": found}
 
@@ -90,7 +115,13 @@ jobs:
               f.write(f"matrix={json.dumps(matrix)}\n")
               f.write(f"count={len(found)}\n")
 
-          print(f"[ok] manager sites found = {len(found)}")
+          print("\n" + "=" * 80)
+          print(f"[summary] tested repos = {len(tested)}")
+          print(f"[summary] manager sites found = {len(found)}")
+          if tested:
+              print("[summary] tested list:")
+              for r in tested:
+                  print(" -", r)
           PY
 
   notify:
