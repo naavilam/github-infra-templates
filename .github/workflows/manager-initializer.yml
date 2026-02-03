@@ -1,4 +1,4 @@
-name: Provision Manager Website and Secrets
+name: Provise Managers Website and Secrets
 
 on:
   workflow_dispatch:
