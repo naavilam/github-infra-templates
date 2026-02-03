@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Target repository or else all"
+        required: false
+        default: ""
 
 permissions:
   contents: write
