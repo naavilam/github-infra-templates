@@ -223,9 +223,9 @@ jobs:
           set -euo pipefail
           echo "https://${ORG}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
           
-      - name: Inject GA tracking id + title + url into out/_config.yml
+      - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
         env:
-          ORG: ${{ inputs.org || github.event.inputs.org }}
+          ORG: ${{ inputs.org || github.event.inputs.org || github.repository_owner }}
         run: |
           set -euo pipefail
 
@@ -233,20 +233,34 @@ jobs:
           pip install pyyaml
 
           python - <<'PY'
-          import os, yaml, sys
+          import os, yaml
 
-          org = os.environ["ORG"]
+          org = (os.environ.get("ORG") or "").strip()
+          if not org:
+              raise SystemExit("ORG env is required")
+
           ws  = os.environ["GITHUB_WORKSPACE"]
 
           orgs_yml   = os.path.join(ws, "templates", "orgs.yml")
           config_yml = os.path.join(ws, "out", "_config.yml")
 
-          # --- Load orgs.yml ---
+          # --- Load orgs.yml (supports list or dict) ---
           with open(orgs_yml, "r", encoding="utf-8") as f:
               data = yaml.safe_load(f) or {}
 
+          if isinstance(data, list):
+              items = data
+          elif isinstance(data, dict):
+              items = data.get("orgs") or data.get("organizations") or data.get("items") or []
+              if not isinstance(items, list):
+                  items = []
+          else:
+              items = []
+
+          org_lc = org.lower()
           entry = next(
-              (x for x in (data.get("orgs") or []) if x.get("name") == org),
+              (x for x in items
+              if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
               None
           )
 
@@ -254,14 +268,18 @@ jobs:
               raise SystemExit(f"ORG not found in orgs.yml: {org}")
 
           # --- Values to inject ---
-          ga_id = entry.get("ga_analytics")
-          title = entry.get("title")                     # from registry
-          url   = f"https://{org}.github.io"             # runtime site URL
-          github_url = f"https://github.com/{org}/{org}.github.io" 
+          ga_id = (entry.get("ga_analytics") or entry.get("GA_ID") or entry.get("ga_id") or "").strip()
+          title = (entry.get("title") or "").strip()
+          url   = f"https://{org_lc}.github.io"
+          github_url = f"https://github.com/{org_lc}/{org_lc}.github.io"
 
           # --- Load existing _config.yml ---
           with open(config_yml, "r", encoding="utf-8") as f:
               cfg = yaml.safe_load(f) or {}
+
+          # --- Inject org + utm_source (so templates can build UTMs) ---
+          cfg["org"] = org_lc
+          cfg["utm_source"] = org_lc
 
           # --- GA tracking id ---
           if ga_id:
@@ -282,16 +300,15 @@ jobs:
           cfg["url"] = url
           print(f"Injected url = {url}")
 
-          # --- URL (always set, site public URL) ---
+          # --- GitHub URL (useful for templates/footer/header links) ---
           cfg["github_url"] = github_url
           print(f"Injected github_url = {github_url}")
-
 
           # --- Write back ---
           with open(config_yml, "w", encoding="utf-8") as f:
               yaml.safe_dump(cfg, f, sort_keys=False, allow_unicode=True)
 
-          print(" _config.yml updated successfully")
+          print("_config.yml updated successfully")
           PY
 
       # 4) Push payload into {org}.github.io
