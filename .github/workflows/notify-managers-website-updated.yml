@@ -1,0 +1,138 @@
+name: Notify Managers Website Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: "Target organization (leave empty = ALL existing manager sites)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: notify-managers
+  cancel-in-progress: true
+
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      count:  ${{ steps.set.outputs.count }}
+
+    steps:
+      - name: Checkout central (orgs.yml only)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: templates
+          sparse-checkout: |
+            orgs.yml
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - id: set
+        name: Build matrix of EXISTING manager repos
+        env:
+          ORG_INPUT: ${{ inputs.org }}
+        run: |
+          python - <<'PY'
+          import os, json, yaml, subprocess
+          from pathlib import Path
+
+          org_input = (os.environ.get("ORG_INPUT") or "").strip().lower()
+          orgs_yml = Path("templates/orgs.yml")
+          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
+
+          if isinstance(data, list):
+              items = data
+          else:
+              items = data.get("orgs") or data.get("organizations") or []
+
+          selected = []
+
+          for it in items:
+              if not isinstance(it, dict):
+                  continue
+              org = str(it.get("name","")).strip()
+              if not org:
+                  continue
+              if org_input and org.lower() != org_input:
+                  continue
+
+              repo = f"{org}/{org}.github.io"
+
+              # usa gh api para testar existência
+              r = subprocess.run(
+                  ["gh", "api", f"repos/{repo}"],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL
+              )
+
+              if r.returncode == 0:
+                  selected.append({"org": org})
+
+          matrix = {"include": selected}
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a", encoding="utf-8") as f:
+              f.write(f"matrix={json.dumps(matrix)}\n")
+              f.write(f"count={len(selected)}\n")
+
+          print(f"[ok] manager sites found = {len(selected)}")
+          PY
+
+  notify:
+    needs: plan
+    if: ${{ needs.plan.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+
+    env:
+      ORG: ${{ matrix.org }}
+
+    steps:
+      - name: Create Provisioner installation token
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ matrix.org }}
+
+      - name: Export GH_TOKEN
+        run: |
+          tok='${{ steps.app_token.outputs.token }}'
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+
+      - name: Dispatch manager-website-update in org repo
+        run: |
+          set -euo pipefail
+          REPO="${ORG}.github.io"
+
+          echo "Dispatching update for $ORG"
+
+          gh api "repos/${ORG}/${REPO}/actions/workflows/manager-website-update.yml/dispatches" \
+            -X POST \
+            -f ref=main \
+            -f inputs[org]="$ORG"
