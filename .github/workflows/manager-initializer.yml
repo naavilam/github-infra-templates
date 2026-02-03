@@ -1,4 +1,4 @@
-name: Provision Managers Website and Secrets
+name: Provision Managers Secrets, Repository and Website
 
 on:
   workflow_dispatch:
@@ -313,7 +313,7 @@ jobs:
           REPO="${ORG}.github.io"
           FULL="${ORG}/${REPO}"
 
-          gh api "repos/${FULL}/actions/workflows/manager-website-update.yml/dispatches" \
+          gh api "repos/${FULL}/actions/workflows/listener-manager-website-update.yml/dispatches" \
             -X POST \
             -f ref="main" \
             -F inputs[org]="$ORG" >/dev/null || true
