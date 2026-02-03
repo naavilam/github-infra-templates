@@ -54,40 +54,35 @@ jobs:
           ORG_INPUT: ${{ inputs.org }}
         run: |
           python - <<'PY'
-          import os
-          import json
-          import yaml
-          import subprocess
+          import os, json, yaml, subprocess
           from pathlib import Path
 
-          ORG_FILE = Path("templates/orgs.yml")
+          orgs_yml = Path("templates/orgs.yml")
+          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
 
-          data = yaml.safe_load(ORG_FILE.read_text(encoding="utf-8")) or {}
-          orgs = data.get("orgs", [])
-
+          items = data.get("orgs", []) if isinstance(data, dict) else data
           found = []
 
-          for it in orgs:
-              if not isinstance(it, dict):
-                  continue
+          def repo_exists(org, repo):
+              cmd = ["gh", "api", f"repos/{org}/{repo}"]
+              return subprocess.run(
+                  cmd,
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL
+              ).returncode == 0
 
+          for it in items:
               org = it.get("name")
               if not org:
                   continue
 
               repo = f"{org}.github.io"
 
-              # verifica se o repo existe
-              try:
-                  subprocess.run(
-                      ["gh", "api", f"repos/{org}/{repo}"],
-                      check=True,
-                      stdout=subprocess.DEVNULL,
-                      stderr=subprocess.DEVNULL,
-                  )
-                  found.append({"org": org})
-              except subprocess.CalledProcessError:
-                  pass  # repo não existe → ignora
+              if repo_exists(org, repo):
+                  found.append({
+                      "org": org,
+                      "repo": repo
+                  })
 
           matrix = {"include": found}
 
