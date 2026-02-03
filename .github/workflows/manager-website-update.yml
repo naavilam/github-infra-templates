@@ -1,0 +1,245 @@
+name: Manager Update Website
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: "Target organization (e.g. academic-codex)"
+        required: true
+        type: string
+
+  # opcional: rebuild automático quando algo do site mudar
+  push:
+    branches: [ main ]
+    paths:
+      - "manager/manager_website/**"
+      - "manager/manager_assets/**"
+      - "manager/manager_scripts/**"
+      - "manager/manager_workflows/**"
+      - "org/org_registry/**"
+      - "orgs.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: manager-site
+  cancel-in-progress: true
+
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    # mantém o mesmo padrão: environment por org
+    environment: ${{ inputs.org || github.event.inputs.org }}
+
+    steps:
+      - name: Ensure gh is available
+        run: gh --version
+
+      # Token do App (igual ao provisioner)
+      - name: Create Provisioner installation token
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+          owner: ${{ inputs.org || github.event.inputs.org }}
+
+      - name: Export GH_TOKEN for rest of job (no leak)
+        shell: bash
+        run: |
+          set -euo pipefail
+          tok='${{ steps.app_token.outputs.token }}'
+          [[ "${#tok}" -ge 20 ]]
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+
+      - name: Sanity check auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh auth status
+
+      # checkout do repo de templates (este mesmo)
+      - name: Checkout templates
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: templates
+          fetch-depth: 1
+
+      # monta OUT igual ao provisioner
+      - name: Assemble website payload
+        env:
+          ORG: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+
+          : "${ORG:?ORG is required}"
+
+          WS="$GITHUB_WORKSPACE"
+          ROOT="$WS/templates"
+          OUT="$WS/out"
+
+          rm -rf "$OUT"
+          mkdir -p "$OUT/_posts"
+
+          rsync -a --delete \
+            "$ROOT/manager/manager_website/" \
+            "$OUT/"
+
+          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
+
+          if [[ ! -d "$ASSETS_DIR" ]]; then
+            echo "Missing assets dir: $ASSETS_DIR" >&2
+            echo "Available assets:" >&2
+            ls -la "$ROOT/manager/manager_assets" >&2 || true
+            exit 1
+          fi
+
+          rsync -a "$ASSETS_DIR/" "$OUT/"
+
+          mkdir -p "$OUT/.github/workflows"
+          rsync -a --delete \
+            "$ROOT/manager/manager_workflows/" \
+            "$OUT/.github/workflows/"
+
+          echo "Payload assembled at: $OUT"
+
+      - name: Install python deps for assembly
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Generate _posts from registry
+        env:
+          ORG: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+          ORG_SLUG="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          REG="$GITHUB_WORKSPACE/templates/org/org_registry/${ORG_SLUG}-registry.yml"
+          OUTPOSTS="$GITHUB_WORKSPACE/out/_posts"
+          SCRIPT="$GITHUB_WORKSPACE/templates/manager/manager_scripts/assembly_posts.py"
+
+          [[ -f "$SCRIPT" ]] || (echo "Missing script: $SCRIPT" >&2; exit 1)
+          [[ -f "$REG" ]] || (echo "Missing registry: $REG" >&2; exit 1)
+
+          python "$SCRIPT" \
+            --registry "$REG" \
+            --out-posts "$OUTPOSTS"
+
+      - name: Write site URL to README.md
+        env:
+          ORG: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+          ORG_LC="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          echo "https://${ORG_LC}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
+
+      - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
+        env:
+          ORG: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, yaml
+
+          org = (os.environ.get("ORG") or "").strip()
+          if not org:
+              raise SystemExit("ORG env is required")
+
+          ws  = os.environ["GITHUB_WORKSPACE"]
+          org_lc = org.lower()
+
+          orgs_yml   = os.path.join(ws, "templates", "orgs.yml")
+          config_yml = os.path.join(ws, "out", "_config.yml")
+
+          data = yaml.safe_load(open(orgs_yml, "r", encoding="utf-8")) or {}
+          if isinstance(data, list):
+              items = data
+          elif isinstance(data, dict):
+              items = data.get("orgs") or data.get("organizations") or data.get("items") or []
+              if not isinstance(items, list): items = []
+          else:
+              items = []
+
+          entry = next(
+              (x for x in items if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
+              None
+          )
+          if not entry:
+              raise SystemExit(f"ORG not found in orgs.yml: {org}")
+
+          ga_id = (entry.get("ga_analytics") or entry.get("GA_ID") or entry.get("ga_id") or "").strip()
+          title = (entry.get("title") or "").strip()
+          url   = f"https://{org_lc}.github.io"
+          github_url = f"https://github.com/{org_lc}/{org_lc}.github.io"
+
+          cfg = yaml.safe_load(open(config_yml, "r", encoding="utf-8")) or {}
+
+          cfg["org"] = org_lc
+          cfg["utm_source"] = org_lc
+          cfg["url"] = url
+          cfg["github_url"] = github_url
+
+          if ga_id:
+              cfg["ga_tracking_id"] = ga_id
+          else:
+              cfg.pop("ga_tracking_id", None)
+
+          if title:
+              cfg["title"] = title
+
+          yaml.safe_dump(cfg, open(config_yml, "w", encoding="utf-8"), sort_keys=False, allow_unicode=True)
+          print("[ok] _config.yml updated")
+          PY
+
+      # deploy: só push no repo {org}.github.io (sem criar, sem secrets)
+      - name: Push content to {org}.github.io (site-only)
+        env:
+          ORG: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+
+          ORG_LC="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          REPO="${ORG_LC}.github.io"
+          FULL="${ORG_LC}/${REPO}"
+
+          # sanity: o repo precisa existir (provisioner cria)
+          gh api "repos/${FULL}" -q '.full_name' >/dev/null
+
+          git config --global user.name  "templates-site-builder[bot]"
+          git config --global user.email "templates-site-builder[bot]@users.noreply.github.com"
+
+          rm -rf target
+          mkdir -p target
+          cd target
+
+          git init
+          git branch -M main
+
+          rsync -a "$GITHUB_WORKSPACE/out/" .
+
+          git add -A
+          git commit -m "Rebuild manager website" || echo "Nothing to commit."
+
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${FULL}.git"
+          git push -u origin main --force
+
+      # opcional: tentar garantir Pages (não mexe em secrets)
+      - name: Ensure GitHub Pages enabled (best-effort)
+        env:
+          ORG: ${{ inputs.org || github.event.inputs.org }}
+        run: |
+          set -euo pipefail
+          ORG_LC="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
+          REPO="${ORG_LC}.github.io"
+          gh api "repos/${ORG_LC}/${REPO}/pages" -X POST \
+            -f source[branch]=main \
+            -f source[path]="/" >/dev/null 2>&1 || true

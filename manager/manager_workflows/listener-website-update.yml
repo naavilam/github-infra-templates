@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   run:
-    uses: naavilam/github-infra-templates/.github/workflows/manager-provisioner.yml@main
+    uses: naavilam/github-infra-templates/.github/workflows/manager-website-update.yml@main
     with:
       org: ${{ vars.org }}
     secrets:
