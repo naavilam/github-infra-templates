@@ -14,7 +14,7 @@
       {% assign grad_areas = grad_posts | map: "area" | uniq | sort_natural %}
       {% if grad_areas and grad_areas.size > 0 %}
       <select id="areaFilter-grad" class="form-control" style="display:inline-block;max-width:260px;margin:8px 0 16px;">
-        <option value="all">Todas as áreas</option>
+        <option value="all">All areas</option>
         {% for a in grad_areas %}
         {% if a %}
         <option value="{{ a | slugify }}">{{ a }}</option>
