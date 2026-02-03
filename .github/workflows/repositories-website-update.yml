@@ -1,4 +1,4 @@
-name: Update Websites (org)
+name: Update Repositories Website
 
 on:
   workflow_call:
