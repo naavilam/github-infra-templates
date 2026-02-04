@@ -1,5 +1,5 @@
-name: Notify Managers -> Repositories Website Update
-run-name: Notify Managers -> Repositories Website Update
+name: Notify Repositories Website Update
+run-name: Notify Repositories Website Update
 
 on:
   workflow_dispatch:
