@@ -278,3 +278,16 @@ repos:
     status: completed
     completed_on: 2023-06-30
     readme_cta_text: "Access full course notes"
+
+  - name: MIT-18.650--Statistics-For-Applications
+    id: MIT(18.650)
+    title: "Statistics For Applications"
+    academic_level: undergraduate
+    academic_area: Statistics
+    academic_school: MIT OpenCourseWare
+    course_url: "https://ocw.mit.edu/courses/18-650-statistics-for-applications-fall-2016/"
+    site_hero_image: statistics-for-applications.png
+    site_description: "This course offers an in-depth the theoretical foundations for statistical methods that are useful in many applications. The goal is to understand the role of mathematics in the research and development of efficient statistical methods. - Prof. Philippe Rigollet"
+    status: completed
+    completed_on: 2026-02-28
+    readme_cta_text: "Access full course notes"
