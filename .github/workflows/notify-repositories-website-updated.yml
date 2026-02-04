@@ -1,5 +1,5 @@
-name: Notify orgs site's template updated
-run-name: Notify orgs site's template updated
+name: Notify Website Template Updated
+run-name: Notify Website Template Updated
 
 env:
   GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
