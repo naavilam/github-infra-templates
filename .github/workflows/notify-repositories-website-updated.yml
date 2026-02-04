@@ -1,90 +1,158 @@
-name: Notify Website Template Updated
-run-name: Notify Website Template Updated
-
-env:
-  GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}
+name: Notify Managers -> Repositories Website Update
+run-name: Notify Managers -> Repositories Website Update
 
 on:
+  workflow_dispatch:
+
   push:
     branches: [ main ]
     paths:
       - 'bootstrap/repo_website/**'
-      - 'bootstrap/repo_workflows/**'
-      - 'bootstrap/repo_scripts/build_site.py'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: notify-managers-repositories-website-update
+  cancel-in-progress: true
+
+env:
+  CENTRAL_REPO: naavilam/github-infra-templates
+  TEMPLATE_REF: main
+  LISTENER_WORKFLOW_PATH: ".github/workflows/listener-repositories-website-update.yml"
 
 jobs:
-  notify:
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+  plan:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+      count:  ${{ steps.build.outputs.count }}
+
     steps:
-      - name: Informa alteração do template
-        env:
-          ORG: High-Energy-Physics-Research
-          EXCLUDE_REPO: high-energy-physics-research.github.io
-          EVENT_TYPE: site-template-updated
+      - name: Checkout orgs.yml (central)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          ref: ${{ env.TEMPLATE_REF }}
+          path: templates
+          sparse-checkout: |
+            orgs.yml
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install pyyaml requests
+
+      - id: build
+        name: Build matrix of EXISTING manager repos (ALL orgs)
+        run: |
+          python - <<'PY'
+          import json, yaml, requests, os
+          from pathlib import Path
+
+          data = yaml.safe_load(Path("templates/orgs.yml").read_text(encoding="utf-8")) or {}
+          items = data.get("orgs", []) if isinstance(data, dict) else (data or [])
+
+          found = []
+          tested = 0
+
+          for it in items:
+              if not isinstance(it, dict):
+                  continue
+              org = str(it.get("name", "")).strip()
+              if not org:
+                  continue
+
+              tested += 1
+              url = f"https://api.github.com/repos/{org}/{org}.github.io"
+              r = requests.get(
+                  url,
+                  timeout=15,
+                  headers={"Accept": "application/vnd.github+json", "User-Agent": "notify-managers"},
+              )
+
+              print(f"🔍 {org}: {r.status_code}")
+
+              if r.status_code == 200:
+                  found.append({"org": org})
+              elif r.status_code == 404:
+                  pass
+              else:
+                  raise SystemExit(f"::error::GitHub API unexpected status for {url}: HTTP {r.status_code}")
+
+          matrix = {"include": found}
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"matrix={json.dumps(matrix)}\n")
+              f.write(f"count={len(found)}\n")
+
+          print(f"[summary] orgs tested = {tested}")
+          print(f"[summary] manager repos found = {len(found)}")
+          PY
+
+  notify:
+    needs: plan
+    if: ${{ needs.plan.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+
+    env:
+      ORG: ${{ matrix.org }}
+
+    steps:
+      - name: Ensure gh is available
+        run: gh --version
+
+      - name: Mint templates-provisioner-app token (ROOT) for target org
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id:      ${{ vars.ROOT_PROVISIONER_APP_ID }}
+          private-key: ${{ secrets.ROOT_PROVISIONER_PRIVATE_KEY_PEM }}
+          owner:       ${{ matrix.org }}
+
+      - name: Export GH_TOKEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          tok='${{ steps.app_token.outputs.token }}'
+          [[ "${#tok}" -ge 20 ]]
+          echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
+
+      - name: Dispatch listener-repositories-website-update (by workflow path)
+        shell: bash
         run: |
           set -euo pipefail
 
-          echo "Repositórios da organização high-energy-physics-research: $ORG"
+          FULL="${ORG}/${ORG}.github.io"
+          echo "Repo: $FULL"
 
-          page=1
-          repos_tmp="$(mktemp)"
+          DEFAULT_BRANCH="$(gh api "repos/$FULL" -q '.default_branch')"
+          echo "default_branch=$DEFAULT_BRANCH"
 
-          while :; do
-            json="$(curl -sS \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/orgs/$ORG/repos?per_page=100&page=$page")"
+          WF_PATH="${{ env.LISTENER_WORKFLOW_PATH }}"
+          echo "Looking for workflow path: $WF_PATH"
 
-            count="$(echo "$json" | jq 'length')"
-            if [ "$count" -eq 0 ]; then
-              break
-            fi
+          WF_ID="$(gh api "repos/$FULL/actions/workflows" -q ".workflows[] | select(.path==\"$WF_PATH\") | .id" | head -n 1)"
+          if [[ -z "${WF_ID:-}" ]]; then
+            echo "FATAL: workflow not found at path: $WF_PATH in $FULL" >&2
+            echo "Available workflows (name | path):"
+            gh api "repos/$FULL/actions/workflows" -q '.workflows[] | [.name,.path] | @tsv' || true
+            exit 1
+          fi
 
-            # pega full_name dos repos não arquivados e exclui o repo da homepage
-            echo "$json" | jq -r --arg org "$ORG" --arg excl "$EXCLUDE_REPO" '
-              .[]
-              | select(.archived == false)
-              | select(.name != $excl)
-              | .full_name
-            ' >> "$repos_tmp"
+          echo "Dispatching workflow_id=$WF_ID on ref=$DEFAULT_BRANCH"
+          gh api "repos/$FULL/actions/workflows/$WF_ID/dispatches" \
+            -X POST \
+            -f ref="$DEFAULT_BRANCH" \
+            >/dev/null
 
-            page=$((page + 1))
-          done
-
-          # Remove duplicados e ordena
-          sort -u "$repos_tmp" > "$repos_tmp.sorted"
-
-          total="$(wc -l < "$repos_tmp.sorted" | tr -d ' ')"
-          echo "Total de repos para dispatch: $total"
-
-          echo "— Primeiros 20 repos (debug):"
-          head -n 20 "$repos_tmp.sorted" | sed 's/^/  - /'
-
-          # (Opcional) descomente se quiser imprimir TODOS (pode poluir logs)
-          # echo "— Lista completa (debug):"
-          # cat "$repos_tmp.sorted" | sed 's/^/  - /'
-
-          echo "Disparando repository_dispatch ($EVENT_TYPE)..."
-          ok=0
-          fail=0
-
-          while IFS= read -r repo; do
-            [ -z "$repo" ] && continue
-            echo "-> $repo"
-
-            http="$(curl -sS -o /dev/null -w "%{http_code}" -X POST \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/$repo/dispatches" \
-              -d "{\"event_type\":\"$EVENT_TYPE\"}")"
-
-            if [ "$http" -ge 200 ] && [ "$http" -lt 300 ]; then
-              ok=$((ok + 1))
-            else
-              fail=$((fail + 1))
-              echo "  falhou (HTTP $http) em $repo"
-            fi
-          done < "$repos_tmp.sorted"
-
-          echo "Resultado: ok=$ok fail=$fail total=$total"
+          echo "OK: dispatched for $FULL"
