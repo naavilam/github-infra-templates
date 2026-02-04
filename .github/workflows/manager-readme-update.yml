@@ -1,2 +1,14 @@
 name: Manager Update Readme
 run-name: Manager Update Readme
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "placeholder"
