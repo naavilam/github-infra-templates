@@ -46,7 +46,7 @@ REGISTRY_FILE = _default_registry_file()
 
 WORKDIR_BASE = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "repo_init_work"
 
-DISPATCH_SITE = os.environ.get("DISPATCH_SITE", "site-template-updated")
+DISPATCH_SITE = os.environ.get("DISPATCH_SITE", "website-template-updated")
 DISPATCH_README = os.environ.get("DISPATCH_README", "readme-template-updated")
 
 # Se quiser SEMPRE disparar os 2 workflows, mesmo após push (default true aqui)

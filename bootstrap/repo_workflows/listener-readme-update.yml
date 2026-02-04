@@ -2,6 +2,8 @@ name: Listener Update README.md
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [readme-template-updated]
 
 permissions:
   contents: write
