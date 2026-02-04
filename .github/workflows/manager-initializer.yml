@@ -1,3 +1,4 @@
+name: Provision Managers Secrets, Repository and Website
 run-name: Provision Managers Secrets, Repository and Website
 
 on:

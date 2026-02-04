@@ -1,3 +1,4 @@
+name: Notify Org Managers -> Repositories Initializer
 run-name: Notify Org Managers -> Repositories Initializer
 
 on:
