@@ -78,6 +78,34 @@ def err(repo: str, step: str, msg: str) -> None:
 # HTTP / GitHub
 # ============================================================
 
+def repo_info(org: str, repo: str) -> dict:
+    r = gh("GET", f"{API}/repos/{org}/{repo}")
+    if r.status_code != 200:
+        raise RuntimeError(f"repo_info failed {r.status_code}: {r.text}")
+    return r.json()
+
+def has_branch(org: str, repo: str, branch: str) -> bool:
+    r = gh("GET", f"{API}/repos/{org}/{repo}/branches/{branch}")
+    if r.status_code in (200, 404):
+        return r.status_code == 200
+    raise RuntimeError(f"has_branch unexpected {r.status_code}: {r.text}")
+
+def workflow_file_exists(org: str, repo: str, branch: str, filename: str) -> bool:
+    # contents API: checa arquivo específico no branch
+    url = f"{API}/repos/{org}/{repo}/contents/.github/workflows/{filename}?ref={branch}"
+    r = gh("GET", url)
+    if r.status_code in (200, 404):
+        return r.status_code == 200
+    raise RuntimeError(f"workflow_file_exists unexpected {r.status_code}: {r.text}")
+
+def missing_required_workflows(org: str, repo: str, branch: str) -> List[str]:
+    required = ["listener-readme-update.yml", "listener-website-update.yml"]
+    missing = []
+    for wf in required:
+        if not workflow_file_exists(org, repo, branch, wf):
+            missing.append(wf)
+    return missing
+    
 def gh(method: str, url: str, **kw) -> requests.Response:
     return requests.request(method, url, headers=HEADERS, timeout=30, **kw)
 
@@ -139,9 +167,44 @@ def ensure_repo_clone(org: str, repo: str) -> Path:
     return d
 
 def ensure_main_checkout(repo_dir: Path) -> None:
-    run(["git", "checkout", "-B", "main", "origin/main"], cwd=repo_dir)
-    run(["git", "reset", "--hard", "origin/main"], cwd=repo_dir)
+    # tenta trazer origin/main, se existir
+    try:
+        run(["git", "show-ref", "--verify", "--quiet", "refs/remotes/origin/main"], cwd=repo_dir)
+        run(["git", "checkout", "-B", "main", "origin/main"], cwd=repo_dir)
+        run(["git", "reset", "--hard", "origin/main"], cwd=repo_dir)
+    except subprocess.CalledProcessError:
+        # não existe origin/main: cria main (a partir do HEAD atual)
+        run(["git", "checkout", "-B", "main"], cwd=repo_dir)
+
     run(["git", "clean", "-ffd"], cwd=repo_dir)
+
+def install_required_workflows_only(repo_dir: Path) -> bool:
+    if not WORKFLOWS_SRC.exists():
+        raise RuntimeError(f"missing workflows source: {WORKFLOWS_SRC}")
+
+    ensure_main_checkout(repo_dir)
+
+    dst = repo_dir / ".github" / "workflows"
+    dst.mkdir(parents=True, exist_ok=True)
+
+    required = ["listener-readme-update.yml", "listener-website-update.yml"]
+
+    changed = False
+    for wf in required:
+        src = WORKFLOWS_SRC / wf
+        if not src.exists():
+            raise RuntimeError(f"missing required workflow in template: {src}")
+        # copia/atualiza (preserva perms básicos)
+        shutil.copy2(src, dst / wf)
+        changed = True
+
+    if not out(["git", "status", "--porcelain"], cwd=repo_dir):
+        return False
+
+    run(["git", "add", ".github/workflows"], cwd=repo_dir)
+    run(["git", "commit", "-m", "Add required workflows"], cwd=repo_dir)
+    run(["git", "push", "-u", "origin", "main"], cwd=repo_dir)
+    return True
 
 def sync_bootstrap_into_main(repo_dir: Path) -> bool:
     """
@@ -192,7 +255,7 @@ def sync_bootstrap_into_main(repo_dir: Path) -> bool:
 
 def process_repo(entry: Dict) -> None:
     org = (entry.get("org") or "").strip()
-    
+
     raw_repo = (entry.get("name") or "").strip()
     repo = normalize_repo_name(raw_repo)
 
@@ -205,28 +268,88 @@ def process_repo(entry: Dict) -> None:
 
     log(full, "start")
 
-    if repo_exists(org, repo):
-        log(full, "exists — skipped")
+    exists = repo_exists(org, repo)
+
+    # ----------------------------
+    # Case A) repo não existe
+    # ----------------------------
+    if not exists:
+        create_repo(org, repo, desc, private)
+        log(full, "repo created")
+        wait_repo_ready(org, repo)
+
+        repo_dir = ensure_repo_clone(org, repo)
+        pushed = sync_bootstrap_into_main(repo_dir)  # disciplina + workflows (agora 2)
+        log(full, "bootstrap pushed" if pushed else "no diff after bootstrap (unexpected)")
+
+        if ALWAYS_DISPATCH or (not pushed):
+            dispatch(org, repo, DISPATCH_SITE)
+            log(full, f"dispatched {DISPATCH_SITE}")
+            dispatch(org, repo, DISPATCH_README)
+            log(full, f"dispatched {DISPATCH_README}")
+
+        log(full, "done")
         return
 
-    create_repo(org, repo, desc, private)
-    log(full, "repo created")
-    wait_repo_ready(org, repo) 
+    # ----------------------------
+    # Case B/C) repo existe
+    #   B) sem main => criar main + instalar workflows
+    #   C) com main => se faltar workflows, instalar
+    # ----------------------------
+    info = repo_info(org, repo)
+    default_branch = (info.get("default_branch") or "main").strip()
 
-    repo_dir = ensure_repo_clone(org, repo)
-    pushed = sync_bootstrap_into_main(repo_dir)
-    log(full, "bootstrap pushed" if pushed else "no diff after bootstrap (unexpected for new repo)")
+    has_main = has_branch(org, repo, "main")
 
-    # Dispara os workflows (sempre, por padrão)
-    if ALWAYS_DISPATCH or (not pushed):
-        dispatch(org, repo, DISPATCH_SITE)
-        log(full, f"dispatched {DISPATCH_SITE}")
-        dispatch(org, repo, DISPATCH_README)
-        log(full, f"dispatched {DISPATCH_README}")
-    else:
-        log(full, "dispatch skipped (ALWAYS_DISPATCH=false and push happened)")
+    # clona 1x só quando precisar mexer
+    def clone_for_fix() -> Path:
+        wait_repo_ready(org, repo)
+        d = ensure_repo_clone(org, repo)
+        return d
 
-    log(full, "done")
+    if not has_main:
+        log(full, f"missing branch main (default_branch={default_branch}) — creating main + installing workflows")
+        repo_dir = clone_for_fix()
+
+        # garante que temos o conteúdo do default branch localmente
+        try:
+            run(["git", "checkout", default_branch], cwd=repo_dir)
+        except subprocess.CalledProcessError:
+            # se der ruim, fica no HEAD do clone mesmo e segue
+            pass
+
+        # cria main a partir do estado atual e adiciona workflows
+        ensure_main_checkout(repo_dir)
+        pushed = install_required_workflows_only(repo_dir)
+        log(full, "main created/updated with required workflows" if pushed else "no changes after workflow install")
+
+        if ALWAYS_DISPATCH or pushed:
+            dispatch(org, repo, DISPATCH_SITE)
+            log(full, f"dispatched {DISPATCH_SITE}")
+            dispatch(org, repo, DISPATCH_README)
+            log(full, f"dispatched {DISPATCH_README}")
+
+        log(full, "done")
+        return
+
+    # tem main: checa workflows
+    missing = missing_required_workflows(org, repo, "main")
+    if missing:
+        log(full, f"main exists but missing workflows: {', '.join(missing)} — installing")
+        repo_dir = clone_for_fix()
+        pushed = install_required_workflows_only(repo_dir)
+        log(full, "workflows installed/pushed" if pushed else "no changes after workflow install")
+
+        if ALWAYS_DISPATCH or pushed:
+            dispatch(org, repo, DISPATCH_SITE)
+            log(full, f"dispatched {DISPATCH_SITE}")
+            dispatch(org, repo, DISPATCH_README)
+            log(full, f"dispatched {DISPATCH_README}")
+
+        log(full, "done")
+        return
+
+    log(full, "exists with main + required workflows — skipped")
 
 import time
 
