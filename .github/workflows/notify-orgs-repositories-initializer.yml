@@ -1,5 +1,5 @@
-name: Notify Org Managers -> Repositories Initializer
-run-name: Notify Org Managers -> Repositories Initializer
+name: Notify Org's Repositories Initializer
+run-name: Notify Org's Repositories Initializer
 
 on:
   workflow_dispatch:
