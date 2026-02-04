@@ -102,7 +102,6 @@ jobs:
               if not org:
                   continue
               if not slug:
-                  # fallback seguro: mantém compatibilidade (slug = org)
                   slug = org.lower()
               selected.append({"org": org, "slug": slug.lower()})
 
@@ -129,7 +128,6 @@ jobs:
       max-parallel: 6
       matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
-    # mantém o mesmo padrão: environment por org
     environment: ${{ matrix.org }}
 
     env:
@@ -240,7 +238,7 @@ jobs:
           ORG_LC="$(echo "$ORG" | tr '[:upper:]' '[:lower:]')"
           echo "https://${ORG_LC}.github.io" > "$GITHUB_WORKSPACE/out/README.md"
 
-      - name: Inject GA tracking id + title + url + utm_source into out/_config.yml
+      - name: Inject GA + title + url + utm_source + hero_image into out/_config.yml
         shell: bash
         env:
           ORG: ${{ matrix.org }}
@@ -248,6 +246,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import os, yaml
+          from pathlib import Path
 
           org = (os.environ.get("ORG") or "").strip()
           if not org:
@@ -256,10 +255,11 @@ jobs:
           ws  = os.environ["GITHUB_WORKSPACE"]
           org_lc = org.lower()
 
-          orgs_yml   = os.path.join(ws, "templates", "orgs.yml")
-          config_yml = os.path.join(ws, "out", "_config.yml")
+          orgs_yml   = Path(ws) / "templates" / "orgs.yml"
+          config_yml = Path(ws) / "out" / "_config.yml"
+          out_dir    = Path(ws) / "out"
 
-          data = yaml.safe_load(open(orgs_yml, "r", encoding="utf-8")) or {}
+          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
           if isinstance(data, list):
               items = data
           elif isinstance(data, dict):
@@ -271,7 +271,7 @@ jobs:
 
           entry = next(
               (x for x in items
-              if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
+               if isinstance(x, dict) and str(x.get("name","")).strip().lower() == org_lc),
               None
           )
           if not entry:
@@ -282,7 +282,7 @@ jobs:
           url   = f"https://{org_lc}.github.io"
           github_url = f"https://github.com/{org_lc}/{org_lc}.github.io"
 
-          cfg = yaml.safe_load(open(config_yml, "r", encoding="utf-8")) or {}
+          cfg = yaml.safe_load(config_yml.read_text(encoding="utf-8")) or {}
 
           cfg["org"] = org_lc
           cfg["utm_source"] = org_lc
@@ -297,8 +297,47 @@ jobs:
           if title:
               cfg["title"] = title
 
-          yaml.safe_dump(cfg, open(config_yml, "w", encoding="utf-8"),
-                        sort_keys=False, allow_unicode=True)
+          # ---------- hero_image autodetect ----------
+          img_dir = out_dir / "img"
+          candidates = []
+
+          if img_dir.exists():
+              for p in img_dir.rglob("*"):
+                  if not p.is_file():
+                      continue
+                  name = p.name.lower()
+                  if "banner" not in name:
+                      continue
+                  if p.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp"):
+                      continue
+                  candidates.append(p)
+
+          def ext_rank(ext: str) -> int:
+              return {".png": 0, ".jpg": 1, ".jpeg": 2, ".webp": 3}.get(ext, 9)
+
+          best = None
+          if candidates:
+              candidates.sort(key=lambda p: (
+                  0 if "hero-banner" in p.name.lower() else 1,
+                  ext_rank(p.suffix.lower()),
+                  p.name.lower(),
+              ))
+              best = candidates[0]
+
+          if best:
+              rel = best.relative_to(out_dir).as_posix()   # ex: "img/hero-banner.png"
+              cfg["hero_image"] = "/" + rel                # ex: "/img/hero-banner.png"
+              print(f"[ok] hero_image = {cfg['hero_image']}")
+          else:
+              cfg.pop("hero_image", None)
+              print("[warn] no banner image found under out/img/ (hero_image removed)")
+
+          yaml.safe_dump(
+              cfg,
+              open(config_yml, "w", encoding="utf-8"),
+              sort_keys=False,
+              allow_unicode=True,
+          )
           print("[ok] _config.yml updated")
           PY
 
