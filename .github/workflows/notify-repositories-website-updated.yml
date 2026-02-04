@@ -8,7 +8,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'bootstrap/repo_website/**' 
+      - 'bootstrap/repo_website/**'
+      - 'bootstrap/repo_workflows/**'
       - 'bootstrap/repo_scripts/build_site.py'
 
 jobs:
