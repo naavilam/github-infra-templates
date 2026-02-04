@@ -1,4 +1,4 @@
-name: Update Repositories READMEs
+run-name: Update Repositories READMEs
 
 on:
   workflow_call:

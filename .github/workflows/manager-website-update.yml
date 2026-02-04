@@ -1,4 +1,4 @@
-name: Manager Update Website
+run-name: Manager Update Website
 
 on:
   workflow_call:

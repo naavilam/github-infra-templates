@@ -1,4 +1,4 @@
-name: Notify orgs readme's template updated
+run-name: Notify orgs readme's template updated
 
 env:
   GH_TOKEN: ${{ secrets.GH_WORKFLOWS }}

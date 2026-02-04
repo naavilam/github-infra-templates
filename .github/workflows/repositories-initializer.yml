@@ -1,4 +1,4 @@
-name: Repositories Websites Initializer
+run-name: Repositories Websites Initializer
 
 on:
   workflow_call:

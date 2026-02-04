@@ -1,4 +1,4 @@
-name: Update Repositories Websites
+run-name: Update Repositories Websites
 
 on:
   workflow_call:

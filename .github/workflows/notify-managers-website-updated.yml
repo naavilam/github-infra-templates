@@ -1,4 +1,4 @@
-name: Notify Managers Website Update
+run-name: Notify Managers Website Update
 
 on:
   workflow_dispatch:
