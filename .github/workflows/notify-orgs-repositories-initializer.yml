@@ -1,4 +1,4 @@
-name: Notify Managers -> Repositories Initializer
+name: Notify Org Managers -> Repositories Initializer
 
 on:
   workflow_dispatch:
@@ -6,20 +6,22 @@ on:
   push:
     branches: [ main ]
     paths:
+      - ".github/workflows/repositories-initializer.yml"
+      - "bootstrap/**"
       - "org/**"
+      - "manager/**"
 
 permissions:
   contents: read
   id-token: write
 
 concurrency:
-  group: notify-managers-repo-initializer
+  group: notify-managers-repositories-initializer
   cancel-in-progress: true
 
 env:
   CENTRAL_REPO: naavilam/github-infra-templates
   TEMPLATE_REF: main
-
   LISTENER_WORKFLOW_PATH: ".github/workflows/listener-repositories-initializer.yml"
 
 jobs:
@@ -51,11 +53,10 @@ jobs:
         name: Build matrix of EXISTING manager repos (ALL orgs)
         run: |
           python - <<'PY'
-          import json, yaml, requests
+          import json, yaml, requests, os
           from pathlib import Path
 
-          orgs_yml = Path("templates/orgs.yml")
-          data = yaml.safe_load(orgs_yml.read_text(encoding="utf-8")) or {}
+          data = yaml.safe_load(Path("templates/orgs.yml").read_text(encoding="utf-8")) or {}
           items = data.get("orgs", []) if isinstance(data, dict) else (data or [])
 
           found = []
@@ -81,19 +82,12 @@ jobs:
               if r.status_code == 200:
                   found.append({"org": org})
               elif r.status_code == 404:
-                  # repo manager ainda não existe -> ignora
                   pass
               else:
-                  # se for rate limit/5xx etc, falha pra não ficar silencioso
                   raise SystemExit(f"::error::GitHub API unexpected status for {url}: HTTP {r.status_code}")
 
           matrix = {"include": found}
 
-          out = Path(json.loads(json.dumps(str(Path().absolute()))))  # no-op pra evitar lint chato
-          with open(str(Path().home() / "dummy"), "w") as _:
-              pass
-
-          import os
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
               f.write(f"matrix={json.dumps(matrix)}\n")
               f.write(f"count={len(found)}\n")
@@ -135,7 +129,7 @@ jobs:
           [[ "${#tok}" -ge 20 ]]
           echo "GH_TOKEN=$tok" >> "$GITHUB_ENV"
 
-      - name: Dispatch listener workflow in manager repo (robust by path)
+      - name: Dispatch listener-repositories-initializer (by workflow path)
         shell: bash
         run: |
           set -euo pipefail
@@ -150,7 +144,6 @@ jobs:
           echo "Looking for workflow path: $WF_PATH"
 
           WF_ID="$(gh api "repos/$FULL/actions/workflows" -q ".workflows[] | select(.path==\"$WF_PATH\") | .id" | head -n 1)"
-
           if [[ -z "${WF_ID:-}" ]]; then
             echo "FATAL: workflow not found at path: $WF_PATH in $FULL" >&2
             echo "Available workflows (name | path):"
@@ -158,7 +151,11 @@ jobs:
             exit 1
           fi
 
-          echo "Dispatching workflow_id=$WF_ID ref=$DEFAULT_BRANCH"
+          echo "Dispatching workflow_id=$WF_ID on ref=$DEFAULT_BRANCH (target='')"
           gh api "repos/$FULL/actions/workflows/$WF_ID/dispatches" \
             -X POST \
-            -f ref="$DEFAULT_BRANCH"
+            -f ref="$DEFAULT_BRANCH" \
+            -f inputs[target]="" \
+            >/dev/null
+
+          echo "OK: dispatched for $FULL"
