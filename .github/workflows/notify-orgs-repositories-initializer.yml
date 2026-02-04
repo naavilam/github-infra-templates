@@ -6,10 +6,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - ".github/workflows/repositories-initializer.yml"
-      - "bootstrap/**"
       - "org/**"
-      - "manager/**"
 
 permissions:
   contents: read
