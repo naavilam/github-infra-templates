@@ -341,8 +341,8 @@ repos:
     readme_cta_text: "Open full course website."
     readme_theme: minimal
 
-  - name: IF4302112-Fisica-Matematica-I
-    id: IF4302112
+  - name: IF4302204-Fisica-Matematica-I
+    id: IF4302204
     title: "Mathematical Physics I"
     title_pt: "Física Matemática I"
     academic_level: undergraduate
