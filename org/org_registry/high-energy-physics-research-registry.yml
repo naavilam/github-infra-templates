@@ -53,3 +53,16 @@ repos:
     site_description: Bayesian Inference Research.
     status: on_going
     readme_cta_text: "Open research website."
+
+  - name: GPyTorch
+    id: GPY2026
+    title: GPyTorch
+    academic_level: graduate
+    academic_area: Gaussian Processes
+    academic_school: Cornellius GP
+    site_hero_image: gpytorch.png
+    course_url: ""
+    site_description: Gaussian Process Implementation.
+    status: on_going
+    readme_cta_text: "Open website."
+
