@@ -30,9 +30,12 @@
         <li class="hidden">
           <a href="#page-top"></a>
         </li>
+        {% assign grad_posts = site.posts | where: "category", "graduate" %}
+        {% if grad_posts and grad_posts.size > 0 %}
         <li class="page-scroll">
           <a href="#portfolio">Graduate</a>
         </li>
+        {% endif %}
         {% assign und_posts = site.posts | where: "category", "undergraduate" %}
         {% if und_posts.size > 0 %}
         <li class="page-scroll">
