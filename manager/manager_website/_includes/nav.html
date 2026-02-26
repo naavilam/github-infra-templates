@@ -33,9 +33,12 @@
         <li class="page-scroll">
           <a href="#portfolio">Graduate</a>
         </li>
+        {% assign und_posts = site.posts | where: "category", "undergraduate" %}
+        {% if und_posts.size > 0 %}
         <li class="page-scroll">
           <a href="#portfolio-und">Undergraduate</a>
         </li>
+        {% endif %}
         <li class="page-scroll">
           <a href="#about">About</a>
         </li>
