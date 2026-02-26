@@ -10,7 +10,7 @@ repos:
     id: Variational Approximation
     title: "Research"
     academic_level: graduate
-    academic_area: Materials Science
+    academic_area: Variational Approximation
     academic_school: IF/USP
     status: 
     completed_on: 
@@ -24,7 +24,7 @@ repos:
     id: Quantum Chemistry
     title: "Research"
     academic_level: graduate
-    academic_area: Materials Science
+    academic_area: Ab-Initio Chemistry
     academic_school: IF/USP
     status: 
     completed_on: 
@@ -38,7 +38,7 @@ repos:
     id: Quantum Monte Carlo
     title: "Research"
     academic_level: graduate
-    academic_area: Materials Science
+    academic_area: Quantum Monte Carlo
     academic_school: IF/USP
     status: 
     completed_on: 
@@ -52,7 +52,7 @@ repos:
     id: Quantum Neural State
     title: "Research"
     academic_level: graduate
-    academic_area: Materials Science
+    academic_area: Neural Networks
     academic_school: IF/USP
     status: 
     completed_on: 
