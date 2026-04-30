@@ -386,6 +386,21 @@ repos:
     readme_cta_text: "Open full course website."
     readme_theme: minimal
 
+  - name: IF4302313-Fisica-Experimental-V
+    id: IF4302313
+    title: "Experimental Physics V"
+    title_pt: "Física Experimental V"
+    academic_level: undergraduate
+    academic_area: Physics
+    academic_school: IF/USP
+    status: completed
+    completed_on:
+    site_hero_image: experimental-physics-v.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Open full course website."
+    readme_theme: minimal
+
   - name: IF4302305-Mecanica-Classica-I
     id: IF4302305
     title: "Classical Mechanics I"
