@@ -429,14 +429,7 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
     # 3) Gera reports.json (depois do copy_tree)
     reports_json = build_reports_json_recursive(src_repo=src, out_site=out, pdf_name="report.pdf", debug=True)
 
-    if reports_json is not None:
-        try:
-            rep_node = json.loads(reports_json.read_text(encoding="utf-8"))
-            if rep_node.get("children"):  # só adiciona se não estiver vazio
-                tree.setdefault("children", []).append(rep_node)
-        except Exception as e:
-            print(f"[reports] warn: failed to load {reports_json}: {e}")
-    else:
+    if reports_json is None:
         # remove reports.json antigo se sobrou de build anterior
         stale = out / "assets" / "tree" / "reports.json"
         if stale.exists():
