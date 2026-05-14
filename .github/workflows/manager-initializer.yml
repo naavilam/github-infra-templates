@@ -320,7 +320,6 @@ jobs:
 
           gh api "repos/${FULL}/actions/workflows/listener-manager-website-update.yml/dispatches" \
             -X POST \
-            -f ref="main" \
-            -F inputs[org]="$ORG" >/dev/null || true
+            -f ref="main" >/dev/null
 
           echo "Dispatched manager-website-update for $FULL"
