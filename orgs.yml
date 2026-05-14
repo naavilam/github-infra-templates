@@ -162,6 +162,60 @@ orgs:
         app_name: Economics-Topics-Provisioner-App
         app_instalation: 103588461
 
+  - name: rigorous-proof-series-mathematics
+    slug: proof-mathematics
+    title: "Rigorous Proof Series - Mathematics"
+    ga_analytics: 
+    apps:
+      dispatcher:
+        app_id: 
+        app_name: Proof-Mathematics-Dispatcher-App
+        app_instalation: 
+      auditor:
+        app_id: 
+        app_name: Proof-Mathematics-Auditor-App
+        app_instalation: 
+      provisioner:
+        app_id: 
+        app_name: Proof-Mathematics-Provisioner-App
+        app_instalation: 
+
+  - name: rigorous-proof-series-physics
+    slug: proof-physics
+    title: "Rigorous Proof Series - Physics"
+    ga_analytics: 
+    apps:
+      dispatcher:
+        app_id: 
+        app_name: Proof-Physics-Dispatcher-App
+        app_instalation: 
+      auditor:
+        app_id: 
+        app_name: Proof-Physics-Auditor-App
+        app_instalation: 
+      provisioner:
+        app_id: 
+        app_name: Proof-Physics-Provisioner-App
+        app_instalation: 
+
+  - name: rigorous-proof-series-computer-science
+    slug: proof-cscience
+    title: "Rigorous Proof Series - Computer Science"
+    ga_analytics: 
+    apps:
+      dispatcher:
+        app_id: 3712705
+        app_name: Proof-CScience-Dispatcher-App
+        app_instalation: 132313958
+      auditor:
+        app_id: 3712705
+        app_name: Proof-CScience-Dispatcher-App
+        app_instalation: 132313958
+      provisioner:
+        app_id: 3712705
+        app_name: Proof-CScience-Dispatcher-App
+        app_instalation: 132313958
+
   - name: course-codex
     slug: course-codex
     title: "Course Codex"
