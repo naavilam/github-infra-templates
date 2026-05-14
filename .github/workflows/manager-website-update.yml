@@ -192,12 +192,14 @@ jobs:
           ASSETS_DIR="$ROOT/manager/manager_assets/${ORG_SLUG}"
 
           if [[ ! -d "$ASSETS_DIR" ]]; then
-            echo "Missing assets dir: $ASSETS_DIR" >&2
-            echo "Available assets:" >&2
-            ls -la "$ROOT/manager/manager_assets" >&2 || true
+            echo "::error title=Missing manager assets directory::Expected assets directory not found for org '$ORG' at '$ASSETS_DIR'."
+            echo "::error::Create directory manager/manager_assets/${ORG_SLUG}/ with at least one tracked file, then rerun this workflow."
+            echo "Available assets directories:"
+            ls -la "$ROOT/manager/manager_assets" || true
             exit 1
           fi
 
+          echo "Using org assets dir: $ASSETS_DIR"
           rsync -a "$ASSETS_DIR/" "$OUT/"
 
           mkdir -p "$OUT/.github/workflows"
