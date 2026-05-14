@@ -182,124 +182,128 @@ jobs:
               raise SystemExit("::error::ORG env is required")
 
           ga_id = load_org_ga_id(org)
-          print(f"[debug] ga_id_for_org={org} -> {ga_id or '(missing)'}")
+              if not ga_id:
+                  print(f"::error title=Google Analytics tag missing::Google Analytics tag (ga_analytics) is not configured for org '{org}'. Configure it in orgs.yml.")
+                  sys.exit(1)
+              print(f"[debug] ga_id_for_org={org} -> {ga_id or '(missing)'}")
 
-          org_slug = load_org_slug(org)
-          print(f"[debug] slug_for_org={org} -> {org_slug}")
+              org_slug = load_org_slug(org)
+              print(f"[debug] slug_for_org={org} -> {org_slug}")
 
-          repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
+              repo_filter = (os.environ.get("REPO_FILTER") or "").strip()
 
-          org_lc = org.lower()
-          reg_path_local = f"central/org/org_registry/{org_lc}-registry.yml"
+              org_lc = org.lower()
+              reg_path_local = f"central/org/org_registry/{org_lc}-registry.yml"
 
-          def norm(s: str) -> str:
-              return (s or "").strip().lower()
+              def norm(s: str) -> str:
+                  return (s or "").strip().lower()
 
-          def slug_repo(name: str) -> str:
-              s = (name or "").strip()
-              s = s.replace("(", "-").replace(")", "-")
-              return s
+              def slug_repo(name: str) -> str:
+                  s = (name or "").strip()
+                  s = s.replace("(", "-").replace(")", "-")
+                  return s
 
-          # 1) LÊ LOCAL (CANÔNICO)
-          with open(reg_path_local, "r", encoding="utf-8") as f:
-              raw = f.read()
-          source = f"local:{reg_path_local}"
+              # 1) LÊ LOCAL (CANÔNICO)
+              with open(reg_path_local, "r", encoding="utf-8") as f:
+                  raw = f.read()
+              source = f"local:{reg_path_local}"
 
-          # PARSE YAML + SANITY
-          data = yaml.safe_load(raw) or {}
-          items = data.get("repos", [])
-          if not isinstance(items, list):
-              print(f"::warning::'repos' is not a list (type={type(items).__name__}). Forcing empty list.", file=sys.stderr)
-              items = []
+              # PARSE YAML + SANITY
+              data = yaml.safe_load(raw) or {}
+              items = data.get("repos", [])
+              if not isinstance(items, list):
+                  print(f"::warning::'repos' is not a list (type={type(items).__name__}). Forcing empty list.", file=sys.stderr)
+                  items = []
 
-          print(f"[debug] registry_source={source}")
-          print(f"[debug] top_keys={list(data.keys())}")
-          print(f"[debug] repos_count={len(items)}")
+              print(f"[debug] registry_source={source}")
+              print(f"[debug] top_keys={list(data.keys())}")
+              print(f"[debug] repos_count={len(items)}")
 
-          include = []
-          for it in items:
-              if not isinstance(it, dict):
-                  continue
+              include = []
+              for it in items:
+                  if not isinstance(it, dict):
+                      continue
 
-              raw_name = str(it.get("name", "")).strip()
-              if not raw_name:
-                  continue
+                  raw_name = str(it.get("name", "")).strip()
+                  if not raw_name:
+                      continue
 
-              name = slug_repo(raw_name)
-              full = f"{org_lc}/{name}"
+                  name = slug_repo(raw_name)
+                  full = f"{org_lc}/{name}"
 
-              # filtro: aceita "repo" OU "org/repo"
-              if repo_filter:
-                  rf = repo_filter.strip()
-                  if "/" in rf:
-                      if norm(full) != norm(rf):
-                          continue
-                  else:
-                      if norm(name) != norm(rf) and norm(raw_name) != norm(rf) and norm(slug_repo(rf)) != norm(name):
-                          continue
+                  # filtro: aceita "repo" OU "org/repo"
+                  if repo_filter:
+                      rf = repo_filter.strip()
+                      if "/" in rf:
+                          if norm(full) != norm(rf):
+                              continue
+                      else:
+                          if norm(name) != norm(rf) and norm(raw_name) != norm(rf) and norm(slug_repo(rf)) != norm(name):
+                              continue
 
-              course_id = str(it.get("id") or "").strip() or name
-              title = str(it.get("title") or "").strip()
-              area  = str(it.get("academic_area") or "").strip()
-              about = str(it.get("site_description") or "").strip()
-              course_url = str(it.get("course_url") or "").strip()
+                  course_id = (it.get("id") or "").strip() or name
+                  title = (it.get("title") or "").strip()
+                  area  = (it.get("academic_area") or "").strip()
+                  about = (it.get("site_description") or "").strip()
+                  course_url = (it.get("course_url") or "").strip()
 
-              course_link_block = ""
-              if course_url:
-                  course_link_block = f'''<p class="about-link">
-                <a href="{course_url}" target="_blank" rel="noopener">→ Lecture Notes</a>
-              </p>'''
+                  course_link_block = ""
+                  if course_url:
+                      course_link_block = f'''<p class="about-link">
+                    <a href="{course_url}" target="_blank" rel="noopener">→ Lecture Notes</a>
+                  </p>'''
 
-              LEVEL_MAP = {
-                  "undergraduate": "Undergraduate Course",
-                  "graduate": "Graduate Course",
-              }
-              raw_level = str(it.get("academic_level") or "").strip().lower()
-              level = LEVEL_MAP.get(raw_level, raw_level)
+                  LEVEL_MAP = {
+                      "undergraduate": "Undergraduate Course",
+                      "graduate": "Graduate Course",
+                  }
+                  raw_level = (it.get("academic_level") or "").strip().lower()
+                  level = LEVEL_MAP.get(raw_level, raw_level)
 
-              tagline = str(it.get("readme_tagline") or "").strip()
-              if not tagline:
-                  parts = [p for p in [area, level] if p]
-                  tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
+                  tagline = (it.get("readme_tagline") or "").strip()
+                  if not tagline:
+                      parts = [p for p in [area, level] if p]
+                      tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
 
-              site_url = str(it.get("site_url") or "").strip()
-              if not site_url:
-                  site_url = f"https://{org_lc}.github.io/{name}"
+                  site_url = (it.get("site_url") or "").strip()
+                  if not site_url:
+                      site_url = f"https://{org_lc}.github.io/{name}"
 
-              cfg = {
-                  "TITLE_1": course_id,
-                  "TITLE_2": title or name.replace("-", " "),
-                  "REPO_TAGLINE": tagline,
-                  "CTA_TEXT": str(it.get("readme_cta_text") or "Access the full course website").strip(),
-                  "THEME": str(it.get("readme_theme") or "coding").strip(),
-                  "SITE_URL": site_url,
-                  "HERO_FILE": str(it.get("site_hero_image") or "").strip(),
-                  "GITHUB_LINK": f"https://github.com/{full}",
-                  "CENTRAL_REPO": f"https://{org_lc}.github.io",
-                  "ABOUT": about,
-                  "SUBTITLE_1": area,
-                  "SUBTITLE_2": level,
-                  "COURSE_LINK_BLOCK": course_link_block,
-                  "GA_ID": ga_id,
-              }
+                  cfg = {
+                      "TITLE_1": course_id,
+                      "TITLE_2": title or name.replace("-", " "),
+                      "REPO_TAGLINE": tagline,
+                      "CTA_TEXT": (it.get("readme_cta_text") or "Access the full course website").strip(),
+                      "THEME": (it.get("readme_theme") or "coding").strip(),
+                      "SITE_URL": site_url,
+                      "HERO_FILE": (it.get("site_hero_image") or "").strip(),
+                      "GITHUB_LINK": f"https://github.com/{full}",
+                      "CENTRAL_REPO": f"https://{org_lc}.github.io",
+                      "ABOUT": about,
+                      "SUBTITLE_1": area,
+                      "SUBTITLE_2": level,
+                      "COURSE_LINK_BLOCK": course_link_block,
+                      "GA_ID": ga_id,
+                  }
 
-              payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-              cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
-              include.append({"repo": full, "cfg_b64": cfg_b64, "slug": org_slug})
+                  payload = json.dumps(cfg, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+                  cfg_b64 = base64.urlsafe_b64encode(payload).decode("ascii")
+                  include.append({"repo": full, "cfg_b64": cfg_b64, "slug": org_slug})
 
-          matrix = {"include": include}
-          out_path = os.environ["GITHUB_OUTPUT"]
-          with open(out_path, "a", encoding="utf-8") as f:
-              f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
-              f.write(f"count={len(include)}\n")
+              matrix = {"include": include}
+              out_path = os.environ["GITHUB_OUTPUT"]
+              with open(out_path, "a", encoding="utf-8") as f:
+                  f.write(f"matrix={json.dumps(matrix, ensure_ascii=False)}\n")
+                  f.write(f"count={len(include)}\n")
 
-          print(f"[ok] selected={len(include)} from {source}")
-          if len(include) == 0:
-              names = []
-              for it in items[:20]:
-                  if isinstance(it, dict) and it.get("name"):
-                      names.append(str(it.get("name")))
-              print(f"[debug] first_repo_names={names}")
+              print(f"[ok] selected={len(include)} from {source}")
+              if len(include) == 0:
+                  names = []
+                  for it in items[:20]:
+                      if isinstance(it, dict) and it.get("name"):
+                          names.append(it["name"])
+                  print(f"::warning::No repositories selected. Sample names: {names}")
+                  sys.exit(1)
           PY
           
       - name: Debug plan outputs
