@@ -94,6 +94,35 @@ def render_index(index_src: str, title: str, nb_count: int, tree: dict) -> str:
         out = re.sub(pattern, lambda m, v=value: v, out)  # <— literal
     return out
 
+
+def make_proof_fold_copy(ipynb_path: Path, tmp_dir: Path) -> Path:
+    nb = json.loads(ipynb_path.read_text(encoding="utf-8"))
+
+    for cell in nb.get("cells", []):
+        tags = cell.get("metadata", {}).get("tags", [])
+
+        if cell.get("cell_type") == "markdown" and "proof" in tags:
+            source = "".join(cell.get("source", []))
+
+            # remove título "Proof" se já existir
+            source = re.sub(r"^\s*#{1,6}\s*Proof\s*\n+", "", source)
+
+            wrapped = f"""
+<details class="proof-block">
+<summary>Proof</summary>
+
+{source}
+
+</details>
+"""
+
+            cell["source"] = wrapped.splitlines(keepends=True)
+
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    tmp_path = tmp_dir / ipynb_path.name
+    tmp_path.write_text(json.dumps(nb, ensure_ascii=False, indent=2), encoding="utf-8")
+    return tmp_path
+
 # ====================== Núcleo de varredura/build ======================
 
 #     return root, nb_count
@@ -177,6 +206,10 @@ def collect_tree(src: Path, out: Path, execute: bool):
         out_html = (out / rel).with_suffix(".html")
         out_html.parent.mkdir(parents=True, exist_ok=True)
 
+
+        tmp_nb_dir = out / ".tmp_nbconvert"
+        nb_for_convert = make_proof_fold_copy(sys.path, tmp_nb_dir)
+
         cmd = [
             sys.executable, "-m", "nbconvert",
             "--to", "html",
@@ -187,7 +220,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
             "--TagRemovePreprocessor.remove_all_outputs_tags={'remove-output','ro'}",
             "--output", out_html.name,
             "--output-dir", str(out_html.parent),
-            str(path),
+            str(nb_for_convert),
         ]
         
 
