@@ -208,7 +208,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
 
         tmp_nb_dir = out / ".tmp_nbconvert"
-        nb_for_convert = make_proof_fold_copy(sys.path, tmp_nb_dir)
+        nb_for_convert = make_proof_fold_copy(path, tmp_nb_dir)
 
         cmd = [
             sys.executable, "-m", "nbconvert",
