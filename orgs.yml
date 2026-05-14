@@ -164,43 +164,43 @@ orgs:
 
   - name: rigorous-proof-series-mathematics
     slug: proof-mathematics
-    title: "Rigorous Proof Series - Mathematics"
+    title: "Mathematics Rigorous Proof"
     ga_analytics: 
     apps:
       dispatcher:
-        app_id: 
+        app_id: 3713144
         app_name: Proof-Mathematics-Dispatcher-App
-        app_instalation: 
+        app_instalation: 132324692
       auditor:
-        app_id: 
+        app_id: 3713144
         app_name: Proof-Mathematics-Auditor-App
-        app_instalation: 
+        app_instalation: 132324692
       provisioner:
-        app_id: 
+        app_id: 3713144
         app_name: Proof-Mathematics-Provisioner-App
-        app_instalation: 
+        app_instalation: 132324692
 
   - name: rigorous-proof-series-physics
     slug: proof-physics
-    title: "Rigorous Proof Series - Physics"
+    title: "Physics Rigorous Proof"
     ga_analytics: 
     apps:
       dispatcher:
-        app_id: 
+        app_id: 3713264
         app_name: Proof-Physics-Dispatcher-App
-        app_instalation: 
+        app_instalation: 132327775
       auditor:
-        app_id: 
+        app_id: 3713264
         app_name: Proof-Physics-Auditor-App
-        app_instalation: 
+        app_instalation: 132327775
       provisioner:
-        app_id: 
+        app_id: 3713264
         app_name: Proof-Physics-Provisioner-App
-        app_instalation: 
+        app_instalation: 132327775
 
   - name: rigorous-proof-series-computer-science
     slug: proof-cscience
-    title: "Rigorous Proof Series - Computer Science"
+    title: "Computer Science Rigorous Proof"
     ga_analytics: 
     apps:
       dispatcher:
