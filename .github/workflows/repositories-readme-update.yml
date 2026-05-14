@@ -145,7 +145,7 @@ jobs:
                       continue
                   name = str(it.get("name", "")).strip().lower()
                   if name == org_lc:
-                      return (it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
+                      return str(it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
               return ""
 
           org = (os.environ.get("ORG") or "").strip()
