@@ -174,7 +174,7 @@ jobs:
                       continue
                   name = str(it.get("name", "")).strip().lower()
                   if name == org_lc:
-                      return (it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
+                    return str(it.get("ga_analytics") or it.get("GA_ID") or it.get("ga_id") or "").strip()
               return ""
 
           org = (os.environ.get("ORG") or "").strip()
@@ -241,11 +241,11 @@ jobs:
                       if norm(name) != norm(rf) and norm(raw_name) != norm(rf) and norm(slug_repo(rf)) != norm(name):
                           continue
 
-              course_id = (it.get("id") or "").strip() or name
-              title = (it.get("title") or "").strip()
-              area  = (it.get("academic_area") or "").strip()
-              about = (it.get("site_description") or "").strip()
-              course_url = (it.get("course_url") or "").strip()
+              course_id = str(it.get("id") or "").strip() or name
+              title = str(it.get("title") or "").strip()
+              area  = str(it.get("academic_area") or "").strip()
+              about = str(it.get("site_description") or "").strip()
+              course_url = str(it.get("course_url") or "").strip()
 
               course_link_block = ""
               if course_url:
@@ -257,15 +257,15 @@ jobs:
                   "undergraduate": "Undergraduate Course",
                   "graduate": "Graduate Course",
               }
-              raw_level = (it.get("academic_level") or "").strip().lower()
+                raw_level = str(it.get("academic_level") or "").strip().lower()
               level = LEVEL_MAP.get(raw_level, raw_level)
 
-              tagline = (it.get("readme_tagline") or "").strip()
+                tagline = str(it.get("readme_tagline") or "").strip()
               if not tagline:
                   parts = [p for p in [area, level] if p]
                   tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
 
-              site_url = (it.get("site_url") or "").strip()
+                site_url = str(it.get("site_url") or "").strip()
               if not site_url:
                   site_url = f"https://{org_lc}.github.io/{name}"
 
@@ -273,10 +273,10 @@ jobs:
                   "TITLE_1": course_id,
                   "TITLE_2": title or name.replace("-", " "),
                   "REPO_TAGLINE": tagline,
-                  "CTA_TEXT": (it.get("readme_cta_text") or "Access the full course website").strip(),
-                  "THEME": (it.get("readme_theme") or "coding").strip(),
+                  "CTA_TEXT": str(it.get("readme_cta_text") or "Access the full course website").strip(),
+                  "THEME": str(it.get("readme_theme") or "coding").strip(),
                   "SITE_URL": site_url,
-                  "HERO_FILE": (it.get("site_hero_image") or "").strip(),
+                  "HERO_FILE": str(it.get("site_hero_image") or "").strip(),
                   "GITHUB_LINK": f"https://github.com/{full}",
                   "CENTRAL_REPO": f"https://{org_lc}.github.io",
                   "ABOUT": about,
