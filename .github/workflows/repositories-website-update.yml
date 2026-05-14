@@ -182,7 +182,7 @@ jobs:
               raise SystemExit("::error::ORG env is required")
 
           ga_id = load_org_ga_id(org)
-              if not ga_id:
+          if not ga_id:
               print(f"::error title=Google Analytics tag missing::Google Analytics tag (ga_analytics) is not configured for org '{org}'. Configure it in orgs.yml.")
               sys.exit(1)
           print(f"[debug] ga_id_for_org={org} -> {ga_id or '(missing)'}")
