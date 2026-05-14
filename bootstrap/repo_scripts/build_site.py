@@ -391,6 +391,31 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .output_subarea.output_stream.output_stderr.output_text {
             display: none !important;
         }
+    
+        .proof-block {
+            margin: 24px 55px;
+            padding: 14px 18px;
+            border-left: 4px solid #555;
+            background: #f7f7f7;
+            border-radius: 6px;
+        }
+
+        .proof-block summary {
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.15em;
+            text-indent: 0 !important;
+        }
+
+        .proof-block p,
+        .proof-block h1,
+        .proof-block h2,
+        .proof-block h3,
+        .proof-block h4,
+        .proof-block h5,
+        .proof-block h6 {
+            text-indent: 0 !important;
+        }
         </style>
         """.strip()
 
