@@ -123,6 +123,45 @@ def make_proof_fold_copy(ipynb_path: Path, tmp_dir: Path) -> Path:
     tmp_path.write_text(json.dumps(nb, ensure_ascii=False, indent=2), encoding="utf-8")
     return tmp_path
 
+def fold_proof_blocks_in_html(html_path: Path):
+    s = html_path.read_text(encoding="utf-8", errors="ignore")
+
+    before_has_details = "<details class=\"proof-block\"" in s
+    before_has_proof_h = re.search(r"<h[1-6][^>]*id=[\"']Proof[\"'][^>]*>", s) is not None
+
+    print(f"[proof-fold] file={html_path}")
+    print(f"[proof-fold] before: has_details={before_has_details} has_h_proof={before_has_proof_h}")
+
+    pattern = re.compile(
+        r'(<div class="text_cell_render[^"]* rendered_html">\s*)'
+        r'<h[1-6][^>]*id=["\']Proof["\'][^>]*>.*?</h[1-6]>'
+        r'(.*?)'
+        r'(</div>\s*</div>\s*</div>)',
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
+    def repl(m):
+        before = m.group(1)
+        body = m.group(2)
+        after = m.group(3)
+        return (
+            before
+            + '<details class="proof-block">\n'
+            + '<summary>Proof</summary>\n'
+            + body
+            + '\n</details>\n'
+            + after
+        )
+
+    s2, n = pattern.subn(repl, s)
+
+    after_has_details = "<details class=\"proof-block\"" in s2
+    after_has_proof_h = re.search(r"<h[1-6][^>]*id=[\"']Proof[\"'][^>]*>", s2) is not None
+
+    print(f"[proof-fold] converted={n}")
+    print(f"[proof-fold] after: has_details={after_has_details} has_h_proof={after_has_proof_h}")
+
+    html_path.write_text(s2, encoding="utf-8")
 # ====================== Núcleo de varredura/build ======================
 
 #     return root, nb_count
@@ -435,6 +474,8 @@ def collect_tree(src: Path, out: Path, execute: bool):
         if execute:
             cmd.append("--execute")
         subprocess.run(cmd, check=True)
+
+        fold_proof_blocks_in_html(out_html)
         _widen_notebook_html(out_html)
 
         file_node["nb_html"] = str(out_html.relative_to(out)).replace(os.sep, "/")
