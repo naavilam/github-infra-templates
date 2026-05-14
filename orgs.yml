@@ -164,7 +164,7 @@ orgs:
 
   - name: rigorous-proof-series-mathematics
     slug: proof-mathematics
-    title: "Mathematics Rigorous Proof"
+    title: "Mathematics Rigorous Proofs"
     ga_analytics: 
     apps:
       dispatcher:
@@ -182,7 +182,7 @@ orgs:
 
   - name: rigorous-proof-series-physics
     slug: proof-physics
-    title: "Physics Rigorous Proof"
+    title: "Physics Rigorous Proofs"
     ga_analytics: 
     apps:
       dispatcher:
@@ -200,7 +200,7 @@ orgs:
 
   - name: rigorous-proof-series-computer-science
     slug: proof-cscience
-    title: "Computer Science Rigorous Proof"
+    title: "Computer Science Rigorous Proofs"
     ga_analytics: 
     apps:
       dispatcher:
