@@ -173,11 +173,11 @@ orgs:
         app_instalation: 132324692
       auditor:
         app_id: 3713144
-        app_name: Proof-Mathematics-Auditor-App
+        app_name: Proof-Mathematics-Dispatcher-App
         app_instalation: 132324692
       provisioner:
         app_id: 3713144
-        app_name: Proof-Mathematics-Provisioner-App
+        app_name: Proof-Mathematics-Dispatcher-App
         app_instalation: 132324692
 
   - name: rigorous-proof-series-physics
@@ -191,11 +191,11 @@ orgs:
         app_instalation: 132327775
       auditor:
         app_id: 3713264
-        app_name: Proof-Physics-Auditor-App
+        app_name: Proof-Physics-Dispatcher-App
         app_instalation: 132327775
       provisioner:
         app_id: 3713264
-        app_name: Proof-Physics-Provisioner-App
+        app_name: Proof-Physics-Dispatcher-App
         app_instalation: 132327775
 
   - name: rigorous-proof-series-computer-science
