@@ -257,15 +257,15 @@ jobs:
                   "undergraduate": "Undergraduate Course",
                   "graduate": "Graduate Course",
               }
-                raw_level = str(it.get("academic_level") or "").strip().lower()
+              raw_level = str(it.get("academic_level") or "").strip().lower()
               level = LEVEL_MAP.get(raw_level, raw_level)
 
-                tagline = str(it.get("readme_tagline") or "").strip()
+              tagline = str(it.get("readme_tagline") or "").strip()
               if not tagline:
                   parts = [p for p in [area, level] if p]
                   tagline = " • ".join(parts) if parts else "lectures • notebooks • references"
 
-                site_url = str(it.get("site_url") or "").strip()
+              site_url = str(it.get("site_url") or "").strip()
               if not site_url:
                   site_url = f"https://{org_lc}.github.io/{name}"
 
