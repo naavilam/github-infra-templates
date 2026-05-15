@@ -888,6 +888,32 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .math-block {
             scroll-margin-top: 90px;
         }
+    
+        /* remove espaço externo do markdown renderizado */
+        div.text_cell_render.rendered_html {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* remove padding da célula markdown */
+        div.text_cell {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* remove espaço da inner cell */
+        div.inner_cell {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* remove margem automática dos blocos HTML renderizados */
+        .rendered_html {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
         </style>
         """.strip()
 
