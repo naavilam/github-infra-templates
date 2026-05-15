@@ -337,9 +337,15 @@ def fold_math_blocks_in_html(html_path: Path):
         )
 
         heading_replacement = f"{type_names[block_type]} {number} — {html.escape(title)}"
+
+        def replace_heading(match):
+            level = match.group(1)
+            attrs = match.group(2)
+            return f"<h{level}{attrs}>{heading_replacement}</h{level}>"
+
         main_html = re.sub(
             r"<h([1-6])([^>]*)>.*?</h\1>",
-            rf"<h\1\2>{heading_replacement}</h\1>",
+            replace_heading,
             main_html,
             count=1,
             flags=re.DOTALL | re.IGNORECASE,
