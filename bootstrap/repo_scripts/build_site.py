@@ -183,12 +183,36 @@ def _slugify(text: str) -> str:
 
 
 def _extract_heading_text(block_html: str) -> str:
-    m = re.search(r"<h[1-6][^>]*>(.*?)</h[1-6]>", block_html or "", flags=re.DOTALL | re.IGNORECASE)
+    m = re.search(
+        r"<h[1-6][^>]*>(.*?)</h[1-6]>",
+        block_html or "",
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
     if not m:
         return "Untitled"
-    txt = re.sub(r"<[^>]+>", "", m.group(1))
+
+    content = m.group(1)
+
+    # remove anchor do nbconvert/jupyter
+    content = re.sub(
+        r'<a[^>]*class="anchor-link"[^>]*>.*?</a>',
+        '',
+        content,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
+    txt = re.sub(r"<[^>]+>", "", content)
+
     txt = html.unescape(txt).strip()
-    txt = re.sub(r"^(Theorem|Definition|Lemma|Corollary|Axiom|Proposition|Example|Remark)\s*:\s*", "", txt, flags=re.I)
+
+    txt = re.sub(
+        r"^(Theorem|Definition|Lemma|Corollary|Axiom|Proposition|Example|Remark)\s*:\s*",
+        "",
+        txt,
+        flags=re.I,
+    )
+
     return txt or "Untitled"
 
 
