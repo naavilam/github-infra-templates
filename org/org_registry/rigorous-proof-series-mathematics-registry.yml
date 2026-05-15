@@ -7,7 +7,7 @@ org: rigorous-proof-series-mathematics
 
 repos:
 
-  - name: "001-Algebra"
+  - name: "High-Algebra"
     id: 001
     title: "Algebra"
     title_pt: "Álgebra"
@@ -22,7 +22,7 @@ repos:
     readme_cta_text: "Access website."
     readme_theme: minimal
 
-  - name: "002-Linear-Algebra"
+  - name: "Linear-Algebra"
     id: 002
     title: "Linear Algebra"
     title_pt: "Álgebra Linear"
@@ -37,7 +37,7 @@ repos:
     readme_cta_text: "Access website."
     readme_theme: minimal
 
-  - name: "003-Complex-Analysis"
+  - name: "Complex-Analysis"
     id: 003
     title: "Complex Analysis"
     title_pt: "Análise Complexa"
