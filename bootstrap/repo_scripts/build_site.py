@@ -164,35 +164,170 @@ def fold_proof_blocks_in_html(html_path: Path):
     html_path.write_text(s2, encoding="utf-8")
 
 # ================== FORMATACAO DAS PROVAS MATEMATICAS ==================
+def _parse_attrs(attr_text: str) -> dict:
+    attrs = {}
+    pattern = re.compile(r'([a-zA-Z_][\w-]*)\s*=\s*("([^"]*)"|\'([^\']*)\'|([^\s]+))')
+    for m in pattern.finditer(attr_text or ""):
+        key = m.group(1).strip().lower()
+        val = m.group(3) or m.group(4) or m.group(5) or ""
+        attrs[key] = val.strip()
+    return attrs
+
+
+def _slugify(text: str) -> str:
+    text = re.sub(r"<[^>]+>", "", text or "")
+    text = html.unescape(text).lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text or "item"
+
+
+def _extract_heading_text(block_html: str) -> str:
+    m = re.search(r"<h[1-6][^>]*>(.*?)</h[1-6]>", block_html or "", flags=re.DOTALL | re.IGNORECASE)
+    if not m:
+        return "Untitled"
+    txt = re.sub(r"<[^>]+>", "", m.group(1))
+    txt = html.unescape(txt).strip()
+    txt = re.sub(r"^(Theorem|Definition|Lemma|Corollary|Axiom|Proposition|Example|Remark)\s*:\s*", "", txt, flags=re.I)
+    return txt or "Untitled"
+
+
 def fold_math_blocks_in_html(html_path: Path):
     s = html_path.read_text(encoding="utf-8", errors="ignore")
 
-    pattern = re.compile(
-        r'<!--\s*block:start\s+([a-zA-Z_-]+)\s*-->'
+    allowed = {
+        "theorem", "definition", "lemma", "corollary",
+        "axiom", "proposition", "example", "remark",
+    }
+
+    type_names = {
+        "theorem": "Theorem",
+        "definition": "Definition",
+        "lemma": "Lemma",
+        "corollary": "Corollary",
+        "axiom": "Axiom",
+        "proposition": "Proposition",
+        "example": "Example",
+        "remark": "Remark",
+    }
+
+    chapter_n = 0
+    section_n = 0
+    subsection_n = 0
+    item_n = 0
+
+    current_chapter = None
+    current_section = None
+    current_subsection = None
+
+    index_items = []
+
+    token_pattern = re.compile(
+        r'<!--\s*chapter:start\s*(.*?)\s*-->'
+        r'|<!--\s*section:start\s*(.*?)\s*-->'
+        r'|<!--\s*subsection:start\s*(.*?)\s*-->'
+        r'|<!--\s*block:start\s+([a-zA-Z_-]+)(.*?)\s*-->'
         r'(.*?)'
         r'(?:<!--\s*proof:start\s*-->(.*?))?'
         r'<!--\s*block:end\s*-->',
         flags=re.DOTALL | re.IGNORECASE,
     )
 
-    allowed = {
-        "theorem",
-        "definition",
-        "lemma",
-        "corollary",
-        "axiom",
-        "proposition",
-        "example",
-        "remark",
-    }
-
     def repl(m):
-        block_type = m.group(1).strip().lower()
-        main_html = (m.group(2) or "").strip()
-        proof_html = (m.group(3) or "").strip()
+        nonlocal chapter_n, section_n, subsection_n, item_n
+        nonlocal current_chapter, current_section, current_subsection
+
+        if m.group(1) is not None:
+            attrs = _parse_attrs(m.group(1))
+            chapter_n += 1
+            section_n = 0
+            subsection_n = 0
+            item_n = 0
+
+            title = attrs.get("title", f"Chapter {chapter_n}")
+            cid = attrs.get("label") or f"chapter-{chapter_n}"
+            current_chapter = {"number": str(chapter_n), "title": title, "id": cid}
+
+            index_items.append({
+                "kind": "chapter",
+                "number": str(chapter_n),
+                "title": title,
+                "id": cid,
+            })
+
+            return f'<span id="{html.escape(cid, quote=True)}" class="math-anchor math-chapter-anchor"></span>'
+
+        if m.group(2) is not None:
+            attrs = _parse_attrs(m.group(2))
+            if chapter_n == 0:
+                chapter_n = 1
+                current_chapter = {"number": "1", "title": "Chapter 1", "id": "chapter-1"}
+
+            section_n += 1
+            subsection_n = 0
+            item_n = 0
+
+            number = f"{chapter_n}.{section_n}"
+            title = attrs.get("title", f"Section {number}")
+            sid = attrs.get("label") or f"section-{chapter_n}-{section_n}"
+            current_section = {"number": number, "title": title, "id": sid}
+
+            index_items.append({
+                "kind": "section",
+                "number": number,
+                "title": title,
+                "id": sid,
+            })
+
+            return f'<span id="{html.escape(sid, quote=True)}" class="math-anchor math-section-anchor"></span>'
+
+        if m.group(3) is not None:
+            attrs = _parse_attrs(m.group(3))
+            if chapter_n == 0:
+                chapter_n = 1
+                current_chapter = {"number": "1", "title": "Chapter 1", "id": "chapter-1"}
+            if section_n == 0:
+                section_n = 1
+                current_section = {"number": f"{chapter_n}.1", "title": "Section 1", "id": f"section-{chapter_n}-1"}
+
+            subsection_n += 1
+            item_n = 0
+
+            number = f"{chapter_n}.{section_n}.{subsection_n}"
+            title = attrs.get("title", f"Subsection {number}")
+            ssid = attrs.get("label") or f"subsection-{chapter_n}-{section_n}-{subsection_n}"
+            current_subsection = {"number": number, "title": title, "id": ssid}
+
+            index_items.append({
+                "kind": "subsection",
+                "number": number,
+                "title": title,
+                "id": ssid,
+            })
+
+            return f'<span id="{html.escape(ssid, quote=True)}" class="math-anchor math-subsection-anchor"></span>'
+
+        block_type = (m.group(4) or "").strip().lower()
+        attrs = _parse_attrs(m.group(5) or "")
+        main_html = (m.group(6) or "").strip()
+        proof_html = (m.group(7) or "").strip()
 
         if block_type not in allowed:
             block_type = "proposition"
+
+        item_n += 1
+
+        if subsection_n:
+            number = f"{chapter_n}.{section_n}.{subsection_n}.{item_n}"
+        elif section_n:
+            number = f"{chapter_n}.{section_n}.{item_n}"
+        elif chapter_n:
+            number = f"{chapter_n}.{item_n}"
+        else:
+            number = str(item_n)
+
+        title = _extract_heading_text(main_html)
+        label = attrs.get("label") or f"{block_type}-{number.replace('.', '-')}-{_slugify(title)}"
 
         proof_html = re.sub(
             r'^\s*<h[1-6][^>]*>\s*Proof\s*.*?</h[1-6]>\s*',
@@ -201,30 +336,98 @@ def fold_math_blocks_in_html(html_path: Path):
             flags=re.DOTALL | re.IGNORECASE,
         )
 
+        heading_replacement = f"{type_names[block_type]} {number} — {html.escape(title)}"
+        main_html = re.sub(
+            r"<h([1-6])([^>]*)>.*?</h\1>",
+            rf"<h\1\2>{heading_replacement}</h\1>",
+            main_html,
+            count=1,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+
+        index_items.append({
+            "kind": "block",
+            "type": block_type,
+            "type_name": type_names[block_type],
+            "number": number,
+            "title": title,
+            "id": label,
+        })
+
+        links = ['<a href="#math-index">index</a>']
+        if current_chapter:
+            links.append(f'<a href="#{html.escape(current_chapter["id"], quote=True)}">chapter</a>')
+        if current_section:
+            links.append(f'<a href="#{html.escape(current_section["id"], quote=True)}">section</a>')
+        if current_subsection:
+            links.append(f'<a href="#{html.escape(current_subsection["id"], quote=True)}">subsection</a>')
+
+        nav = '<div class="math-block-links">↑ ' + " · ".join(links) + '</div>'
+
         if proof_html:
             return f"""
-<details class="math-block {block_type}">
+<details id="{html.escape(label, quote=True)}" class="math-block {block_type}">
 <summary class="math-block-summary">
 {main_html}
 </summary>
 <div class="proof-content">
 {proof_html}
+{nav}
 </div>
 </details>
 """
-        else:
-            return f"""
-<div class="math-block {block_type}">
+        return f"""
+<div id="{html.escape(label, quote=True)}" class="math-block {block_type}">
 <div class="math-block-summary">
 {main_html}
+{nav}
 </div>
 </div>
 """
 
-    s2, n = pattern.subn(repl, s)
-    print(f"[math-block-fold] converted={n} file={html_path}")
+    s2, n = token_pattern.subn(repl, s)
+
+    if index_items:
+        index_html = render_math_index_html(index_items)
+
+        if re.search(r'<!--\s*math-index\s*-->', s2, flags=re.I):
+            s2 = re.sub(r'<!--\s*math-index\s*-->', index_html, s2, count=1, flags=re.I)
+        else:
+            first = re.search(r'<(?:details|div) id="[^"]+" class="math-block', s2)
+            if first:
+                s2 = s2[:first.start()] + index_html + "\n" + s2[first.start():]
+
+    print(f"[math-structure] converted_blocks={n} index_items={len(index_items)} file={html_path}")
     html_path.write_text(s2, encoding="utf-8")
 
+
+def render_math_index_html(items: list[dict]) -> str:
+    if not items:
+        return ""
+
+    out = ['<nav id="math-index" class="math-index">']
+    out.append("<h2>Mathematical Index</h2>")
+    out.append("<ul>")
+
+    for item in items:
+        kind = item.get("kind")
+        number = html.escape(str(item.get("number", "")))
+        title = html.escape(str(item.get("title", "")))
+        item_id = html.escape(str(item.get("id", "")), quote=True)
+
+        if kind == "chapter":
+            out.append(f'<li class="math-index-chapter"><a href="#{item_id}">Chapter {number} — {title}</a></li>')
+        elif kind == "section":
+            out.append(f'<li class="math-index-section"><a href="#{item_id}">Section {number} — {title}</a></li>')
+        elif kind == "subsection":
+            out.append(f'<li class="math-index-subsection"><a href="#{item_id}">Subsection {number} — {title}</a></li>')
+        elif kind == "block":
+            type_name = html.escape(str(item.get("type_name", "")))
+            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}">{type_name} {number} — {title}</a></li>')
+
+    out.append("</ul>")
+    out.append("</nav>")
+    return "\n".join(out)
 # ====================== Núcleo de varredura/build ======================
 
 #     return root, nb_count
@@ -575,6 +778,85 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .proof-content ul,
         .proof-content ol {
             text-indent: 0 !important;
+        }
+
+        .math-index {
+            margin: 24px 55px 36px 55px;
+            padding: 22px 26px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+        }
+
+        .math-index h2 {
+            margin-top: 0;
+            text-indent: 0 !important;
+        }
+
+        .math-index ul {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            list-style: none;
+        }
+
+        .math-index li {
+            text-align: left !important;
+            margin: 6px 0;
+        }
+
+        .math-index a {
+            text-decoration: none;
+            color: #1e293b;
+        }
+
+        .math-index a:hover {
+            text-decoration: underline;
+        }
+
+        .math-index-chapter {
+            margin-top: 14px !important;
+            font-weight: 800;
+        }
+
+        .math-index-section {
+            margin-left: 18px !important;
+            font-weight: 650;
+        }
+
+        .math-index-subsection {
+            margin-left: 36px !important;
+            font-weight: 550;
+        }
+
+        .math-index-block {
+            margin-left: 54px !important;
+            font-size: 0.95em;
+        }
+
+        .math-block-links {
+            margin-top: 18px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            font-size: 0.85em;
+            opacity: 0.72;
+            text-align: right;
+        }
+
+        .math-block-links a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .math-block-links a:hover {
+            text-decoration: underline;
+        }
+
+        .math-anchor {
+            scroll-margin-top: 90px;
+        }
+
+        .math-block {
+            scroll-margin-top: 90px;
         }
         </style>
         """.strip()
