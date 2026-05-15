@@ -7,44 +7,14 @@ org: rigorous-proof-series-physics
 
 repos:
 
-  - name: "001-Eletrodynamics"
-    id: 001
-    title: "Eletrodynamics"
-    title_pt: "Eletrodinâmica"
-    academic_level: graduate
-    academic_area: Physics
-    academic_school:
-    status: 
-    completed_on:
-    site_hero_image: eletrodinamica.png
-    site_description:
-    readme_tagline:
-    readme_cta_text: "Access website."
-    readme_theme: minimal
-  
-  - name: "002-Statistical-Physics"
-    id: 002
-    title: "Statistical-Physics"
-    title_pt: "Física Estatística"
-    academic_level: graduate
-    academic_area: Physics
-    academic_school:
-    status: 
-    completed_on:
-    site_hero_image: fisica-estatistica.png
-    site_description:
-    readme_tagline:
-    readme_cta_text: "Access website."
-    readme_theme: minimal
-
-  - name: "003-Classical-Mechanics"
-    id: 003
+  - name: "PHY3101-Classical-Mechanics"
+    id: PHY3101
     title: "Classical Mechanics"
     title_pt: "Mecânica Clássica"
     academic_level: graduate
     academic_area: Physics
     academic_school:
-    status: 
+    status:
     completed_on:
     site_hero_image: mecanica-classica.png
     site_description:
@@ -52,16 +22,76 @@ repos:
     readme_cta_text: "Access website."
     readme_theme: minimal
 
-  - name: "004-Quantum-Mechanics"
-    id: 004
-    title: "Quantum Mechanics"
-    title_pt: "Mecânica"
+  - name: "PHY3102-Electrodynamics"
+    id: PHY3102
+    title: "Electrodynamics"
+    title_pt: "Eletrodinâmica"
     academic_level: graduate
     academic_area: Physics
     academic_school:
-    status: 
+    status:
+    completed_on:
+    site_hero_image: eletrodinamica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+
+  - name: "PHY3103-Statistical-Physics"
+    id: PHY3103
+    title: "Statistical Physics"
+    title_pt: "Física Estatística"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status:
+    completed_on:
+    site_hero_image: fisica-estatistica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+
+  - name: "PHY3104-Quantum-Mechanics"
+    id: PHY3104
+    title: "Quantum Mechanics"
+    title_pt: "Mecânica Quântica"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status:
     completed_on:
     site_hero_image: mecanica-quantica.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+
+  - name: "PHY3105-Relativity"
+    id: PHY3105
+    title: "Relativity"
+    title_pt: "Relatividade"
+    academic_level: graduate
+    academic_area: Physics
+    academic_school:
+    status:
+    completed_on:
+    site_hero_image: relativity.png
+    site_description:
+    readme_tagline:
+    readme_cta_text: "Access website."
+    readme_theme: minimal
+
+  - name: "PHY4101-Quantum-Mechanics-II"
+    id: PHY4101
+    title: "Quantum Mechanics II"
+    title_pt: "Mecânica Quântica II"
+    academic_level: advanced_graduate
+    academic_area: Physics
+    academic_school:
+    status:
+    completed_on:
+    site_hero_image: quantum-mechanics-ii.png
     site_description:
     readme_tagline:
     readme_cta_text: "Access website."

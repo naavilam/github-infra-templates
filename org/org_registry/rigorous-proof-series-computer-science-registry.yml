@@ -7,14 +7,14 @@ org: rigorous-proof-series-computer-science
 
 repos:
 
-  - name: "001-Graph-Theory"
-    id: 001
+  - name: "CSC3101-Graph-Theory"
+    id: CSC3101
     title: "Graph Theory"
     title_pt: "Teoria de Grafos"
     academic_level: graduate
     academic_area: Computer Science
     academic_school:
-    status: 
+    status:
     completed_on:
     site_hero_image: teoria-de-grafos.png
     site_description:
@@ -22,14 +22,14 @@ repos:
     readme_cta_text: "Access website."
     readme_theme: minimal
 
-  - name: "002-Complexidade-Algoritmos"
-    id: 002
+  - name: "CSC3102-Algorithmic-Complexity"
+    id: CSC3102
     title: "Algorithmic Complexity"
     title_pt: "Complexidade de Algoritmos"
     academic_level: graduate
     academic_area: Computer Science
     academic_school:
-    status: 
+    status:
     completed_on:
     site_hero_image: complexidade-de-algoritmos.png
     site_description:
@@ -37,14 +37,14 @@ repos:
     readme_cta_text: "Access website."
     readme_theme: minimal
 
-  - name: "003-Quantum-Computing"
-    id: 003
+  - name: "CSC3103-Quantum-Computing"
+    id: CSC3103
     title: "Quantum Computing"
     title_pt: "Computação Quântica"
     academic_level: graduate
     academic_area: Computer Science
     academic_school:
-    status: 
+    status:
     completed_on:
     site_hero_image: quantum-computing.png
     site_description:
