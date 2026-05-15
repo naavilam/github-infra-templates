@@ -164,24 +164,36 @@ def fold_proof_blocks_in_html(html_path: Path):
     html_path.write_text(s2, encoding="utf-8")
 
 # ================== FORMATACAO DAS PROVAS MATEMATICAS ==================
-
-def fold_theorem_proof_blocks_in_html(html_path: Path):
+def fold_math_blocks_in_html(html_path: Path):
     s = html_path.read_text(encoding="utf-8", errors="ignore")
 
     pattern = re.compile(
-        r'<!--\s*theorem-proof:start\s*-->'
+        r'<!--\s*block:start\s+([a-zA-Z_-]+)\s*-->'
         r'(.*?)'
-        r'<!--\s*proof:start\s*-->'
-        r'(.*?)'
-        r'<!--\s*theorem-proof:end\s*-->',
+        r'(?:<!--\s*proof:start\s*-->(.*?))?'
+        r'<!--\s*block:end\s*-->',
         flags=re.DOTALL | re.IGNORECASE,
     )
 
-    def repl(m):
-        theorem_html = m.group(1).strip()
-        proof_html = m.group(2).strip()
+    allowed = {
+        "theorem",
+        "definition",
+        "lemma",
+        "corollary",
+        "axiom",
+        "proposition",
+        "example",
+        "remark",
+    }
 
-        # remove heading Proof dentro da prova, se existir
+    def repl(m):
+        block_type = m.group(1).strip().lower()
+        main_html = (m.group(2) or "").strip()
+        proof_html = (m.group(3) or "").strip()
+
+        if block_type not in allowed:
+            block_type = "proposition"
+
         proof_html = re.sub(
             r'^\s*<h[1-6][^>]*>\s*Proof\s*.*?</h[1-6]>\s*',
             '',
@@ -189,21 +201,30 @@ def fold_theorem_proof_blocks_in_html(html_path: Path):
             flags=re.DOTALL | re.IGNORECASE,
         )
 
-        return f"""
-<details class="theorem-proof-block">
-<summary class="theorem-summary">
-{theorem_html}
+        if proof_html:
+            return f"""
+<details class="math-block {block_type}">
+<summary class="math-block-summary">
+{main_html}
 </summary>
 <div class="proof-content">
 {proof_html}
 </div>
 </details>
 """
+        else:
+            return f"""
+<div class="math-block {block_type}">
+<div class="math-block-summary">
+{main_html}
+</div>
+</div>
+"""
 
     s2, n = pattern.subn(repl, s)
-    print(f"[theorem-proof-fold] converted={n} file={html_path}")
-
+    print(f"[math-block-fold] converted={n} file={html_path}")
     html_path.write_text(s2, encoding="utf-8")
+
 # ====================== Núcleo de varredura/build ======================
 
 #     return root, nb_count
@@ -472,56 +493,71 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .output_subarea.output_stream.output_stderr.output_text {
             display: none !important;
         }
-    
-        .proof-block {
-            margin: 24px 55px;
-            padding: 14px 18px;
-            border-left: 4px solid #555;
-            background: #f7f7f7;
-            border-radius: 6px;
-        }
 
-        .proof-block summary {
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1.15em;
-            text-indent: 0 !important;
-        }
-
-        .proof-block p,
-        .proof-block h1,
-        .proof-block h2,
-        .proof-block h3,
-        .proof-block h4,
-        .proof-block h5,
-        .proof-block h6 {
-            text-indent: 0 !important;
-        }
-    
-        
-        .theorem-proof-block {
+        .math-block {
             margin: 24px 55px;
             border-radius: 14px;
-            background: #f7f7f7;
-            border-left: 5px solid #555;
+            background: var(--block-bg, #f7f7f7);
+            border-left: 5px solid var(--block-border, #555);
             overflow: hidden;
         }
 
-        .theorem-proof-block summary {
+        .math-block.theorem {
+            --block-border: #2563eb;
+            --block-bg: #eff6ff;
+        }
+
+        .math-block.definition {
+            --block-border: #0f766e;
+            --block-bg: #ecfdf5;
+        }
+
+        .math-block.lemma {
+            --block-border: #7c3aed;
+            --block-bg: #f5f3ff;
+        }
+
+        .math-block.corollary {
+            --block-border: #d97706;
+            --block-bg: #fffbeb;
+        }
+
+        .math-block.axiom {
+            --block-border: #be123c;
+            --block-bg: #fff1f2;
+        }
+
+        .math-block.proposition {
+            --block-border: #475569;
+            --block-bg: #f8fafc;
+        }
+
+        .math-block.example {
+            --block-border: #0891b2;
+            --block-bg: #ecfeff;
+        }
+
+        .math-block.remark {
+            --block-border: #334155;
+            --block-bg: #f1f5f9;
+        }
+
+        .math-block summary,
+        .math-block-summary {
             cursor: pointer;
             padding: 22px 26px;
             list-style: none;
         }
 
-        .theorem-proof-block summary::-webkit-details-marker {
+        .math-block summary::-webkit-details-marker {
             display: none;
         }
 
-        .theorem-summary h1,
-        .theorem-summary h2,
-        .theorem-summary h3,
-        .theorem-summary h4,
-        .theorem-summary p {
+        .math-block-summary h1,
+        .math-block-summary h2,
+        .math-block-summary h3,
+        .math-block-summary h4,
+        .math-block-summary p {
             text-indent: 0 !important;
         }
 
@@ -560,7 +596,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
             cmd.append("--execute")
         subprocess.run(cmd, check=True)
 
-        fold_theorem_proof_blocks_in_html(out_html)
+        fold_math_blocks_in_html(out_html)
         fold_proof_blocks_in_html(out_html)
         _widen_notebook_html(out_html)
 
