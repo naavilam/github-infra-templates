@@ -599,30 +599,53 @@ def render_references_html(refs: list[dict]) -> str:
 
     items = []
     for r in refs:
-        title = html.escape(str(r.get("title", "")).strip() or "Untitled")
-        author = html.escape(str(r.get("author", "")).strip())
-        year = html.escape(str(r.get("year", "")).strip())
-        note = html.escape(str(r.get("note", "")).strip())
-        url = str(r.get("url", "")).strip()
+        title = html.escape(str(r.get("title") or "").strip() or "Untitled")
+        author = html.escape(str(r.get("author") or "").strip())
+        year = html.escape(str(r.get("year") or "").strip())
+        note = html.escape(str(r.get("note") or "").strip())
 
-        # título vira link se tiver url
-        if url:
-            safe_url = html.escape(url, quote=True)
-            title_html = f"<a href='{safe_url}' target='_blank' rel='noopener noreferrer'><strong>{title}</strong></a>"
+        url = str(r.get("url") or "").strip()
+        image_url = str(r.get("image_url") or "").strip()
+
+        safe_url = html.escape(url, quote=True) if url else ""
+        safe_img = html.escape(image_url, quote=True) if image_url else ""
+
+        cover_html = ""
+        if safe_img:
+            cover_html = (
+                "<div class='ref-cover-wrap'>"
+                f"<img class='ref-cover' src='{safe_img}' alt='Cover of {title}' loading='lazy'>"
+                "</div>"
+            )
+
+        if safe_url:
+            title_html = (
+                f"<a href='{safe_url}' target='_blank' rel='noopener noreferrer'>"
+                f"<strong class='ref-title'>{title}</strong>"
+                "</a>"
+            )
         else:
-            title_html = f"<strong>{title}</strong>"
+            title_html = f"<strong class='ref-title'>{title}</strong>"
 
         parts = [title_html]
 
         meta = " — ".join([p for p in [author, year] if p])
         if meta:
             parts.append(f"<div class='ref-meta'>{meta}</div>")
+
         if note:
             parts.append(f"<div class='ref-note'><em>{note}</em></div>")
 
-        items.append("<li class='ref-item'>" + "\n".join(parts) + "</li>")
+        body_html = "<div class='ref-body'>" + "\n".join(parts) + "</div>"
 
-    return "<ul class='ref-list'>\n" + "\n".join(items) + "\n</ul>"
+        items.append(
+            "<li class='ref-item ref-card'>"
+            + cover_html
+            + body_html
+            + "</li>"
+        )
+
+    return "<ul class='ref-list ref-grid'>\n" + "\n".join(items) + "\n</ul>"
 
 DATE_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
