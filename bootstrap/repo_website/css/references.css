@@ -1,22 +1,90 @@
 body.references .references-text ul {
     margin-top: 10px;
-    padding-left: 20px;
-    list-style: disc;
+    list-style: none;
+    padding-left: 0;
 }
 
-.referencias a {
-    color: #a8d0ff;
-    /* azul claro */
+/* =========================================================
+   References
+========================================================= */
+
+.ref-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.ref-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(4px);
+}
+
+.ref-cover-wrap {
+    flex: 0 0 72px;
+}
+
+.ref-cover {
+    width: 72px;
+    height: 104px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+.ref-body {
+    min-width: 0;
+}
+
+.ref-title {
+    display: block;
+
+    font-size: 1rem;
+    line-height: 1.25;
+    font-weight: 600;
+
+    color: #222;
+}
+
+.ref-meta {
+    margin-top: 0.25rem;
+
+    font-size: 0.9rem;
+    opacity: 0.75;
+}
+
+.ref-note {
+    margin-top: 0.5rem;
+
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.ref-link {
+    margin-top: 0.6rem;
+}
+
+.ref-link a {
+    color: #3b82f6;
     text-decoration: none;
-    /* tira o sublinhado */
 }
 
-.referencias a:hover {
-    color: #ffffff;
-    /* branco ao passar o mouse */
+.ref-link a:hover {
+    color: #1d4ed8;
     text-decoration: underline;
 }
-
-.ref-list { list-style: none; padding-left: 0; margin: 0; }
-.ref-item { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.12); }
-.ref-meta, .ref-note, .ref-link { margin-top: 4px; font-size: 0.95em; opacity: .85; }
