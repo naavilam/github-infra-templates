@@ -765,7 +765,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
 
         .math-block {
-            margin: 24px 55px;
+            margin: 0px;
             border-radius: 14px;
             background: var(--block-bg, #f7f7f7);
             border-left: 5px solid var(--block-border, #555);
@@ -848,7 +848,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
 
         .math-index {
-            margin: 24px 55px 36px 55px;
+            margin: 0px;
             padding: 22px 26px;
             border-radius: 16px;
             background: #f8fafc;
