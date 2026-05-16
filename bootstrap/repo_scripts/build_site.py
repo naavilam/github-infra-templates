@@ -221,7 +221,7 @@ def fold_math_blocks_in_html(html_path: Path):
 
     allowed = {
         "theorem", "definition", "lemma", "corollary",
-        "axiom", "proposition", "example", "remark",
+        "axiom", "proposition", "result", "example", "remark",
     }
 
     type_names = {
@@ -231,6 +231,7 @@ def fold_math_blocks_in_html(html_path: Path):
         "corollary": "Corollary",
         "axiom": "Axiom",
         "proposition": "Proposition",
+        "result": "Result",
         "example": "Example",
         "remark": "Remark",
     }
@@ -238,7 +239,12 @@ def fold_math_blocks_in_html(html_path: Path):
     chapter_n = 0
     section_n = 0
     subsection_n = 0
-    item_n = 0
+    block_counters = {k: 0 for k in allowed}
+    dependent_counters = {
+        "lemma": 0,
+        "corollary": 0,
+    }
+    last_major_number = None
 
     current_chapter = None
     current_section = None
@@ -258,7 +264,8 @@ def fold_math_blocks_in_html(html_path: Path):
     )
 
     def repl(m):
-        nonlocal chapter_n, section_n, subsection_n, item_n
+        nonlocal chapter_n, section_n, subsection_n
+        nonlocal block_counters, dependent_counters, last_major_number
         nonlocal current_chapter, current_section, current_subsection
 
         if m.group(1) is not None:
@@ -266,7 +273,12 @@ def fold_math_blocks_in_html(html_path: Path):
             chapter_n += 1
             section_n = 0
             subsection_n = 0
-            item_n = 0
+            block_counters = {k: 0 for k in allowed}
+            dependent_counters = {
+                "lemma": 0,
+                "corollary": 0,
+            }
+            last_major_number = None
 
             title = attrs.get("title", f"Chapter {chapter_n}")
             cid = attrs.get("label") or f"chapter-{chapter_n}"
@@ -289,7 +301,12 @@ def fold_math_blocks_in_html(html_path: Path):
 
             section_n += 1
             subsection_n = 0
-            item_n = 0
+            block_counters = {k: 0 for k in allowed}
+            dependent_counters = {
+                "lemma": 0,
+                "corollary": 0,
+            }
+            last_major_number = None
 
             number = f"{chapter_n}.{section_n}"
             title = attrs.get("title", f"Section {number}")
@@ -315,7 +332,12 @@ def fold_math_blocks_in_html(html_path: Path):
                 current_section = {"number": f"{chapter_n}.1", "title": "Section 1", "id": f"section-{chapter_n}-1"}
 
             subsection_n += 1
-            item_n = 0
+            block_counters = {k: 0 for k in allowed}
+            dependent_counters = {
+                "lemma": 0,
+                "corollary": 0,
+            }
+            last_major_number = None
 
             number = f"{chapter_n}.{section_n}.{subsection_n}"
             title = attrs.get("title", f"Subsection {number}")
@@ -339,16 +361,35 @@ def fold_math_blocks_in_html(html_path: Path):
         if block_type not in allowed:
             block_type = "proposition"
 
-        item_n += 1
-
         if subsection_n:
-            number = f"{chapter_n}.{section_n}.{subsection_n}.{item_n}"
+            prefix = f"{chapter_n}.{section_n}.{subsection_n}"
         elif section_n:
-            number = f"{chapter_n}.{section_n}.{item_n}"
+            prefix = f"{chapter_n}.{section_n}"
         elif chapter_n:
-            number = f"{chapter_n}.{item_n}"
+            prefix = f"{chapter_n}"
         else:
-            number = str(item_n)
+            prefix = "1"
+
+        major_types = {"theorem", "proposition", "result"}
+
+        if block_type in {"lemma", "corollary"}:
+            dependent_counters[block_type] += 1
+
+            if last_major_number:
+                number = f"{last_major_number}.{dependent_counters[block_type]}"
+            else:
+                number = f"{prefix}.{dependent_counters[block_type]}"
+
+        else:
+            block_counters[block_type] += 1
+            number = f"{prefix}.{block_counters[block_type]}"
+
+            if block_type in major_types:
+                last_major_number = number
+                dependent_counters = {
+                    "lemma": 0,
+                    "corollary": 0,
+                }
 
         title = _extract_heading_text(main_html)
         label = attrs.get("label") or f"{block_type}-{number.replace('.', '-')}-{_slugify(title)}"
@@ -360,7 +401,7 @@ def fold_math_blocks_in_html(html_path: Path):
             flags=re.DOTALL | re.IGNORECASE,
         )
 
-        heading_replacement = f"{type_names[block_type]} {number} — {html.escape(title)}"
+        heading_replacement = f"{number} {type_names[block_type]}: {html.escape(title)}"
 
         def replace_heading(match):
             level = match.group(1)
@@ -453,7 +494,7 @@ def render_math_index_html(items: list[dict]) -> str:
             out.append(f'<li class="math-index-subsection"><a href="#{item_id}">Subsection {number} — {title}</a></li>')
         elif kind == "block":
             type_name = html.escape(str(item.get("type_name", "")))
-            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}">{type_name} {number} — {title}</a></li>')
+            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}">{number} {type_name}: {title}</a></li>')
 
     out.append("</ul>")
     out.append("</nav>")
@@ -913,6 +954,11 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .rendered_html {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
+        }
+
+        .math-block.result {
+            --block-border: #9333ea;
+            --block-bg: #faf5ff;
         }
         </style>
         """.strip()
