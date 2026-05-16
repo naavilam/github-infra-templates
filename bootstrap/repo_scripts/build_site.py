@@ -435,26 +435,20 @@ def fold_math_blocks_in_html(html_path: Path):
 
         nav = '<div class="math-block-links">↑ ' + " · ".join(links) + '</div>'
 
-        if proof_html:
-            return f"""
-<details id="{html.escape(label, quote=True)}" class="math-block {block_type}">
-<summary class="math-block-summary">
-{main_html}
-</summary>
-<div class="proof-content">
-{proof_html}
-{nav}
-</div>
-</details>
-"""
+        details_content = proof_html if proof_html else ""
+        details_class = "proof-content" if proof_html else "math-block-details"
+
         return f"""
-<div id="{html.escape(label, quote=True)}" class="math-block {block_type}">
-<div class="math-block-summary">
-{main_html}
-{nav}
-</div>
-</div>
-"""
+        <details id="{html.escape(label, quote=True)}" class="math-block {block_type}">
+        <summary class="math-block-summary">
+        {main_html}
+        </summary>
+        <div class="{details_class}">
+        {details_content}
+        {nav}
+        </div>
+        </details>
+        """
 
     s2, n = token_pattern.subn(repl, s)
 
@@ -959,6 +953,17 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .math-block.result {
             --block-border: #9333ea;
             --block-bg: #faf5ff;
+        }
+        .math-block-details {
+            padding: 14px 26px 18px 26px;
+            border-top: 1px solid rgba(0,0,0,0.10);
+            background: rgba(255,255,255,0.55);
+        }
+
+        .math-block-details .math-block-links {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
         }
         </style>
         """.strip()
