@@ -207,7 +207,7 @@ def _extract_heading_text(block_html: str) -> str:
     txt = html.unescape(txt).strip()
 
     txt = re.sub(
-        r"^(Theorem|Definition|Lemma|Corollary|Axiom|Proposition|Example|Remark)\s*:\s*",
+        r"^(Theorem|Definition|Lemma|Corollary|Axiom|Postulate|Proposition|Result|Example|Remark)\s*:\s*",
         "",
         txt,
         flags=re.I,
@@ -221,7 +221,8 @@ def fold_math_blocks_in_html(html_path: Path):
 
     allowed = {
         "theorem", "definition", "lemma", "corollary",
-        "axiom", "proposition", "result", "example", "remark",
+        "axiom", "postulate", "proposition", "result",
+        "example", "remark",
     }
 
     type_names = {
@@ -230,6 +231,7 @@ def fold_math_blocks_in_html(html_path: Path):
         "lemma": "Lemma",
         "corollary": "Corollary",
         "axiom": "Axiom",
+        "postulate": "Postulate",
         "proposition": "Proposition",
         "result": "Result",
         "example": "Example",
@@ -973,6 +975,11 @@ def collect_tree(src: Path, out: Path, execute: bool):
             font-size: 0.82em;
             font-weight: 500;
             letter-spacing: 0.02em;
+        }
+
+        .math-block.postulate {
+            --block-border: #b45309;
+            --block-bg: #fff7ed;
         }
         </style>
         """.strip()
