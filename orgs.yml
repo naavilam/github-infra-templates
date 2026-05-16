@@ -182,7 +182,7 @@ orgs:
 
   - name: rigorous-proof-series-physics
     slug: proof-physics
-    title: "Rigorous Physics Proofs"
+    title: "Rigorous Physics Derivations"
     ga_analytics: G-X39S935KBW
     apps:
       dispatcher:
@@ -200,7 +200,7 @@ orgs:
 
   - name: rigorous-proof-series-computer-science
     slug: proof-cscience
-    title: "Rigorous Computer Science Proofs"
+    title: "Rigorous Computer Science Derivations"
     ga_analytics: G-73ZBST0L12
     apps:
       dispatcher:
