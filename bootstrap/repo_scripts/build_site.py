@@ -474,7 +474,6 @@ def render_math_index_html(items: list[dict]) -> str:
         return ""
 
     out = ['<nav id="math-index" class="math-index">']
-    out.append("<h2>Index</h2>")
     out.append("<ul>")
 
     for item in items:
