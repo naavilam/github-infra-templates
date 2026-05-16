@@ -401,7 +401,10 @@ def fold_math_blocks_in_html(html_path: Path):
             flags=re.DOTALL | re.IGNORECASE,
         )
 
-        heading_replacement = f"{number} {type_names[block_type]}: {html.escape(title)}"
+        heading_replacement = (
+            f'<span class="math-number">{number}</span> '
+            f'{type_names[block_type]}: {html.escape(title)}'
+        )
 
         def replace_heading(match):
             level = match.group(1)
@@ -488,7 +491,7 @@ def render_math_index_html(items: list[dict]) -> str:
             out.append(f'<li class="math-index-subsection"><a href="#{item_id}">Subsection {number} — {title}</a></li>')
         elif kind == "block":
             type_name = html.escape(str(item.get("type_name", "")))
-            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}">{number} {type_name}: {title}</a></li>')
+            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}"><span class="math-number">{number}</span> {type_name}: {title}</a></li>')
 
     out.append("</ul>")
     out.append("</nav>")
@@ -964,6 +967,13 @@ def collect_tree(src: Path, out: Path, execute: bool):
             margin-top: 0;
             padding-top: 0;
             border-top: none;
+        }
+
+        .math-number {
+            color: #94a3b8;
+            font-size: 0.82em;
+            font-weight: 500;
+            letter-spacing: 0.02em;
         }
         </style>
         """.strip()
