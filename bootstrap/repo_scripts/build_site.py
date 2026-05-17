@@ -435,9 +435,15 @@ def fold_math_blocks_in_html(html_path: Path):
             links.append(f'<a href="#{html.escape(current_subsection["id"], quote=True)}">subsection</a>')
 
         nav = '<div class="math-block-links">↑ ' + " · ".join(links) + '</div>'
-
-        details_content = proof_html if proof_html else ""
-        details_class = "proof-content" if proof_html else "math-block-details"
+        
+        if proof_html:
+            details_html = f"""
+        <div class="proof-content">
+        {proof_html}
+        </div>
+        """
+        else:
+            details_html = ""
 
         return f"""
         <details id="{html.escape(label, quote=True)}" class="math-block {block_type}">
@@ -445,9 +451,7 @@ def fold_math_blocks_in_html(html_path: Path):
         {main_html}
         </summary>
 
-        <div class="{details_class}">
-        {details_content}
-        </div>
+        {details_html}
 
         <div class="math-block-footer">
         {nav}
