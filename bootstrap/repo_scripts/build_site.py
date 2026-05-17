@@ -444,10 +444,15 @@ def fold_math_blocks_in_html(html_path: Path):
         <summary class="math-block-summary">
         {main_html}
         </summary>
+
         <div class="{details_class}">
         {details_content}
+        </div>
+
+        <div class="math-block-footer">
         {nav}
         </div>
+
         </details>
         """
 
@@ -909,28 +914,28 @@ def collect_tree(src: Path, out: Path, execute: bool):
             font-size: 0.95em;
         }
 
+        .math-block-footer {
+            padding: 0 26px 18px 26px;
+        }
+
         .math-block-links {
-            margin-top: 18px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(148, 163, 184, 0.25);
+            padding-top: 12px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
             font-size: 0.85em;
             text-align: right;
             color: #cbd5e1;
-            opacity: 1;
         }
 
         .math-block-links a {
             color: #94a3b8;
             text-decoration: none;
+
         }
 
         .math-block-links a:hover {
             color: #64748b;
             text-decoration: underline;
-        }
 
-        .math-block-links::first-letter {
-            color: #cbd5e1;
         }
 
         .math-anchor {
