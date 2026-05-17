@@ -487,7 +487,7 @@ def render_math_index_html(items: list[dict]) -> str:
             out.append(f'<li class="math-index-subsection"><a href="#{item_id}">Subsection {number} — {title}</a></li>')
         elif kind == "block":
             type_name = html.escape(str(item.get("type_name", "")))
-            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}"><span class="math-number">{number}</span> {type_name}: {title}</a></li>')
+            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}"><span class="math-number">{number}{type_name}: {title}</span></a></li>')
 
     out.append("</ul>")
     out.append("</nav>")
