@@ -929,13 +929,11 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .math-block-links a {
             color: #94a3b8;
             text-decoration: none;
-
         }
 
         .math-block-links a:hover {
             color: #64748b;
             text-decoration: underline;
-
         }
 
         .math-anchor {
