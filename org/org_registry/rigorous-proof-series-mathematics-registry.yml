@@ -183,22 +183,6 @@ repos:
     readme_cta_text: "Access website."
     readme_theme: minimal
 
-  - name: "MAT4101-Abstract-Algebra"
-    id: MAT4101
-    title: "Abstract Algebra"
-    title_pt: "Álgebra Abstrata"
-    academic_level: graduate
-    academic_area: Mathematics
-    academic_field: Abstract Algebra
-    academic_school:
-    status:
-    completed_on:
-    site_hero_image: algebra.png
-    site_description:
-    readme_tagline:
-    readme_cta_text: "Access website."
-    readme_theme: minimal
-
   - name: "MAT4307-Complex-Analysis"
     id: MAT4307
     title: "Complex Analysis"
