@@ -809,6 +809,16 @@ def collect_tree(src: Path, out: Path, execute: bool):
             --block-bg: #f8fafc;
         }
 
+        .math-block.result {
+            --block-border: #9333ea;
+            --block-bg: #f8fafc;
+        }
+
+        .math-block.postulate {
+            --block-border: #b45309;
+            --block-bg: #f8fafc;
+        }
+
         .math-block summary,
         .math-block-summary {
             cursor: pointer;
@@ -949,10 +959,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
             padding-bottom: 0 !important;
         }
 
-        .math-block.result {
-            --block-border: #9333ea;
-            --block-bg: #faf5ff;
-        }
         .math-block-details {
             padding: 14px 26px 18px 26px;
             border-top: 1px solid rgba(0,0,0,0.10);
@@ -970,11 +976,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
             font-size: 0.82em;
             font-weight: 500;
             letter-spacing: 0.02em;
-        }
-
-        .math-block.postulate {
-            --block-border: #b45309;
-            --block-bg: #fff7ed;
         }
 
         .math-block-summary {

@@ -236,7 +236,7 @@ repos:
     id: MAT5102
     title: "Group Theory"
     title_pt: "Teoria dos Grupos"
-    academic_level: research
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
@@ -251,7 +251,7 @@ repos:
     id: MAT5204
     title: "Rings"
     title_pt: "Anéis"
-    academic_level: research
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
@@ -266,7 +266,7 @@ repos:
     id: MAT5208
     title: "Fields"
     title_pt: "Campos"
-    academic_level: research
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
@@ -281,7 +281,7 @@ repos:
     id: MAT5312
     title: "Functional Analysis"
     title_pt: "Análise Funcional"
-    academic_level: research
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
@@ -296,7 +296,7 @@ repos:
     id: MAT5406
     title: "Topology"
     title_pt: "Topologia"
-    academic_level: research
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
