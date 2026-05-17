@@ -1002,7 +1002,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
             text-indent: 0 !important;
         }
 
-        /* número + tipo + título como etiqueta */
         .math-number {
             color: inherit;
             font-size: inherit;
