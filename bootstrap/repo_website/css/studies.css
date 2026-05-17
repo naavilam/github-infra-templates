@@ -4,8 +4,11 @@
 
 /* container principal da página Studies */
 .main-wide {
-  width: 90%;
-  margin: 32px auto;
+  width: calc(90% + 13px);
+  margin-top: 32px;
+  margin-bottom: 32px;
+  margin-left: auto;
+  margin-right: auto;
   padding: 0 0 16px 0;
 }
 
