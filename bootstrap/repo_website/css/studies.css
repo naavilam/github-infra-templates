@@ -132,8 +132,13 @@
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .notebook-tools {
+    order: 3;
+    flex-direction: row;
     height: auto;
-    overflow: visible;
+    padding: 8px;
   }
 
   .sidebar {
