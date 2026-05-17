@@ -916,6 +916,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
         .math-block-footer {
             padding: 0 26px 18px 26px;
+            background: rgba(255,255,255,0.55);
         }
 
         .math-block-links {
