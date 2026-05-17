@@ -771,27 +771,27 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
         .math-block.theorem {
             --block-border: #2563eb;
-            --block-bg: #eff6ff;
+            --block-bg: #f8fafc;
         }
 
         .math-block.definition {
             --block-border: #0f766e;
-            --block-bg: #ecfdf5;
+            --block-bg: #f8fafc;
         }
 
         .math-block.lemma {
             --block-border: #7c3aed;
-            --block-bg: #f5f3ff;
+            --block-bg: #f8fafc;
         }
 
         .math-block.corollary {
             --block-border: #d97706;
-            --block-bg: #fffbeb;
+            --block-bg: #f8fafc;
         }
 
         .math-block.axiom {
             --block-border: #be123c;
-            --block-bg: #fff1f2;
+            --block-bg: #f8fafc;
         }
 
         .math-block.proposition {
@@ -801,12 +801,12 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
         .math-block.example {
             --block-border: #0891b2;
-            --block-bg: #ecfeff;
+            --block-bg: #f8fafc;
         }
 
         .math-block.remark {
             --block-border: #334155;
-            --block-bg: #f1f5f9;
+            --block-bg: #f8fafc;
         }
 
         .math-block summary,
