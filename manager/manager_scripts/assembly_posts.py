@@ -17,11 +17,9 @@ def load_registry(path: str) -> List[Dict]:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    # Lista direta
     if isinstance(data, list):
         return data
 
-    # Dict com listas em chaves conhecidas
     if isinstance(data, dict):
         for key in ("repos", "repositories", "items", "orgs", "entries"):
             val = data.get(key)
@@ -39,46 +37,65 @@ def ensure_dir(path: str):
     os.makedirs(path, exist_ok=True)
 
 
+def yaml_quote(value) -> str:
+    if value is None:
+        return '""'
+    return yaml.safe_dump(
+        str(value),
+        default_style='"',
+        allow_unicode=True,
+    ).strip()
+
+
 def generate_posts(items: List[Dict], out_dir: str):
     ensure_dir(out_dir)
 
-    # ordenação estável para modal-id
     def sort_key(item):
         date = item.get("completed_on") or today_iso()
         name = item.get("name", "")
         return (date, name)
 
-    items_sorted = sorted(items, key=sort_key)
     def slug_repo(name: str) -> str:
         s = (name or "").strip()
         s = s.replace("(", "-").replace(")", "-")
         return s
+
+    items_sorted = sorted(items, key=sort_key)
+
     for idx, item in enumerate(items_sorted, start=1):
         name = item["name"]
         course_id = item["id"]
         title_human = item["title"]
 
         completed_on = item.get("completed_on") or today_iso()
-        academic_area = item.get("academic_area")
-        academic_level = item.get("academic_level")
-        site_hero_image = item.get("site_hero_image")
-        site_description = item.get("site_description", "")
+        academic_level = item.get("academic_level") or ""
+        academic_area = item.get("academic_area") or ""
+        academic_field = item.get("academic_field") or ""
+
+        site_hero_image = item.get("site_hero_image") or ""
+        site_description = item.get("site_description") or ""
 
         filename = f"{completed_on}-{name}.markdown"
         filepath = os.path.join(out_dir, filename)
         link = slug_repo(name)
 
         front_matter = f"""---
-title: "{course_id} {title_human}"
-link: "/{link}"
-category: {academic_level}
-area: {academic_area}
+title: {yaml_quote(f"{course_id} {title_human}")}
+link: {yaml_quote(f"/{link}")}
+category: {yaml_quote(academic_level)}
+
+academic_area: {yaml_quote(academic_area)}
+academic_field: {yaml_quote(academic_field)}
+
+area: {yaml_quote(academic_area)}
+field: {yaml_quote(academic_field)}
+
 layout: default
 modal-id: {idx}
 date: {completed_on}
-img: {site_hero_image}
+img: {yaml_quote(site_hero_image)}
 alt: image-alt
-description: {site_description or ""}
+description: {yaml_quote(site_description)}
 ---
 """
 
