@@ -255,6 +255,40 @@
 
   })();
 
+  function setupNotebookTools() {
+    const layout = document.getElementById('studiesLayout');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const btnCollapse = document.getElementById('btnCollapseCells');
+    const btnExpand = document.getElementById('btnExpandCells');
+
+    if (!layout || !btnFullscreen || !btnCollapse || !btnExpand || !viewer) return;
+
+    btnFullscreen.addEventListener('click', () => {
+      layout.classList.toggle('is-fullscreen');
+      btnFullscreen.textContent = layout.classList.contains('is-fullscreen') ? '⤢' : '⛶';
+    });
+
+    btnCollapse.addEventListener('click', () => {
+      const doc = viewer.contentDocument || viewer.contentWindow?.document;
+      if (!doc) return;
+
+      doc.querySelectorAll('details.math-block').forEach(d => {
+        d.open = false;
+      });
+    });
+
+    btnExpand.addEventListener('click', () => {
+      const doc = viewer.contentDocument || viewer.contentWindow?.document;
+      if (!doc) return;
+
+      doc.querySelectorAll('details.math-block').forEach(d => {
+        d.open = true;
+      });
+    });
+  }
+
+  setupNotebookTools();
+
 })();
 
 (() => {
