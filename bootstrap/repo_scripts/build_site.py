@@ -910,21 +910,27 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .math-block-links {
             margin-top: 18px;
             padding-top: 10px;
-            border-top: 1px solid rgba(0,0,0,0.08);
+            border-top: 1px solid rgba(148, 163, 184, 0.25);
             font-size: 0.85em;
-            opacity: 0.72;
             text-align: right;
+            color: #cbd5e1;
+            opacity: 1;
         }
 
         .math-block-links a {
-            color: inherit;
+            color: #94a3b8;
             text-decoration: none;
         }
 
         .math-block-links a:hover {
+            color: #64748b;
             text-decoration: underline;
         }
 
+        .math-block-links::first-letter {
+            color: #cbd5e1;
+        }
+        
         .math-anchor {
             scroll-margin-top: 90px;
         }
