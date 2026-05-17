@@ -243,7 +243,6 @@ def fold_math_blocks_in_html(html_path: Path):
     subsection_n = 0
     block_counters = {k: 0 for k in allowed}
     dependent_counters = {
-        "lemma": 0,
         "corollary": 0,
     }
     last_major_number = None
@@ -277,7 +276,6 @@ def fold_math_blocks_in_html(html_path: Path):
             subsection_n = 0
             block_counters = {k: 0 for k in allowed}
             dependent_counters = {
-                "lemma": 0,
                 "corollary": 0,
             }
             last_major_number = None
@@ -305,7 +303,6 @@ def fold_math_blocks_in_html(html_path: Path):
             subsection_n = 0
             block_counters = {k: 0 for k in allowed}
             dependent_counters = {
-                "lemma": 0,
                 "corollary": 0,
             }
             last_major_number = None
@@ -336,7 +333,6 @@ def fold_math_blocks_in_html(html_path: Path):
             subsection_n += 1
             block_counters = {k: 0 for k in allowed}
             dependent_counters = {
-                "lemma": 0,
                 "corollary": 0,
             }
             last_major_number = None
@@ -374,13 +370,13 @@ def fold_math_blocks_in_html(html_path: Path):
 
         major_types = {"theorem", "proposition", "result"}
 
-        if block_type in {"lemma", "corollary"}:
-            dependent_counters[block_type] += 1
+        if block_type == "corollary":
+            dependent_counters["corollary"] += 1
 
             if last_major_number:
-                number = f"{last_major_number}.{dependent_counters[block_type]}"
+                number = f"{last_major_number}.{dependent_counters['corollary']}"
             else:
-                number = f"{prefix}.{dependent_counters[block_type]}"
+                number = f"{prefix}.{dependent_counters['corollary']}"
 
         else:
             block_counters[block_type] += 1
@@ -389,7 +385,6 @@ def fold_math_blocks_in_html(html_path: Path):
             if block_type in major_types:
                 last_major_number = number
                 dependent_counters = {
-                    "lemma": 0,
                     "corollary": 0,
                 }
 
