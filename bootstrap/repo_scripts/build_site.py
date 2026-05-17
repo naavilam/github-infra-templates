@@ -848,9 +848,9 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
 
         .proof-content {
-            margin: 0 26px 22px 26px;
+            margin: 0 10px 22px 10px;
             padding: 22px 26px;
-            border: 1px solid rgba(0,0,0,0.12);
+            
             border-radius: 12px;
             background: white;
         }
