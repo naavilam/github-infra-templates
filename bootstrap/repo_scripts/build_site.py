@@ -846,7 +846,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
 
         .math-index {
-            margin: 2px;
+            margin: 0px 2px 6px 2px;
             padding: 22px 26px;
             border-radius: 16px;
             background: #f8fafc;
