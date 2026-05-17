@@ -990,7 +990,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
             margin: 0 0 14px 0 !important;
             padding: 0 !important;
 
-            font-size: 0.82rem !important;
+            font-size: 0.95rem !important;
             line-height: 1.2 !important;
             font-weight: 600 !important;
             letter-spacing: 0.04em;
