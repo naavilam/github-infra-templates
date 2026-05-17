@@ -12,7 +12,7 @@
 /* ocupa a altura útil (desconta header) */
 .layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 320px 1fr 26px;
   gap: 16px;
   width: 100%;
   margin: 0 auto;
@@ -191,4 +191,67 @@ a.file-notebook.is-active {
   font-weight: 600;
   border-radius: 4px;
   /* box-shadow: inset 3px 0 0 #60a5fa; */
+}
+
+/* ============================= */
+/* NOTEBOOK TOOLS                */
+/* ============================= */
+
+.notebook-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  align-items: center;
+  justify-content: flex-start;
+
+  padding-top: 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(11, 18, 32, 0.65);
+}
+
+.notebook-tools button {
+  width: 20px;
+  height: 20px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: rgba(203, 213, 225, 0.75);
+
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.notebook-tools button:hover {
+  background: rgba(148, 163, 184, 0.15);
+  color: #ffffff;
+}
+
+.layout.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  width: 100vw;
+  height: 100vh;
+
+  margin: 0;
+  padding: 12px;
+
+  background: #0b1220;
+
+  grid-template-columns: 0 1fr 26px;
+}
+
+.layout.is-fullscreen .sidebar {
+  display: none;
+}
+
+.layout.is-fullscreen .viewer {
+  height: calc(100vh - 24px);
 }

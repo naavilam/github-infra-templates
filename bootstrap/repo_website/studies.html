@@ -39,7 +39,7 @@
 
 
     <main class="main-wide">
-        <div class="layout">
+        <div class="layout" id="studiesLayout">
             <aside class="sidebar">
                 <input id="q" class="search" placeholder="Filter notebooks..." />
                 <ul id="tree" class="tree"></ul>
@@ -47,6 +47,12 @@
             <section class="viewer">
                 <iframe id="viewer" src=""></iframe>
             </section>
+            <aside class="notebook-tools">
+                <button id="btnFullscreen" title="Expand view">⛶</button>
+                <button id="btnCollapseCells" title="Collapse all cells">−</button>
+                <button id="btnExpandCells" title="Expand all cells">＋</button>
+
+            </aside>
         </div>
     </main>
 
