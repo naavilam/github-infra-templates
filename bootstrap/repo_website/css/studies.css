@@ -266,9 +266,17 @@ a.file-notebook.is-active {
 /* ============================= */
 
 .layout.sidebar-collapsed {
-  grid-template-columns: 0 1fr 26px;
+  grid-template-columns: 1fr 26px;
 }
 
 .layout.sidebar-collapsed .sidebar {
   display: none;
+}
+
+.layout.sidebar-collapsed .viewer {
+  grid-column: 1;
+}
+
+.layout.sidebar-collapsed .notebook-tools {
+  grid-column: 2;
 }
