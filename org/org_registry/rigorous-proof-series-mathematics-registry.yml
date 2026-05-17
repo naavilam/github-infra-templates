@@ -146,7 +146,7 @@ repos:
     id: MAT3302
     title: "Real Analysis"
     title_pt: "Análise Real"
-    academic_level: advanced
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
@@ -161,7 +161,7 @@ repos:
     id: MAT3901
     title: "Pure Mathematics"
     title_pt: "Matemática Pura"
-    academic_level: advanced
+    academic_level: graduate
     academic_area: Mathematics
     academic_school:
     status:
