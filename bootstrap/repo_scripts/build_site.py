@@ -1010,14 +1010,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
             letter-spacing: inherit;
         }
 
-        /* resultado matemático mais legível */
-        .math-block-summary p {
-            font-size: 1.08rem;
-            line-height: 1.65;
-            margin-top: 0.4rem;
-            margin-bottom: 0.8rem;
-        }
-
         /* equações ganham prioridade visual */
         .math-block-summary .MathJax_Display,
         .math-block-summary mjx-container[display="true"] {
