@@ -920,7 +920,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
         .math-block-links {
             padding-top: 12px;
-            border-top: 1px solid rgba(148, 163, 184, 0.18);
             font-size: 0.85em;
             text-align: right;
             color: #cbd5e1;
