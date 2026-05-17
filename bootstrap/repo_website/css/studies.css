@@ -6,10 +6,18 @@
 .main-wide {
   width: auto;
   margin-top: 32px;
-  margin-bottom: 32px;
+  margin-bottom: 0;
   margin-left: 4.5vw;
   margin-right: 2vw;
-  padding: 0 0 16px 0;
+  padding: 0;
+  height: calc(100vh - 64px - 32px);
+  overflow: hidden;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 /* ocupa a altura útil (desconta header) */
@@ -18,9 +26,8 @@
   grid-template-columns: 320px 1fr 26px;
   gap: 16px;
   width: 100%;
+  height: 100%;
   margin: 0 auto;
-  height: calc(100vh - 64px);
-  /* evita “scroll duplo” do grid */
   overflow: hidden;
 }
 
