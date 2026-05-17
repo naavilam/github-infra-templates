@@ -277,6 +277,10 @@
       }
     });
 
+    document.addEventListener('fullscreenchange', () => {
+      btnFullscreen.innerHTML = document.fullscreenElement ? '⤢' : '⛶';
+    });
+
     btnCollapse.addEventListener('click', () => {
       const doc = viewer.contentDocument || viewer.contentWindow?.document;
       if (!doc) return;
