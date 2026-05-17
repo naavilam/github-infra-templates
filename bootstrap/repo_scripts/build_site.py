@@ -766,7 +766,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
             margin: 2px;
             border-radius: 14px;
             background: var(--block-bg, #f7f7f7);
-            border-left: 5px solid var(--block-border, #555);
             overflow: hidden;
         }
 
