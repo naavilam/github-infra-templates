@@ -919,7 +919,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
 
         .math-block-links {
-            padding-top: 12px;
+            padding-top: 0px;
             font-size: 0.85em;
             text-align: right;
             color: #cbd5e1;
