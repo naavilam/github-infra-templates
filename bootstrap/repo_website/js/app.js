@@ -263,9 +263,18 @@
 
     if (!layout || !btnFullscreen || !btnCollapse || !btnExpand || !viewer) return;
 
-    btnFullscreen.addEventListener('click', () => {
-      layout.classList.toggle('is-fullscreen');
-      btnFullscreen.textContent = layout.classList.contains('is-fullscreen') ? '⤢' : '⛶';
+    btnFullscreen.addEventListener('click', async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+          btnFullscreen.innerHTML = '⤢';
+        } else {
+          await document.exitFullscreen();
+          btnFullscreen.innerHTML = '⛶';
+        }
+      } catch (err) {
+        console.error('fullscreen error', err);
+      }
     });
 
     btnCollapse.addEventListener('click', () => {
