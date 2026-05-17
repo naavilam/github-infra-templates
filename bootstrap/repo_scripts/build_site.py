@@ -977,6 +977,53 @@ def collect_tree(src: Path, out: Path, execute: bool):
             --block-border: #b45309;
             --block-bg: #fff7ed;
         }
+
+        .math-block-summary {
+            padding: 18px 26px 24px 26px;
+        }
+
+        /* título do card vira metadado discreto */
+        .math-block-summary h1,
+        .math-block-summary h2,
+        .math-block-summary h3,
+        .math-block-summary h4 {
+            margin: 0 0 14px 0 !important;
+            padding: 0 !important;
+
+            font-size: 0.82rem !important;
+            line-height: 1.2 !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.04em;
+
+            color: var(--block-border, #64748b) !important;
+            opacity: 0.72;
+
+            text-transform: uppercase;
+            text-indent: 0 !important;
+        }
+
+        /* número + tipo + título como etiqueta */
+        .math-number {
+            color: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            letter-spacing: inherit;
+        }
+
+        /* resultado matemático mais legível */
+        .math-block-summary p {
+            font-size: 1.08rem;
+            line-height: 1.65;
+            margin-top: 0.4rem;
+            margin-bottom: 0.8rem;
+        }
+
+        /* equações ganham prioridade visual */
+        .math-block-summary .MathJax_Display,
+        .math-block-summary mjx-container[display="true"] {
+            margin: 1.1rem 0 0.6rem 0 !important;
+            font-size: 1.08em;
+        }
         </style>
         """.strip()
 
