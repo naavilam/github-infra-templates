@@ -399,7 +399,9 @@ def fold_math_blocks_in_html(html_path: Path):
         )
 
         heading_replacement = (
-            f'<span class="math-number">{number} {type_names[block_type]}: {html.escape(title)}</span>'
+            f'<span class="math-number">'
+            f'{number} {type_names[block_type]}: {html.escape(title)}'
+            f'</span>'
         )
 
         def replace_heading(match):
