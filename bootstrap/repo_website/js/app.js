@@ -261,8 +261,23 @@
     const btnCollapse = document.getElementById('btnCollapseCells');
     const btnExpand = document.getElementById('btnExpandCells');
     const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    const tools = document.querySelector('.notebook-tools');
 
-    if (!layout || !btnToggleSidebar || !btnFullscreen || !btnCollapse || !btnExpand || !viewer) return;
+    if (!layout || !tools || !btnToggleSidebar || !btnFullscreen || !btnCollapse || !btnExpand || !viewer) return;
+
+    function refreshProofTools() {
+      try {
+        const doc = viewer.contentDocument || viewer.contentWindow?.document;
+        const hasProofBlocks = !!doc?.querySelector('details.math-block');
+
+        tools.classList.toggle('has-proofs', hasProofBlocks);
+      } catch (_) {
+        tools.classList.remove('has-proofs');
+      }
+    }
+
+    viewer.addEventListener('load', refreshProofTools);
+    refreshProofTools();
 
     btnToggleSidebar.addEventListener('click', () => {
       layout.classList.toggle('sidebar-collapsed');
@@ -272,6 +287,7 @@
           ? '⇄'
           : '⇆';
     });
+
     btnFullscreen.addEventListener('click', async () => {
       try {
         if (!document.fullscreenElement) {

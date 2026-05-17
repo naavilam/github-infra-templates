@@ -291,3 +291,11 @@ a.file-notebook.is-active {
 .layout.sidebar-collapsed .notebook-tools {
   grid-column: 2;
 }
+
+.notebook-tools .proof-only {
+  display: none;
+}
+
+.notebook-tools.has-proofs .proof-only {
+  display: flex;
+}
