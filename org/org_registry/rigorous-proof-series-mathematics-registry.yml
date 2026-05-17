@@ -13,6 +13,7 @@ repos:
     title_pt: "Cálculo"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Calculus
     academic_school:
     status:
     completed_on:
@@ -28,6 +29,7 @@ repos:
     title_pt: "Trigonometria"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Trigonometry
     academic_school:
     status:
     completed_on:
@@ -43,6 +45,7 @@ repos:
     title_pt: "Geometria"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Geometry
     academic_school:
     status:
     completed_on:
@@ -58,6 +61,7 @@ repos:
     title_pt: "Séries"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Analysis
     academic_school:
     status:
     completed_on:
@@ -73,6 +77,7 @@ repos:
     title_pt: "Estatística"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Statistics
     academic_school:
     status:
     completed_on:
@@ -88,6 +93,7 @@ repos:
     title_pt: "Álgebra Linear"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Algebra
     academic_school:
     status:
     completed_on:
@@ -103,6 +109,7 @@ repos:
     title_pt: "Probabilidade"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Probability
     academic_school:
     status:
     completed_on:
@@ -118,6 +125,7 @@ repos:
     title_pt: "Análise Vetorial"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Analysis
     academic_school:
     status:
     completed_on:
@@ -133,6 +141,7 @@ repos:
     title_pt: "Equações Diferenciais Ordinárias"
     academic_level: undergraduate
     academic_area: Mathematics
+    academic_field: Differential Equations
     academic_school:
     status:
     completed_on:
@@ -148,6 +157,7 @@ repos:
     title_pt: "Análise Real"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Analysis
     academic_school:
     status:
     completed_on:
@@ -163,6 +173,7 @@ repos:
     title_pt: "Matemática Pura"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Pure Mathematics
     academic_school:
     status:
     completed_on:
@@ -178,6 +189,7 @@ repos:
     title_pt: "Álgebra Abstrata"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Algebra
     academic_school:
     status:
     completed_on:
@@ -193,6 +205,7 @@ repos:
     title_pt: "Análise Complexa"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Analysis
     academic_school:
     status:
     completed_on:
@@ -208,6 +221,7 @@ repos:
     title_pt: "Equações Diferenciais Parciais"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Differential Equations
     academic_school:
     status:
     completed_on:
@@ -223,6 +237,7 @@ repos:
     title_pt: "Geometria Diferencial"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Geometry
     academic_school:
     status:
     completed_on:
@@ -238,6 +253,7 @@ repos:
     title_pt: "Teoria dos Grupos"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Algebra
     academic_school:
     status:
     completed_on:
@@ -253,6 +269,7 @@ repos:
     title_pt: "Anéis"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Algebra
     academic_school:
     status:
     completed_on:
@@ -268,6 +285,7 @@ repos:
     title_pt: "Campos"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Algebra
     academic_school:
     status:
     completed_on:
@@ -283,6 +301,7 @@ repos:
     title_pt: "Análise Funcional"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Analysis
     academic_school:
     status:
     completed_on:
@@ -298,6 +317,7 @@ repos:
     title_pt: "Topologia"
     academic_level: graduate
     academic_area: Mathematics
+    academic_field: Topology
     academic_school:
     status:
     completed_on:
