@@ -189,7 +189,7 @@ repos:
     title_pt: "Álgebra Abstrata"
     academic_level: graduate
     academic_area: Mathematics
-    academic_field: Algebra
+    academic_field: Abstract Algebra
     academic_school:
     status:
     completed_on:
@@ -253,7 +253,7 @@ repos:
     title_pt: "Teoria dos Grupos"
     academic_level: graduate
     academic_area: Mathematics
-    academic_field: Algebra
+    academic_field: Abstract Algebra
     academic_school:
     status:
     completed_on:
@@ -269,7 +269,7 @@ repos:
     title_pt: "Anéis"
     academic_level: graduate
     academic_area: Mathematics
-    academic_field: Algebra
+    academic_field: Abstract Algebra
     academic_school:
     status:
     completed_on:
@@ -285,7 +285,7 @@ repos:
     title_pt: "Campos"
     academic_level: graduate
     academic_area: Mathematics
-    academic_field: Algebra
+    academic_field: Abstract Algebra
     academic_school:
     status:
     completed_on:
