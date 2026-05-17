@@ -260,3 +260,15 @@ a.file-notebook.is-active {
 .layout.is-fullscreen .viewer {
   height: calc(100vh - 24px);
 }
+
+/* ============================= */
+/* COLLAPSED SIDEBAR             */
+/* ============================= */
+
+.layout.sidebar-collapsed {
+  grid-template-columns: 0 1fr 26px;
+}
+
+.layout.sidebar-collapsed .sidebar {
+  display: none;
+}

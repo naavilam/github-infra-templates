@@ -260,9 +260,18 @@
     const btnFullscreen = document.getElementById('btnFullscreen');
     const btnCollapse = document.getElementById('btnCollapseCells');
     const btnExpand = document.getElementById('btnExpandCells');
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
 
-    if (!layout || !btnFullscreen || !btnCollapse || !btnExpand || !viewer) return;
+    if (!layout || !btnToggleSidebar || !btnFullscreen || !btnCollapse || !btnExpand || !viewer) return;
 
+    btnToggleSidebar.addEventListener('click', () => {
+      layout.classList.toggle('sidebar-collapsed');
+
+      btnToggleSidebar.innerHTML =
+        layout.classList.contains('sidebar-collapsed')
+          ? '⇄'
+          : '⇆';
+    });
     btnFullscreen.addEventListener('click', async () => {
       try {
         if (!document.fullscreenElement) {
@@ -298,6 +307,7 @@
         d.open = true;
       });
     });
+
   }
 
   setupNotebookTools();
