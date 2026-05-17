@@ -399,8 +399,7 @@ def fold_math_blocks_in_html(html_path: Path):
         )
 
         heading_replacement = (
-            f'<span class="math-number">{number}</span> '
-            f'{type_names[block_type]}: {html.escape(title)}'
+            f'<span class="math-number">{number} {type_names[block_type]}: {html.escape(title)}</span>'
         )
 
         def replace_heading(match):
@@ -487,7 +486,7 @@ def render_math_index_html(items: list[dict]) -> str:
             out.append(f'<li class="math-index-subsection"><a href="#{item_id}">Subsection {number} — {title}</a></li>')
         elif kind == "block":
             type_name = html.escape(str(item.get("type_name", "")))
-            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}"><span class="math-number">{number}{type_name}: {title}</span></a></li>')
+            out.append(f'<li class="math-index-block math-index-{item.get("type")}"><a href="#{item_id}"><span class="math-number">{number}</span> {type_name}: {title}</a></li>')
 
     out.append("</ul>")
     out.append("</nav>")
