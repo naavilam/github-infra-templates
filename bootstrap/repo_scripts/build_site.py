@@ -974,17 +974,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
             padding-bottom: 0 !important;
         }
 
-        .math-block-details {
-            padding: 14px 26px 18px 26px;
-            background: rgba(255,255,255,0.55);
-        }
-
-        .math-block-details .math-block-links {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
-        }
-
         .math-number {
             color: #94a3b8;
             font-size: 0.82em;
