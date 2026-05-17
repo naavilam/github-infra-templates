@@ -839,8 +839,10 @@ def collect_tree(src: Path, out: Path, execute: bool):
         }
 
         .proof-content {
+            margin: 0 26px 22px 26px;
             padding: 22px 26px;
-            border-top: 1px solid rgba(0,0,0,0.12);
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 12px;
             background: white;
         }
 
@@ -930,7 +932,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
         .math-block-links::first-letter {
             color: #cbd5e1;
         }
-        
+
         .math-anchor {
             scroll-margin-top: 90px;
         }
@@ -967,7 +969,6 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
         .math-block-details {
             padding: 14px 26px 18px 26px;
-            border-top: 1px solid rgba(0,0,0,0.10);
             background: rgba(255,255,255,0.55);
         }
 
