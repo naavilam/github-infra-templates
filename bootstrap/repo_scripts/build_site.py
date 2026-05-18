@@ -513,11 +513,25 @@ def ensure_minimal_cell(ipynb_path: Path):
     Garante que o notebook tenha pelo menos 1 célula renderizável.
     - Se cells == []  -> injeta 1 markdown.
     - Se não existir nenhuma célula do tipo markdown/code -> injeta 1 markdown no topo.
+    - Se arquivo estiver vazio ou com JSON inválido -> cria estrutura mínima válida.
     """
     try:
-        nb = json.loads(ipynb_path.read_text(encoding="utf-8"))
+        content = ipynb_path.read_text(encoding="utf-8")
+        nb = json.loads(content) if content.strip() else None
     except Exception:
-        return
+        nb = None
+
+    if nb is None:
+        nb = {
+            "cells": [],
+            "metadata": {"language_info": {"name": "python"}},
+            "nbformat": 4,
+            "nbformat_minor": 5,
+        }
+        ipynb_path.write_text(
+            json.dumps(nb, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
 
     cells = nb.get("cells", [])
     has_md_or_code = any(
