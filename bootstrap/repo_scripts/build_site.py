@@ -54,6 +54,57 @@ IGNORE_DIRS = {
     "node_modules", ".script", "site"
 }
 
+def _git_changed_notebooks(src: Path, since_ref: str = "HEAD~1") -> tuple[set[str] | None, set[str] | None]:
+    """
+    Retorna (changed, deleted) como paths relativos POSIX de notebooks.
+    Se não conseguir determinar via git, retorna (None, None) para fallback full build.
+    """
+    git_dir = src / ".git"
+    if not git_dir.exists():
+        print(f"[incremental] no .git found in {src}; fallback to full build")
+        return None, None
+
+    try:
+        # valida referência base (evita quebrar em repositório com 1 único commit)
+        subprocess.run(
+            ["git", "-C", str(src), "rev-parse", "--verify", since_ref],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        changed_cmd = [
+            "git", "-C", str(src), "diff", "--name-only", "--diff-filter=ACMR",
+            f"{since_ref}..HEAD", "--", "*.ipynb",
+        ]
+        deleted_cmd = [
+            "git", "-C", str(src), "diff", "--name-only", "--diff-filter=D",
+            f"{since_ref}..HEAD", "--", "*.ipynb",
+        ]
+
+        changed_out = subprocess.run(changed_cmd, check=True, capture_output=True, text=True)
+        deleted_out = subprocess.run(deleted_cmd, check=True, capture_output=True, text=True)
+
+        changed = {
+            line.strip().replace("\\", "/")
+            for line in changed_out.stdout.splitlines()
+            if line.strip().lower().endswith(".ipynb")
+        }
+        deleted = {
+            line.strip().replace("\\", "/")
+            for line in deleted_out.stdout.splitlines()
+            if line.strip().lower().endswith(".ipynb")
+        }
+
+        print(
+            f"[incremental] since={since_ref} changed_notebooks={len(changed)} deleted_notebooks={len(deleted)}"
+        )
+        return changed, deleted
+    except subprocess.CalledProcessError as e:
+        stderr = (e.stderr or "").strip()
+        print(f"[incremental] git diff unavailable ({stderr}); fallback to full build")
+        return None, None
+
 def copy_tree(src_dir: Path, dst_dir: Path):
     """
     Copia todo o conteúdo de src_dir para dst_dir (se existir).
@@ -551,7 +602,7 @@ def ensure_minimal_cell(ipynb_path: Path):
             encoding="utf-8"
         )
 
-def collect_tree(src: Path, out: Path, execute: bool):
+def collect_tree(src: Path, out: Path, execute: bool, changed_notebooks: set[str] | None = None):
     """
     Varre src; converte apenas .ipynb -> .html em out.
     - Arquivos que não sejam .ipynb são ignorados.
@@ -593,6 +644,7 @@ def collect_tree(src: Path, out: Path, execute: bool):
 
         # Converte notebook
         rel = path.relative_to(src)
+        rel_posix = str(rel).replace(os.sep, "/")
         file_node = {"type": "file", "name": rel.name, "path": str(rel)}
         nb_count += 1
 
@@ -600,21 +652,27 @@ def collect_tree(src: Path, out: Path, execute: bool):
         out_html.parent.mkdir(parents=True, exist_ok=True)
 
 
-        tmp_nb_dir = out / ".tmp_nbconvert"
-        nb_for_convert = make_proof_fold_copy(path, tmp_nb_dir)
+        should_convert = True
+        if changed_notebooks is not None:
+            should_convert = (rel_posix in changed_notebooks) or (not out_html.exists())
 
-        cmd = [
-            sys.executable, "-m", "nbconvert",
-            "--to", "html",
-            "--template=classic",
-            "--HTMLExporter.embed_images=True",
-            "--TagRemovePreprocessor.enabled=True",
-            "--TagRemovePreprocessor.remove_input_tags=hide-input",
-            "--TagRemovePreprocessor.remove_all_outputs_tags={'remove-output','ro'}",
-            "--output", out_html.name,
-            "--output-dir", str(out_html.parent),
-            str(nb_for_convert),
-        ]
+        cmd = None
+        if should_convert:
+            tmp_nb_dir = out / ".tmp_nbconvert"
+            nb_for_convert = make_proof_fold_copy(path, tmp_nb_dir)
+
+            cmd = [
+                sys.executable, "-m", "nbconvert",
+                "--to", "html",
+                "--template=classic",
+                "--HTMLExporter.embed_images=True",
+                "--TagRemovePreprocessor.enabled=True",
+                "--TagRemovePreprocessor.remove_input_tags=hide-input",
+                "--TagRemovePreprocessor.remove_all_outputs_tags={'remove-output','ro'}",
+                "--output", out_html.name,
+                "--output-dir", str(out_html.parent),
+                str(nb_for_convert),
+            ]
         
 
         def _widen_notebook_html(html_path: Path):
@@ -1048,13 +1106,16 @@ def collect_tree(src: Path, out: Path, execute: bool):
             html_path.write_text(s, encoding="utf-8")
 
 
-        if execute:
-            cmd.append("--execute")
-        subprocess.run(cmd, check=True)
+        if should_convert:
+            if execute:
+                cmd.append("--execute")
+            subprocess.run(cmd, check=True)
 
-        fold_math_blocks_in_html(out_html)
-        fold_proof_blocks_in_html(out_html)
-        _widen_notebook_html(out_html)
+            fold_math_blocks_in_html(out_html)
+            fold_proof_blocks_in_html(out_html)
+            _widen_notebook_html(out_html)
+        else:
+            print(f"[incremental] skip unchanged notebook: {rel_posix}")
 
         file_node["nb_html"] = str(out_html.relative_to(out)).replace(os.sep, "/")
 
@@ -1091,7 +1152,22 @@ def build_static_site(src: Path, out: Path, template_dir: Path, title: str, exec
     cfg = dict(cfg or {})
     cfg["REFERENCIAS"] = refs_html
     
-    tree, nb_count = collect_tree(src, out, execute)
+    incremental = bool((cfg or {}).get("INCREMENTAL_BUILD", False))
+    since_ref = str((cfg or {}).get("INCREMENTAL_SINCE") or "HEAD~1")
+
+    changed_notebooks = None
+    deleted_notebooks = None
+    if incremental:
+        changed_notebooks, deleted_notebooks = _git_changed_notebooks(src, since_ref)
+
+    if deleted_notebooks:
+        for rel_posix in deleted_notebooks:
+            stale_html = (out / Path(rel_posix)).with_suffix(".html")
+            if stale_html.exists():
+                stale_html.unlink()
+                print(f"[incremental] removed stale html: {stale_html}")
+
+    tree, nb_count = collect_tree(src, out, execute, changed_notebooks=changed_notebooks)
 
     out.mkdir(parents=True, exist_ok=True)
 
@@ -1346,6 +1422,8 @@ def main():
     ap.add_argument("--title", type=str, default=None)
     ap.add_argument("--execute", type=str, default="false")
     ap.add_argument("--cfg", type=str, default=None)  # <-- ADICIONE ISTO
+    ap.add_argument("--incremental", type=str, default="false")
+    ap.add_argument("--since", type=str, default="HEAD~1")
     args = ap.parse_args()
 
     src = Path(args.src).resolve()
@@ -1354,6 +1432,11 @@ def main():
     execute = args.execute.lower() == "true"
     title = args.title or f"Notebooks Tree — {src.name}"
     cfg = load_config(Path(args.cfg)) if args.cfg else {}   # <-- E ISTO
+
+    incremental = args.incremental.lower() == "true"
+    cfg = dict(cfg or {})
+    cfg["INCREMENTAL_BUILD"] = incremental
+    cfg["INCREMENTAL_SINCE"] = args.since
 
     nb_count = build_static_site(src, out, template_dir, title, execute, cfg)  # <-- E ISTO
     print(f"[OK] Gerado em {out} • notebooks convertidos: {nb_count}")
