@@ -81,18 +81,3 @@ repos:
     readme_tagline:
     readme_cta_text: "Access website."
     readme_theme: minimal
-
-  - name: "PHY4101-Quantum-Mechanics-II"
-    id: PHY4101
-    title: "Quantum Mechanics II"
-    title_pt: "Mecânica Quântica II"
-    academic_level: advanced_graduate
-    academic_area: Physics
-    academic_school:
-    status:
-    completed_on:
-    site_hero_image: quantum-mechanics-ii.png
-    site_description:
-    readme_tagline:
-    readme_cta_text: "Access website."
-    readme_theme: minimal
